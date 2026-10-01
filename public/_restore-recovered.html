@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title>기록 복구</title>
+</head>
+<body>
+<p>어제·오늘 기록을 되돌리는 중입니다…</p>
+<script>
+(function () {
+  var bb = {
+    sex: "남",
+    age: "58세",
+    height: "170 cm",
+    weight: "72 kg",
+    bp: "128/82",
+    rx: "암로디핀 5mg",
+    dx: "고혈압",
+    otc: "",
+    supp: "",
+    labs: ""
+  };
+  var log = {
+    "2026-09-28": {
+      meals: { breakfast: "밥 계란", lunch: "비빔밥", dinner: "생선구이", snack: "" },
+      activities: ["수면 7시간", "걷기 60분", "스트레칭 30분"],
+      dayActivity: {
+        sleepHours: 7,
+        walkMinutes: 60,
+        walkSteps: null,
+        sitHours: null,
+        driveMinutes: null,
+        exerciseKind: "스트레칭",
+        exerciseMinutes: 30,
+        extras: []
+      },
+      walk: { steps: "", hours: "1" },
+      intake: 1130,
+      burn: 570,
+      bodyBasics: bb
+    },
+    "2026-09-29": {
+      meals: { breakfast: "토스트", lunch: "", dinner: "", snack: "" },
+      activities: ["헬스 40분"],
+      dayActivity: {
+        sleepHours: null,
+        walkMinutes: null,
+        walkSteps: 3000,
+        sitHours: null,
+        driveMinutes: null,
+        exerciseKind: "헬스",
+        exerciseMinutes: 40,
+        extras: []
+      },
+      walk: { steps: "3000", hours: "" },
+      intake: 250,
+      burn: 320,
+      bodyBasics: bb
+    }
+  };
+  localStorage.setItem("healthapp.bodyBasics.v1", JSON.stringify(bb));
+  localStorage.setItem("healthapp.dayMeta.v1", JSON.stringify({ calendarDate: "2026-09-29" }));
+  localStorage.setItem("healthapp.dailyLog.v1", JSON.stringify(log));
+  localStorage.setItem("healthapp.yesterdayMeals.v1", JSON.stringify(log["2026-09-28"].meals));
+  localStorage.setItem(
+    "healthapp.yesterdayActivities.v1",
+    JSON.stringify(log["2026-09-28"].activities)
+  );
+  localStorage.setItem("healthapp.yesterdayWalk.v1", JSON.stringify(log["2026-09-28"].walk));
+  location.replace("/#status-block");
+})();
+</script>
+</body>
+</html>

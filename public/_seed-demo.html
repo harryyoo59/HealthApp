@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title>seed</title>
+</head>
+<body>
+<script>
+(function () {
+  var pad = function (n) { return String(n).padStart(2, "0"); };
+  var today = new Date();
+  var y = new Date(today);
+  y.setDate(y.getDate() - 1);
+  var yk = y.getFullYear() + "-" + pad(y.getMonth() + 1) + "-" + pad(y.getDate());
+  var tk = today.getFullYear() + "-" + pad(today.getMonth() + 1) + "-" + pad(today.getDate());
+  var bb = {
+    sex: "남", age: "62", height: "170", weight: "72", bp: "138/86",
+    rx: "암로디핀", dx: "고혈압", otc: "", supp: "오메가3", labs: ""
+  };
+  var log = {};
+  try { log = JSON.parse(localStorage.getItem("healthapp.dailyLog.v1") || "{}") || {}; } catch (e) {}
+  // 기록 보존: 해당 날짜에 이미 먹은 음식이 있으면 시드 끼니로 덮지 않음
+  function dayHasMeals(rec) {
+    var m = (rec && rec.meals) || {};
+    return !!(m.breakfast || m.lunch || m.dinner || m.snack);
+  }
+  localStorage.setItem("healthapp.bodyBasics.v1", JSON.stringify(bb));
+  localStorage.setItem("healthapp.dayMeta.v1", JSON.stringify({ calendarDate: tk }));
+  if (!dayHasMeals(log[yk])) log[yk] = {
+    meals: { breakfast: "밥 계란", lunch: "비빔밥", dinner: "생선구이", snack: "" },
+    activities: ["스트레칭 30분", "걷기 60분"],
+    walk: { steps: "6500", hours: "1" },
+    dayActivity: {
+      sleepHours: 7,
+      walkMinutes: 60,
+      walkSteps: null,
+      sitHours: null,
+      driveMinutes: null,
+      exerciseKind: "스트레칭",
+      exerciseMinutes: 30,
+      extras: []
+    },
+    intake: 0,
+    burn: 0,
+    bodyBasics: bb
+  };
+  if (!dayHasMeals(log[tk])) log[tk] = {
+    meals: { breakfast: "토스트 계란", lunch: "", dinner: "", snack: "" },
+    activities: ["헬스 40분"],
+    walk: { steps: "3000", hours: "" },
+    dayActivity: {
+      sleepHours: null,
+      walkMinutes: null,
+      walkSteps: 3000,
+      sitHours: null,
+      driveMinutes: null,
+      exerciseKind: "헬스",
+      exerciseMinutes: 40,
+      extras: []
+    },
+    intake: 0,
+    burn: 0,
+    bodyBasics: bb
+  };
+  localStorage.setItem("healthapp.dailyLog.v1", JSON.stringify(log));
+  location.replace("/#status-block");
+})();
+</script>
+</body>
+</html>

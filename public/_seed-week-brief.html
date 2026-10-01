@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="ko"><head><meta charset="UTF-8"/><title>seed</title></head>
+<body>
+<script>
+(function(){
+  function pad(n){return n<10?'0'+n:String(n)}
+  function keyFrom(d){return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())}
+  function day(d, intake, burn, walkMin, exerciseMin, weight, bp, qSym){
+    return {
+      meals:{breakfast:intake?'아침 밥':'',lunch:'',dinner:'',snack:''},
+      activities: walkMin?['걷기 '+walkMin+'분']:[],
+      dayActivity:{sleepHours:7,walkMinutes:walkMin||null,walkSteps:null,sitHours:null,driveMinutes:null,exerciseKind:exerciseMin?'헬스':'',exerciseMinutes:exerciseMin||null,extras:[]},
+      walk:{steps:'',hours: walkMin?String(Math.round(walkMin/60*10)/10):''},
+      intake:intake||0, burn:burn||0,
+      vitals:{weight:weight||'',bp:bp||'',at:Date.now()},
+      bodyBasics:{sex:'남',age:'60',height:'170',weight:weight||'',bp:bp||'',rx:'',dx:'',otc:'',supp:'',labs:'',surgery:'',cured:'',
+        questionnaire:{symptoms:qSym||[],symptomFreq:'',symptomDuration:'',bodyAreas:[],severity:qSym&&qSym.length&&qSym[0]!=='none'?'moderate':'',peakTime:'',sleepBand:'',bedtime:'',smoking:'',drinking:'',waterIntake:'',stress:qSym&&qSym.indexOf('tired')>=0?'high':'',bowelChange:'',homeMeasure:'',weightChange:'',emergencyFlag:'',allergyMode:'',allergyDetail:'',avoidFoodMode:'',avoidFoods:[],goals:[]}
+      }
+    };
+  }
+  // 기록 보존: 이미 먹은 음식·행동이 있으면 시드가 덮어쓰지 않음
+  var existing={};
+  try{ existing=JSON.parse(localStorage.getItem('healthapp.dailyLog.v1')||'{}')||{}; }catch(e){}
+  var hasUserMeals=Object.keys(existing).some(function(k){
+    var m=(existing[k]&&existing[k].meals)||{};
+    return !!(m.breakfast||m.lunch||m.dinner||m.snack);
+  });
+  if(hasUserMeals){
+    document.title='seed-skipped-preserve';
+    location.replace('/');
+    return;
+  }
+  var log={};
+  var today=new Date();
+  // this week Mon..today and last week
+  var dow=today.getDay();
+  var thisMon=new Date(today.getFullYear(),today.getMonth(),today.getDate()+(dow===0?-6:1-dow));
+  var prevMon=new Date(thisMon.getFullYear(),thisMon.getMonth(),thisMon.getDate()-7);
+  for(var i=0;i<7;i++){
+    var d=new Date(prevMon.getFullYear(),prevMon.getMonth(),prevMon.getDate()+i);
+    log[keyFrom(d)]=day(d, 1900+i*20, 350+i*15, 20+i*5, 20, '71.2', '128/82', ['tired']);
+  }
+  for(var j=0;j<= (today-thisMon)/86400000; j++){
+    var d2=new Date(thisMon.getFullYear(),thisMon.getMonth(),thisMon.getDate()+j);
+    log[keyFrom(d2)]=day(d2, 1600+j*10, 480+j*20, 40+j*5, 30, '70.8', '122/78', ['none']);
+  }
+  localStorage.setItem('healthapp.dailyLog.v1', JSON.stringify(log));
+  localStorage.setItem('healthapp.bodyBasics.v1', JSON.stringify({sex:'남',age:'60',height:'170',weight:'70.8',bp:'122/78',rx:'',dx:'',otc:'',supp:'',labs:'',surgery:'',cured:'',questionnaire:{symptoms:['none'],symptomFreq:'',symptomDuration:'',bodyAreas:[],severity:'',peakTime:'',sleepBand:'',bedtime:'',smoking:'',drinking:'',waterIntake:'',stress:'',bowelChange:'',homeMeasure:'',weightChange:'',emergencyFlag:'',allergyMode:'',allergyDetail:'',avoidFoodMode:'',avoidFoods:[],goals:[]}}));
+  localStorage.setItem('healthapp.dayMeta.v1', JSON.stringify({calendarDate:keyFrom(today)}));
+  localStorage.setItem('healthapp.legalNoticeConsent.v1', JSON.stringify({version:1,agreedAt:Date.now()}));
+  location.replace('/');
+})();
+</script>
+</body></html>

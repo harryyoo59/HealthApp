@@ -1,0 +1,11 @@
+# Local / temp
+.tmp-shots/
+.DS_Store
+*.log
+
+# Secrets
+.env
+.env.*
+*.pem
+*.key
+credentials.json

@@ -1,0 +1,10 @@
+{
+  "name": "know-my-body",
+  "private": true,
+  "version": "0.1.0",
+  "scripts": {
+    "dev": "python3 server.py --bind 0.0.0.0 --port 43127",
+    "dev:py": "python3 server.py --bind 0.0.0.0 --port 43127",
+    "dev:legacy": "python3 -m http.server 43127 --bind 0.0.0.0 --directory public"
+  }
+}

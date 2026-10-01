@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="ko"><head><meta charset="utf-8"><title>seed status B</title></head>
+<body>
+<script>
+(function () {
+  var yKey = "2026-09-29";
+  var tKey = "2026-09-30";
+  // 기록 보존: 이미 먹은 음식이 있으면 시드가 통째로 지우지 않음
+  var existing = {};
+  try { existing = JSON.parse(localStorage.getItem("healthapp.dailyLog.v1") || "{}") || {}; } catch (e) {}
+  var hasUserMeals = Object.keys(existing).some(function (k) {
+    var m = (existing[k] && existing[k].meals) || {};
+    return !!(m.breakfast || m.lunch || m.dinner || m.snack);
+  });
+  if (hasUserMeals) {
+    document.title = "seed-skipped-preserve";
+    location.replace("/");
+    return;
+  }
+  localStorage.setItem("healthapp.legalNoticeConsent.v1", JSON.stringify({ agreed: true, version: 1, at: Date.now() }));
+  localStorage.setItem("healthapp.bodyBasics.v1", JSON.stringify({
+    sex: "남", age: "62", height: "170", weight: "72", bp: "128/82",
+    rx: "", dx: "", otc: "", supp: "", labs: "", surgery: "", cured: "",
+    questionnaire: {
+      symptoms: ["none"], symptomFreq: "", symptomDuration: "", bodyAreas: [],
+      severity: "", peakTime: "", sleepBand: "under5", bedtime: "",
+      smoking: "", drinking: "", waterIntake: "low", stress: "high",
+      bowelChange: "", homeMeasure: "", weightChange: "", emergencyFlag: "",
+      allergyMode: "", allergyDetail: "", avoidFoodMode: "", avoidFoods: [], goals: []
+    }
+  }));
+  var daily = {};
+  daily[yKey] = {
+    meals: { breakfast: "밥 국", lunch: "비빔밥", dinner: "생선구이", snack: "커피" },
+    intake: 1800,
+    dayActivity: {
+      sleepHours: 5, walkMinutes: 20, walkSteps: null, sitHours: 8,
+      driveMinutes: 30, exerciseKind: "", exerciseMinutes: null, extras: []
+    },
+    activities: ["수면 5시간", "걷기 20분", "앉아있기 8시간", "운전 30분"],
+    walk: { hours: "0.33", steps: "" },
+    burn: 350,
+    vitals: { weight: "72", bp: "128/82", at: Date.now() },
+    bodyBasics: null
+  };
+  localStorage.setItem("healthapp.dailyLog.v1", JSON.stringify(daily));
+  localStorage.setItem("healthapp.dayMeta.v1", JSON.stringify({ calendarDate: tKey }));
+  localStorage.setItem("healthapp.yesterdayMeals.v1", JSON.stringify({ breakfast: "", lunch: "", dinner: "", snack: "" }));
+  localStorage.setItem("healthapp.yesterdayActivities.v1", JSON.stringify([]));
+  location.replace("/");
+})();
+</script>
+</body></html>

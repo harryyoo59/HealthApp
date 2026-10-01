@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title>seed food warehouse</title>
+</head>
+<body>
+<script>
+(function () {
+  try {
+    localStorage.setItem("healthapp.legalNoticeConsent.v1", JSON.stringify({
+      version: 2,
+      agreedAt: Date.now()
+    }));
+    localStorage.setItem("healthapp.bodyBasics.v1", JSON.stringify({
+      sex: "남",
+      age: "62",
+      height: "170",
+      weight: "74",
+      bp: "138/88",
+      rx: "암로디핀",
+      dx: "고혈압",
+      otc: "",
+      supp: "",
+      labs: "",
+      surgery: "",
+      cured: "",
+      questionnaire: {
+        allergyMode: "none",
+        allergyDetail: "",
+        avoidFoodMode: "has",
+        avoidFoods: ["dairy"],
+        goals: ["bp", "weight"]
+      }
+    }));
+    localStorage.setItem("healthapp.foodWarehouse.v1", JSON.stringify([
+      { id: "w1", label: "샐러드" },
+      { id: "w2", label: "라면" },
+      { id: "w3", label: "유제품" },
+      { id: "w4", label: "밥·국" }
+    ]));
+    document.title = "warehouse-seeded";
+  } catch (e) {
+    document.title = "seed-failed";
+  }
+})();
+</script>
+<p>warehouse seed ready</p>
+</body>
+</html>
