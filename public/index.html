@@ -1225,10 +1225,12 @@
       display: none;
       flex-direction: column;
       gap: 10px;
-      flex: 1 1 auto;
+      flex: 1 1 0;
       min-height: 0;
       overflow-y: auto;
       -webkit-overflow-scrolling: touch;
+      overscroll-behavior: contain;
+      touch-action: pan-y;
     }
     .sheet-backdrop.mode-meals .sheet-meals { display: flex; }
     .sheet-backdrop.mode-meals .sheet-single,
@@ -1460,10 +1462,12 @@
       display: none;
       flex-direction: column;
       gap: 12px;
-      flex: 1 1 auto;
+      flex: 1 1 0;
       min-height: 0;
       overflow-y: auto;
       -webkit-overflow-scrolling: touch;
+      overscroll-behavior: contain;
+      touch-action: pan-y;
     }
     .sheet-backdrop.mode-activity .sheet-activity { display: flex; }
     .sheet-backdrop.mode-activity .sheet-single,
@@ -1971,7 +1975,7 @@
     .sheet-backdrop.open { display: flex; }
     .sheet {
       width: 100%;
-      max-height: min(78vh, 560px);
+      max-height: min(92vh, 720px);
       background: #142820;
       border-radius: 18px 18px 0 0;
       border: 1px solid var(--line);
@@ -1981,6 +1985,13 @@
       flex-direction: column;
       gap: 10px;
       overflow: hidden;
+    }
+    /* 긴 입력 시트는 높이 고정 → 저장 버튼이 항상 하단에 남고, 본문만 스크롤 */
+    .sheet-backdrop.mode-meals .sheet,
+    .sheet-backdrop.mode-activity .sheet,
+    .sheet-backdrop.mode-profile .sheet,
+    .sheet-backdrop.mode-meds .sheet {
+      height: min(92vh, 720px);
     }
     .sheet-head {
       display: flex;
@@ -2031,10 +2042,12 @@
       display: none;
       flex-direction: column;
       gap: 10px;
-      flex: 1 1 auto;
+      flex: 1 1 0;
       min-height: 0;
       overflow-y: auto;
       -webkit-overflow-scrolling: touch;
+      overscroll-behavior: contain;
+      touch-action: pan-y;
     }
     .sheet-backdrop.mode-profile .sheet-profile { display: flex; }
     .sheet-backdrop.mode-profile .sheet-single { display: none; }
@@ -2299,10 +2312,12 @@
       display: none;
       flex-direction: column;
       gap: 10px;
-      flex: 1 1 auto;
+      flex: 1 1 0;
       min-height: 0;
       overflow-y: auto;
       -webkit-overflow-scrolling: touch;
+      overscroll-behavior: contain;
+      touch-action: pan-y;
     }
     .sheet-backdrop.mode-meds .sheet-meds { display: flex; }
     .sheet-backdrop.mode-meds .sheet-single,
@@ -2341,6 +2356,10 @@
       grid-template-columns: 1fr 1.4fr;
       gap: 8px;
       flex-shrink: 0;
+      margin-top: auto;
+      padding-top: 4px;
+      border-top: 1px solid rgba(232,242,236,0.12);
+      background: #142820;
     }
     .sheet-actions button {
       appearance: none;
@@ -3026,10 +3045,6 @@
         <button type="button" class="sheet-close" id="sheet-close" data-i18n="sheet.close">닫기</button>
       </div>
       <p class="sheet-help" id="sheet-help"></p>
-      <div class="sheet-actions">
-        <button type="button" class="btn-clear" id="sheet-clear" data-i18n="sheet.clear">비우기</button>
-        <button type="button" class="btn-save" id="sheet-save" data-i18n="sheet.save">저장</button>
-      </div>
       <div class="sheet-single" id="sheet-single">
         <label class="visually-hidden" for="sheet-input" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);">내용</label>
         <textarea id="sheet-input" rows="6" placeholder="여기에 적어 주세요" data-i18n-placeholder="sheet.placeholder"></textarea>
@@ -3415,6 +3430,10 @@
           <span class="value" id="activity-sheet-total">약 0 kcal</span>
         </div>
         <p class="activity-note" style="margin-top:2px;">흔한 활동·시간 기준 추정입니다. 정확한 소모량·다이어트 처방이 아닙니다.</p>
+      </div>
+      <div class="sheet-actions">
+        <button type="button" class="btn-clear" id="sheet-clear" data-i18n="sheet.clear">비우기</button>
+        <button type="button" class="btn-save" id="sheet-save" data-i18n="sheet.save">저장</button>
       </div>
     </div>
   </div>
