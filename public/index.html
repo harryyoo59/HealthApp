@@ -594,49 +594,48 @@
     }
     .novelist-entry {
       margin-top: 14px;
-      margin-bottom: 18px;
-      scroll-margin-bottom: 96px;
+      padding-top: 12px;
+      border-top: 1px solid var(--line);
     }
     .novelist-bar {
       appearance: none;
       display: flex;
       flex-direction: column;
       align-items: flex-start;
-      gap: 4px;
+      gap: 2px;
       width: 100%;
       margin: 0;
-      padding: 14px 14px 13px;
-      border-radius: 16px;
-      border: 1px solid rgba(212, 165, 116, 0.42);
-      background:
-        linear-gradient(135deg, rgba(212, 165, 116, 0.22) 0%, rgba(90, 58, 36, 0.55) 48%, rgba(42, 32, 22, 0.92) 100%),
-        #2a2218;
-      color: #f6e8d4;
+      padding: 10px 4px;
+      border: 0;
+      border-radius: 8px;
+      background: transparent;
+      color: var(--muted);
       font: inherit;
       text-align: left;
       cursor: pointer;
-      min-height: 72px;
-      box-shadow: inset 0 1px 0 rgba(255, 230, 190, 0.12);
+      min-height: 0;
+      box-shadow: none;
     }
     .novelist-bar:focus-visible {
-      outline: 2px solid #d4a574;
+      outline: 2px solid var(--accent);
       outline-offset: 2px;
     }
     .novelist-bar:active {
-      transform: scale(0.992);
+      transform: none;
+      opacity: 0.85;
     }
     .novelist-bar-kicker {
       font-size: 11px;
-      font-weight: 650;
-      letter-spacing: 0.04em;
-      color: #e0c29a;
+      font-weight: 600;
+      letter-spacing: 0.01em;
+      color: rgba(155,181,168,0.85);
     }
     .novelist-bar-title {
-      font-size: 18px;
-      font-weight: 800;
-      letter-spacing: -0.02em;
-      line-height: 1.25;
-      color: #fff4e4;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0;
+      line-height: 1.35;
+      color: #c5d9ce;
     }
     .novelist-bar-row {
       display: flex;
@@ -647,12 +646,13 @@
     }
     .novelist-bar-go {
       flex: 0 0 auto;
-      font-size: 12px;
-      font-weight: 700;
-      color: #2a1c10;
-      background: #d4a574;
-      border-radius: 999px;
-      padding: 6px 10px;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--muted);
+      background: transparent;
+      border: 1px solid rgba(155,181,168,0.35);
+      border-radius: 8px;
+      padding: 4px 8px;
       white-space: nowrap;
     }
     a.novelist-bar { text-decoration: none; color: inherit; }
@@ -3022,24 +3022,24 @@
         <div class="records-consent-row">
           <button type="button" class="records-consent-link" id="records-consent-revoke" data-i18n="records.revoke">주의사항 다시 보기 · 동의 철회</button>
         </div>
+        <section class="novelist-entry" id="novelist-entry" data-i18n-attr="aria-label:novelist.sectionAria" aria-label="개발자가 만든 다른 앱">
+          <a
+            class="novelist-bar"
+            id="novelist-open"
+            href="https://project-nl-peach.vercel.app"
+            target="_blank"
+            rel="noopener noreferrer"
+            data-i18n-attr="aria-label:novelist.aria"
+            aria-label="개발자가 만든 다른 앱 · 이제 나도 소설가"
+          >
+            <span class="novelist-bar-kicker" data-i18n="novelist.kicker">개발자가 만든 다른 앱</span>
+            <span class="novelist-bar-row">
+              <strong class="novelist-bar-title" data-i18n="novelist.title">이제 나도 소설가</strong>
+              <span class="novelist-bar-go" data-i18n="novelist.go">열기</span>
+            </span>
+          </a>
+        </section>
       </div>
-    </section>
-    <section class="novelist-entry" id="novelist-entry" data-i18n-attr="aria-label:novelist.sectionAria" aria-label="AI 소설쓰기">
-      <a
-        class="novelist-bar"
-        id="novelist-open"
-        href="https://project-nl-peach.vercel.app"
-        target="_blank"
-        rel="noopener noreferrer"
-        data-i18n-attr="aria-label:novelist.aria"
-        aria-label="이제 나도 소설가 바로가기"
-      >
-        <span class="novelist-bar-kicker" data-i18n="novelist.kicker">AI 소설쓰기 · 소설 사이트로</span>
-        <span class="novelist-bar-row">
-          <strong class="novelist-bar-title" data-i18n="novelist.title">이제 나도 소설가 바로가기</strong>
-          <span class="novelist-bar-go" data-i18n="novelist.go">이동</span>
-        </span>
-      </a>
     </section>
   </main>
   <nav class="nav" data-i18n-attr="aria-label:nav.aria" aria-label="하단 메뉴">
