@@ -1970,7 +1970,7 @@
       background: rgba(0,0,0,0.55);
       display: none;
       align-items: flex-end;
-      z-index: 40;
+      z-index: 60; /* nav(50)보다 위 — 저장 버튼이 하단 메뉴에 가리지 않게 */
     }
     .sheet-backdrop.open { display: flex; }
     .sheet {
@@ -1986,12 +1986,22 @@
       gap: 10px;
       overflow: hidden;
     }
-    /* 긴 입력 시트는 높이 고정 → 저장 버튼이 항상 하단에 남고, 본문만 스크롤 */
+    /* 긴 입력 시트: 화면 거의 전체로 올려서 저장이 항상 보이게 */
+    .sheet-backdrop.mode-meals,
+    .sheet-backdrop.mode-activity,
+    .sheet-backdrop.mode-profile,
+    .sheet-backdrop.mode-meds {
+      align-items: stretch;
+      padding-top: max(10px, env(safe-area-inset-top, 0px));
+    }
     .sheet-backdrop.mode-meals .sheet,
     .sheet-backdrop.mode-activity .sheet,
     .sheet-backdrop.mode-profile .sheet,
     .sheet-backdrop.mode-meds .sheet {
-      height: min(92vh, 720px);
+      height: auto;
+      flex: 1 1 auto;
+      max-height: none;
+      border-radius: 18px 18px 0 0;
     }
     .sheet-head {
       display: flex;
@@ -2357,7 +2367,8 @@
       gap: 8px;
       flex-shrink: 0;
       margin-top: auto;
-      padding-top: 4px;
+      padding-top: 8px;
+      padding-bottom: 4px;
       border-top: 1px solid rgba(232,242,236,0.12);
       background: #142820;
     }
