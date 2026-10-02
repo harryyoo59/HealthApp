@@ -4026,10 +4026,28 @@
           MEAL_FOOD_CHIP_BY_ID[chip.id] = chip;
           MEAL_FOOD_CHIP_BY_LABEL[chip.label] = chip;
         });
+        var fixedKcalFixed = false;
         forEachFixedMenuChip(function (chip) {
+          var def = findDefaultFoodChipByLabel(chip.label);
+          if (def && Number(chip.kcal) !== Number(def.kcal)) {
+            chip.kcal = def.kcal;
+            fixedKcalFixed = true;
+          }
           MEAL_FOOD_CHIP_BY_ID[chip.id] = chip;
-          MEAL_FOOD_CHIP_BY_LABEL[chip.label] = chip;
+          // 기본 메뉴와 같은 라벨이면 기본 kcal 유지 (메인에 옛 값이 있어도 덮지 않음)
+          if (!def) MEAL_FOOD_CHIP_BY_LABEL[chip.label] = chip;
         });
+        if (fixedKcalFixed) saveFixedMenu();
+      }
+
+      function findDefaultFoodChipByLabel(label) {
+        var key = String(label || "").trim().toLowerCase();
+        if (!key) return null;
+        var chips = collectAllDefaultFoodChips();
+        for (var i = 0; i < chips.length; i++) {
+          if (String(chips[i].label || "").trim().toLowerCase() === key) return chips[i];
+        }
+        return null;
       }
 
       /** 아침 기본 메뉴 프리셋 교체 시: 아침 숨김만 비워 새 9개가 보이게 */
@@ -4440,8 +4458,9 @@
         { test: /미역국|북어국|국|탕/, kcal: 120, label: "국·탕" },
         { test: /삼겹살|불고기|갈비|치킨|닭고기|돼지고기|소고기|고기/, kcal: 450, label: "고기·치킨" },
         { test: /생선|회|초밥|연어/, kcal: 280, label: "생선·회" },
-        { test: /계란\s*후라이\s*2|달걀\s*후라이\s*2|후라이\s*2개/, kcal: 180, label: "계란 후라이 2개" },
-        { test: /계란|달걀|후라이|스크램블/, kcal: 100, label: "계란" },
+        { test: /계란\s*후라이\s*2|달걀\s*후라이\s*2|후라이\s*2\s*개|계란후라이\s*2|달걀후라이\s*2/, kcal: 180, label: "계란 후라이 2개" },
+        { test: /계란\s*후라이|달걀\s*후라이|계란후라이|달걀후라이|후라이/, kcal: 90, label: "계란 후라이" },
+        { test: /계란|달걀|스크램블/, kcal: 100, label: "계란" },
         { test: /토스트|식빵|빵|샌드위치/, kcal: 250, label: "빵·토스트" },
         { test: /시리얼|요거트|그릭/, kcal: 180, label: "시리얼·요거트" },
         { test: /유제품|치즈|요구르트/, kcal: 150, label: "유제품" },
@@ -6296,7 +6315,10 @@
       }
 
       function estimateItemKcal(item) {
-        var chip = MEAL_FOOD_CHIP_BY_LABEL[String(item || "").trim()];
+        var raw = String(item || "").trim();
+        var def = findDefaultFoodChipByLabel(raw);
+        if (def) return { kcal: def.kcal, label: def.label };
+        var chip = MEAL_FOOD_CHIP_BY_LABEL[raw];
         if (chip) return { kcal: chip.kcal, label: chip.label };
         for (var i = 0; i < FOOD_KCAL_RULES.length; i++) {
           if (FOOD_KCAL_RULES[i].test.test(item)) {
