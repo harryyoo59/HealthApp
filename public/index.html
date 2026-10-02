@@ -3325,13 +3325,13 @@
             <strong>걷기</strong>
             <span class="act-block-kcal" data-act-kcal="walk"></span>
           </div>
-          <p class="act-mode-hint">시간 · +/- · 걸음 수 — <strong>하나만</strong></p>
+          <p class="act-mode-hint">주어진 시간 · +/- 분 · +/- 걸음 — <strong>하나만</strong></p>
           <div class="act-path act-path-preset" data-act-path="preset">
             <span class="act-path-label">주어진 시간</span>
             <div class="act-chips" id="act-walk-min-chips" role="group" aria-label="걷기 시간 선택"></div>
           </div>
           <div class="act-path act-path-adjust" data-act-path="adjust">
-            <span class="act-path-label">+/- 조절</span>
+            <span class="act-path-label">+/- 분</span>
             <div class="act-row">
               <span class="muted">분</span>
               <div class="stepper" data-act-stepper="walkMinutes" role="group" aria-label="걷기 분">
@@ -3342,8 +3342,15 @@
             </div>
           </div>
           <div class="act-path act-path-steps" data-act-path="steps">
-            <span class="act-path-label">걸음 수</span>
-            <div class="act-chips" id="act-walk-step-chips" role="group" aria-label="걸음 수 선택"></div>
+            <span class="act-path-label">+/- 걸음</span>
+            <div class="act-row">
+              <span class="muted">보</span>
+              <div class="stepper" data-act-stepper="walkSteps" role="group" aria-label="걸음 수">
+                <button type="button" class="step-btn" data-dir="-1" aria-label="걸음 줄이기">−</button>
+                <span class="step-val is-empty" id="act-walk-step-val" aria-live="polite">눌러 고르기</span>
+                <button type="button" class="step-btn" data-dir="1" aria-label="걸음 늘리기">+</button>
+              </div>
+            </div>
           </div>
         </div>
         <div class="act-block" data-act="sit" data-input-mode="none">
@@ -3492,11 +3499,11 @@
         },
         "activity-yesterday": {
           title: "어제 하루 행동",
-          help: "수면·걷기·앉아있기·운전·운동을 눌러 고르세요. 주어진 시간과 +/- 조절은 하나만 씁니다. 아래 총 소모 칼로리가 대략 합산됩니다."
+          help: "수면·걷기·앉아있기·운전·운동을 눌러 고르세요. 주어진 시간·+/-·걸음(+/-)은 하나만 씁니다. 아래 총 소모 칼로리가 대략 합산됩니다."
         },
         "activity-today": {
           title: "오늘 하루 행동",
-          help: "오늘 한 행동을 틈틈이 눌러 기록하세요. 주어진 시간과 +/- 조절은 하나만. 수면·걷기·앉아있기·운전·운동과 총 소모가 합산됩니다."
+          help: "오늘 한 행동을 틈틈이 눌러 기록하세요. 주어진 시간·+/-·걸음(+/-)은 하나만. 수면·걷기·앉아있기·운전·운동과 총 소모가 합산됩니다."
         }
       };
       var PROFILE_KEYS = ["sex", "age", "height", "weight", "bp"];
@@ -4609,6 +4616,7 @@
       var activitySheetTotal = document.getElementById("activity-sheet-total");
       var actSleepVal = document.getElementById("act-sleep-val");
       var actWalkMinVal = document.getElementById("act-walk-min-val");
+      var actWalkStepVal = document.getElementById("act-walk-step-val");
       var actSitVal = document.getElementById("act-sit-val");
       var actDriveVal = document.getElementById("act-drive-val");
       var actExerciseMinVal = document.getElementById("act-exercise-min-val");
@@ -4932,7 +4940,6 @@
       var EXTRA_KINDS = ["가사", "청소", "출퇴근", "계단", "가벼운 활동"];
       var SLEEP_PRESETS = [5, 6, 7, 8, 9];
       var WALK_MIN_PRESETS = [15, 30, 45, 60, 90];
-      var WALK_STEP_PRESETS = [3000, 5000, 8000, 10000];
       var SIT_PRESETS = [2, 4, 6, 8, 10];
       var DRIVE_PRESETS = [15, 30, 60, 90];
       var EXERCISE_MIN_PRESETS = [20, 30, 40, 60];
@@ -4940,6 +4947,7 @@
       var ACT_STEPPER_CFG = {
         sleepHours: { min: 0, max: 14, step: 0.5, fallback: 7, unit: "시간", decimals: 1 },
         walkMinutes: { min: 0, max: 300, step: 5, fallback: 30, unit: "분", decimals: 0 },
+        walkSteps: { min: 0, max: 50000, step: 500, fallback: 5000, unit: "보", decimals: 0 },
         sitHours: { min: 0, max: 16, step: 0.5, fallback: 6, unit: "시간", decimals: 1 },
         driveMinutes: { min: 0, max: 300, step: 5, fallback: 30, unit: "분", decimals: 0 },
         exerciseMinutes: { min: 0, max: 180, step: 5, fallback: 40, unit: "분", decimals: 0 }
@@ -4991,6 +4999,8 @@
         }
         if (act.walkMinutes != null && act.walkMinutes > 0) {
           lines.push("걷기 " + Math.round(act.walkMinutes) + "분");
+        } else if (act.walkSteps != null && act.walkSteps > 0) {
+          lines.push("걷기 " + Math.round(act.walkSteps).toLocaleString("ko-KR") + "보");
         }
         if (act.sitHours != null && act.sitHours > 0) {
           lines.push("앉아있기 " + formatActHours(act.sitHours) + "시간");
@@ -8649,6 +8659,9 @@
         var cfg = ACT_STEPPER_CFG[key];
         if (num == null || !isFinite(num)) return "";
         var n = Number(num);
+        if (key === "walkSteps") {
+          return Math.round(n).toLocaleString("ko-KR") + (cfg && cfg.unit ? (" " + cfg.unit) : " 보");
+        }
         if (cfg.decimals > 0) {
           var rounded = Math.round(n / cfg.step) * cfg.step;
           rounded = Math.round(rounded * 10) / 10;
@@ -8699,7 +8712,7 @@
 
       function stepperKeyToAct(key) {
         if (key === "sleepHours") return "sleep";
-        if (key === "walkMinutes") return "walk";
+        if (key === "walkMinutes" || key === "walkSteps") return "walk";
         if (key === "sitHours") return "sit";
         if (key === "driveMinutes") return "drive";
         if (key === "exerciseMinutes") return "exercise";
@@ -8803,6 +8816,7 @@
         syncActBlockModes();
         paintActStep(actSleepVal, "sleepHours", actModes.sleep === "adjust" ? d.sleepHours : null);
         paintActStep(actWalkMinVal, "walkMinutes", actModes.walk === "adjust" ? d.walkMinutes : null);
+        paintActStep(actWalkStepVal, "walkSteps", actModes.walk === "steps" ? d.walkSteps : null);
         paintActStep(actSitVal, "sitHours", actModes.sit === "adjust" ? d.sitHours : null);
         paintActStep(actDriveVal, "driveMinutes", actModes.drive === "adjust" ? d.driveMinutes : null);
         paintActStep(actExerciseMinVal, "exerciseMinutes", actModes.exercise === "adjust" ? d.exerciseMinutes : null);
@@ -8816,21 +8830,6 @@
           return v + "분";
         }, actModes.walk === "preset" ? d.walkMinutes : null, function (v) {
           pickActPreset("walk", "walkMinutes", v, WALK_MIN_PRESETS);
-        });
-        fillChipGroup("act-walk-step-chips", WALK_STEP_PRESETS, function (v) {
-          return v.toLocaleString("ko-KR") + "보";
-        }, actModes.walk === "steps" ? d.walkSteps : null, function (v) {
-          if (!activityDraft) return;
-          var same = activityDraft.walkSteps != null && Number(activityDraft.walkSteps) === Number(v) && actModes.walk === "steps";
-          if (same) {
-            activityDraft.walkSteps = null;
-            actModes.walk = "none";
-          } else {
-            activityDraft.walkSteps = v;
-            actModes.walk = "steps";
-            applyExclusiveWalk("steps");
-          }
-          paintActivityDraft();
         });
         fillChipGroup("act-sit-chips", SIT_PRESETS, function (v) {
           return formatActHours(v) + "시간";
@@ -8920,8 +8919,13 @@
         if (!cfg || !activityDraft) return;
         var act = stepperKeyToAct(key);
         if (act) {
-          actModes[act] = "adjust";
-          if (act === "walk") applyExclusiveWalk("minutes");
+          if (key === "walkSteps") {
+            actModes[act] = "steps";
+            applyExclusiveWalk("steps");
+          } else {
+            actModes[act] = "adjust";
+            if (act === "walk") applyExclusiveWalk("minutes");
+          }
         }
         var cur = activityDraft[key];
         if (cur == null || !(cur > 0)) {
@@ -10790,8 +10794,13 @@
               activityDraft[key] = ACT_STEPPER_CFG[key].fallback;
             }
             if (act) {
-              actModes[act] = "adjust";
-              if (act === "walk") applyExclusiveWalk("minutes");
+              if (key === "walkSteps") {
+                actModes[act] = "steps";
+                applyExclusiveWalk("steps");
+              } else {
+                actModes[act] = "adjust";
+                if (act === "walk") applyExclusiveWalk("minutes");
+              }
             }
             paintActivityDraft();
           });
