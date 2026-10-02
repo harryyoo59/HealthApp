@@ -1256,12 +1256,16 @@
       font-weight: 600;
       line-height: 1.3;
     }
-    .meals-main-hint {
-      margin-top: 8px;
-      color: #b8e6c8;
-    }
     .meals-food-chips {
       margin: 0 0 2px;
+    }
+    .meals-menu-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .meals-menu-wrap .act-chips {
+      margin: 0;
     }
     .meals-field .fixed-menu-guide {
       margin: 2px 0 4px;
@@ -1338,15 +1342,6 @@
       line-height: 1.35;
     }
     .fixed-menu-empty[hidden] { display: none; }
-    .act-chip.fixed-menu-chip {
-      border-color: rgba(120,200,160,0.55);
-      background: #163528;
-    }
-    .act-chip.fixed-menu-chip[aria-pressed="true"] {
-      border: 3px solid #ffffff;
-      background: #0b7a4a;
-      color: #ffffff;
-    }
     .act-chip.fixed-menu-chip.is-remove-mode {
       border-color: #ffb4a8;
     }
@@ -2900,7 +2895,7 @@
                 <input type="text" class="food-wh-input" id="food-warehouse-input" maxlength="40" placeholder="메뉴 예: 된장찌개" data-i18n-placeholder="food.menuPlaceholder" autocomplete="off" />
                 <button type="button" class="food-wh-add-btn" id="food-warehouse-add" data-i18n="food.add">넣기</button>
               </div>
-              <button type="button" class="food-wh-import" id="food-warehouse-import" data-i18n="food.import">끼니 메인 메뉴에서 가져오기</button>
+              <button type="button" class="food-wh-import" id="food-warehouse-import" data-i18n="food.import">끼니 메뉴에서 가져오기</button>
               <ul class="food-wh-list" id="food-warehouse-list" hidden></ul>
               <p class="panel-empty" id="food-warehouse-empty" data-i18n="food.warehouseEmpty">메뉴를 넣으면 여기에 좋음·주의·보통 판단이 보입니다.</p>
             </div>
@@ -3242,14 +3237,13 @@
       <div class="sheet-meals" id="sheet-meals" data-i18n-attr="aria-label:meal.sectionAria" aria-label="먹은 음식 입력">
         <div class="meals-field" data-meal-slot="breakfast">
           <label><span data-i18n="meal.breakfast">아침</span> <span class="meals-field-kcal" data-meal-sheet-kcal="breakfast"></span></label>
-          <p class="meals-chip-hint meals-default-hint" data-i18n="meal.defaults">기본 메뉴</p>
-          <div class="meals-defaults-wrap" data-defaults-wrap>
-            <div class="act-chips meals-food-chips" id="meal-breakfast-chips" role="group" data-i18n-attr="aria-label:meal.breakfastDefaultsAria" aria-label="아침 기본 메뉴"></div>
+          <p class="meals-chip-hint" data-i18n="meal.menu">메뉴</p>
+          <p class="fixed-menu-guide" id="meal-breakfast-fixed-guide" data-i18n="meal.guide">한 번 탭=선택 · 두 번 탭=목록에서 빼기</p>
+          <div class="meals-menu-wrap" role="group" data-i18n-attr="aria-label:meal.breakfastMenuAria" aria-label="아침 메뉴">
+            <div class="act-chips meals-food-chips" id="meal-breakfast-chips"></div>
+            <div class="act-chips meals-food-chips fixed-menu-chips" id="meal-breakfast-fixed"></div>
+            <p class="fixed-menu-empty" id="meal-breakfast-fixed-empty" hidden data-i18n="meal.empty">직접 적기로 자주 먹는 걸 올리면 여기에도 쌓입니다</p>
           </div>
-          <p class="meals-chip-hint meals-main-hint" data-i18n="meal.main">메인 메뉴</p>
-          <p class="fixed-menu-guide" id="meal-breakfast-fixed-guide" data-i18n="meal.guide">올리면 여기 쌓입니다 · 한 번 탭=선택 · 두 번 탭=빼기</p>
-          <div class="act-chips meals-food-chips fixed-menu-chips" id="meal-breakfast-fixed" role="group" data-i18n-attr="aria-label:meal.breakfastMainAria" aria-label="아침 메인 메뉴"></div>
-          <p class="fixed-menu-empty" id="meal-breakfast-fixed-empty" data-i18n="meal.empty">아직 없음 · 기본 메뉴나 직접 적기로 올리면 쌓입니다</p>
           <label class="meals-note-label" for="meal-breakfast" data-i18n="meal.writeOwn">직접 적기</label>
           <div class="meals-note-row">
             <input type="text" class="meals-note-input" id="meal-breakfast" maxlength="80" placeholder="예: 된장찌개. 밥. 김치" data-i18n-placeholder="meal.ph.breakfast" autocomplete="off" />
@@ -3257,14 +3251,13 @@
         </div>
         <div class="meals-field" data-meal-slot="lunch">
           <label><span data-i18n="meal.lunch">점심</span> <span class="meals-field-kcal" data-meal-sheet-kcal="lunch"></span></label>
-          <p class="meals-chip-hint meals-default-hint" data-i18n="meal.defaults">기본 메뉴</p>
-          <div class="meals-defaults-wrap" data-defaults-wrap>
-            <div class="act-chips meals-food-chips" id="meal-lunch-chips" role="group" data-i18n-attr="aria-label:meal.lunchDefaultsAria" aria-label="점심 기본 메뉴"></div>
+          <p class="meals-chip-hint" data-i18n="meal.menu">메뉴</p>
+          <p class="fixed-menu-guide" id="meal-lunch-fixed-guide" data-i18n="meal.guide">한 번 탭=선택 · 두 번 탭=목록에서 빼기</p>
+          <div class="meals-menu-wrap" role="group" data-i18n-attr="aria-label:meal.lunchMenuAria" aria-label="점심 메뉴">
+            <div class="act-chips meals-food-chips" id="meal-lunch-chips"></div>
+            <div class="act-chips meals-food-chips fixed-menu-chips" id="meal-lunch-fixed"></div>
+            <p class="fixed-menu-empty" id="meal-lunch-fixed-empty" hidden data-i18n="meal.empty">직접 적기로 자주 먹는 걸 올리면 여기에도 쌓입니다</p>
           </div>
-          <p class="meals-chip-hint meals-main-hint" data-i18n="meal.main">메인 메뉴</p>
-          <p class="fixed-menu-guide" id="meal-lunch-fixed-guide" data-i18n="meal.guide">올리면 여기 쌓입니다 · 한 번 탭=선택 · 두 번 탭=빼기</p>
-          <div class="act-chips meals-food-chips fixed-menu-chips" id="meal-lunch-fixed" role="group" data-i18n-attr="aria-label:meal.lunchMainAria" aria-label="점심 메인 메뉴"></div>
-          <p class="fixed-menu-empty" id="meal-lunch-fixed-empty" data-i18n="meal.empty">아직 없음 · 기본 메뉴나 직접 적기로 올리면 쌓입니다</p>
           <label class="meals-note-label" for="meal-lunch" data-i18n="meal.writeOwn">직접 적기</label>
           <div class="meals-note-row">
             <input type="text" class="meals-note-input" id="meal-lunch" maxlength="80" placeholder="예외 메뉴 · 칼로리 숫자 선택" data-i18n-placeholder="meal.ph.lunch" autocomplete="off" />
@@ -3272,14 +3265,13 @@
         </div>
         <div class="meals-field" data-meal-slot="dinner">
           <label><span data-i18n="meal.dinner">저녁</span> <span class="meals-field-kcal" data-meal-sheet-kcal="dinner"></span></label>
-          <p class="meals-chip-hint meals-default-hint" data-i18n="meal.defaults">기본 메뉴</p>
-          <div class="meals-defaults-wrap" data-defaults-wrap>
-            <div class="act-chips meals-food-chips" id="meal-dinner-chips" role="group" data-i18n-attr="aria-label:meal.dinnerDefaultsAria" aria-label="저녁 기본 메뉴"></div>
+          <p class="meals-chip-hint" data-i18n="meal.menu">메뉴</p>
+          <p class="fixed-menu-guide" id="meal-dinner-fixed-guide" data-i18n="meal.guide">한 번 탭=선택 · 두 번 탭=목록에서 빼기</p>
+          <div class="meals-menu-wrap" role="group" data-i18n-attr="aria-label:meal.dinnerMenuAria" aria-label="저녁 메뉴">
+            <div class="act-chips meals-food-chips" id="meal-dinner-chips"></div>
+            <div class="act-chips meals-food-chips fixed-menu-chips" id="meal-dinner-fixed"></div>
+            <p class="fixed-menu-empty" id="meal-dinner-fixed-empty" hidden data-i18n="meal.empty">직접 적기로 자주 먹는 걸 올리면 여기에도 쌓입니다</p>
           </div>
-          <p class="meals-chip-hint meals-main-hint" data-i18n="meal.main">메인 메뉴</p>
-          <p class="fixed-menu-guide" id="meal-dinner-fixed-guide" data-i18n="meal.guide">올리면 여기 쌓입니다 · 한 번 탭=선택 · 두 번 탭=빼기</p>
-          <div class="act-chips meals-food-chips fixed-menu-chips" id="meal-dinner-fixed" role="group" data-i18n-attr="aria-label:meal.dinnerMainAria" aria-label="저녁 메인 메뉴"></div>
-          <p class="fixed-menu-empty" id="meal-dinner-fixed-empty" data-i18n="meal.empty">아직 없음 · 기본 메뉴나 직접 적기로 올리면 쌓입니다</p>
           <label class="meals-note-label" for="meal-dinner" data-i18n="meal.writeOwn">직접 적기</label>
           <div class="meals-note-row">
             <input type="text" class="meals-note-input" id="meal-dinner" maxlength="80" placeholder="예외 메뉴 · 칼로리 숫자 선택" data-i18n-placeholder="meal.ph.dinner" autocomplete="off" />
@@ -3287,14 +3279,13 @@
         </div>
         <div class="meals-field" data-meal-slot="snack">
           <label><span data-i18n="meal.snack">간식</span> <span class="meals-field-kcal" data-meal-sheet-kcal="snack"></span></label>
-          <p class="meals-chip-hint meals-default-hint" data-i18n="meal.defaults">기본 메뉴</p>
-          <div class="meals-defaults-wrap" data-defaults-wrap>
-            <div class="act-chips meals-food-chips" id="meal-snack-chips" role="group" data-i18n-attr="aria-label:meal.snackDefaultsAria" aria-label="간식 기본 메뉴"></div>
+          <p class="meals-chip-hint" data-i18n="meal.menu">메뉴</p>
+          <p class="fixed-menu-guide" id="meal-snack-fixed-guide" data-i18n="meal.guide">한 번 탭=선택 · 두 번 탭=목록에서 빼기</p>
+          <div class="meals-menu-wrap" role="group" data-i18n-attr="aria-label:meal.snackMenuAria" aria-label="간식 메뉴">
+            <div class="act-chips meals-food-chips" id="meal-snack-chips"></div>
+            <div class="act-chips meals-food-chips fixed-menu-chips" id="meal-snack-fixed"></div>
+            <p class="fixed-menu-empty" id="meal-snack-fixed-empty" hidden data-i18n="meal.empty">직접 적기로 자주 먹는 걸 올리면 여기에도 쌓입니다</p>
           </div>
-          <p class="meals-chip-hint meals-main-hint" data-i18n="meal.main">메인 메뉴</p>
-          <p class="fixed-menu-guide" id="meal-snack-fixed-guide" data-i18n="meal.guide">올리면 여기 쌓입니다 · 한 번 탭=선택 · 두 번 탭=빼기</p>
-          <div class="act-chips meals-food-chips fixed-menu-chips" id="meal-snack-fixed" role="group" data-i18n-attr="aria-label:meal.snackMainAria" aria-label="간식 메인 메뉴"></div>
-          <p class="fixed-menu-empty" id="meal-snack-fixed-empty" data-i18n="meal.empty">아직 없음 · 기본 메뉴나 직접 적기로 올리면 쌓입니다</p>
           <label class="meals-note-label" for="meal-snack" data-i18n="meal.writeOwn">직접 적기</label>
           <div class="meals-note-row">
             <input type="text" class="meals-note-input" id="meal-snack" maxlength="80" placeholder="예: 커피 또는 커피 50" data-i18n-placeholder="meal.ph.snack" autocomplete="off" />
@@ -3304,7 +3295,7 @@
           <span class="label" data-i18n="meal.total">총 칼로리</span>
           <span class="value" id="meals-sheet-total">약 0 kcal</span>
         </div>
-        <p class="meals-note" style="margin-top:6px;" data-i18n="meal.note">기본 메뉴는 흔한 1인분 추정, 메인 메뉴는 올린 단품이 끼니별로 쌓입니다. 정확한 영양 계산·식단 처방은 아닙니다.</p>
+        <p class="meals-note" style="margin-top:6px;" data-i18n="meal.note">메뉴는 흔한 1인분 추정입니다. 자주 먹는 건 목록에 쌓입니다. 정확한 영양 계산·식단 처방은 아닙니다.</p>
       </div>
       <div class="sheet-activity" id="sheet-activity" aria-label="하루 행동 입력">
         <div class="act-block" data-act="sleep" data-input-mode="none">
@@ -3493,11 +3484,11 @@
         },
         "meals-yesterday": {
           title: "어제 먹은 음식",
-          help: "기본 메뉴를 고르거나 직접 적기 하세요. 한 번 탭=선택, 두 번 탭하면 기본 목록에서 빼기(아침·점심·저녁·간식 독립)."
+          help: "메뉴를 고르거나 직접 적기 하세요. 한 번 탭=선택, 두 번 탭하면 목록에서 빼기(아침·점심·저녁·간식 독립)."
         },
         "meals-today": {
           title: "오늘 먹은 음식",
-          help: "기본 메뉴를 고르거나 직접 적기 하세요. 한 번 탭=선택, 두 번 탭하면 기본 목록에서 빼기(아침·점심·저녁·간식 독립)."
+          help: "메뉴를 고르거나 직접 적기 하세요. 한 번 탭=선택, 두 번 탭하면 목록에서 빼기(아침·점심·저녁·간식 독립)."
         },
         "activity-yesterday": {
           title: "어제 하루 행동",
@@ -7038,15 +7029,15 @@
           foodWarehouseImport.addEventListener("click", function () {
             var added = importFixedMenusToWarehouse();
             if (!added) {
-              foodWarehouseImport.textContent = "가져올 메인 메뉴가 없어요";
+              foodWarehouseImport.textContent = "가져올 메뉴가 없어요";
               setTimeout(function () {
-                foodWarehouseImport.textContent = "끼니 메인 메뉴에서 가져오기";
+                foodWarehouseImport.textContent = "끼니 메뉴에서 가져오기";
               }, 1600);
               return;
             }
             foodWarehouseImport.textContent = added + "개 가져왔어요";
             setTimeout(function () {
-              foodWarehouseImport.textContent = "끼니 메인 메뉴에서 가져오기";
+              foodWarehouseImport.textContent = "끼니 메뉴에서 가져오기";
             }, 1600);
           });
         }
@@ -8492,6 +8483,17 @@
         return chip.label + " ·" + chip.kcal;
       }
 
+      function isVisibleDefaultMenuChip(chip, mealKey) {
+        if (!chip || !isMealKey(mealKey)) return false;
+        var defaults = getDefaultFoodChips(mealKey) || [];
+        for (var i = 0; i < defaults.length; i++) {
+          var d = defaults[i];
+          if (isDefaultChipSuppressed(d.id, mealKey)) continue;
+          if (d.id === chip.id || d.label === chip.label) return true;
+        }
+        return false;
+      }
+
       function paintFixedMenuChips(mealKey) {
         var wrap = document.getElementById("meal-" + mealKey + "-fixed");
         var emptyEl = document.getElementById("meal-" + mealKey + "-fixed-empty");
@@ -8499,8 +8501,11 @@
         var slot = mealDraft[mealKey] || emptyMealSlotDraft();
         var list = getFixedMenuList(mealKey) || [];
         wrap.innerHTML = "";
-        if (emptyEl) emptyEl.hidden = list.length > 0;
+        var shown = 0;
         list.forEach(function (chip) {
+          // 프리셋과 겹치면 한 목록에 두 번 보이지 않게
+          if (isVisibleDefaultMenuChip(chip, mealKey)) return;
+          shown += 1;
           var on = isMealChipSelected(slot, chip.id);
           var btn = document.createElement("button");
           btn.type = "button";
@@ -8512,15 +8517,17 @@
             chip.label +
               " 약 " +
               chip.kcal +
-              " kcal. 한 번 탭하면 선택, 두 번 탭하면 메인 메뉴에서 빼기"
+              " kcal. 한 번 탭하면 선택, 두 번 탭하면 목록에서 빼기"
           );
-          btn.title = "한 번 탭=선택 · 두 번 탭=메인 메뉴에서 빼기";
+          btn.title = "한 번 탭=선택 · 두 번 탭=목록에서 빼기";
           btn.textContent = formatFoodChipLabel(chip);
           btn.addEventListener("click", function () {
             handleFixedChipTap(mealKey, chip);
           });
           wrap.appendChild(btn);
         });
+        if (emptyEl) emptyEl.hidden = true;
+        wrap.hidden = shown === 0;
       }
 
       /** 예전 UI 없이 고정만 남던 단품을 직접 적기로 옮기던 보정 — 메인 메뉴 UI 복구 후 미사용 */
@@ -8580,9 +8587,9 @@
             chip.label +
               " 약 " +
               chip.kcal +
-              " kcal. 한 번 탭하면 선택, 두 번 탭하면 기본 메뉴에서 빼기"
+              " kcal. 한 번 탭하면 선택, 두 번 탭하면 목록에서 빼기"
           );
-          btn.title = "한 번 탭=선택 · 두 번 탭=기본 메뉴에서 빼기";
+          btn.title = "한 번 탭=선택 · 두 번 탭=목록에서 빼기";
           btn.textContent = formatFoodChipLabel(chip);
           btn.addEventListener("click", function () {
             handleDefaultChipTap(mealKey, chip);
