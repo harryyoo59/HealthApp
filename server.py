@@ -22,13 +22,20 @@ class NoCacheHandler(SimpleHTTPRequestHandler):
         ".json": "application/json",
         ".svg": "image/svg+xml",
         ".webp": "image/webp",
+        ".png": "image/png",
+        ".webmanifest": "application/manifest+json",
     }
 
     def end_headers(self) -> None:
-        # Phone-first: never let browsers keep stale HTML/JS/CSS (or other assets).
-        self.send_header("Cache-Control", NO_CACHE)
-        self.send_header("Pragma", "no-cache")
-        self.send_header("Expires", "0")
+        path = self.path.split("?", 1)[0]
+        # HTML stays uncached so a live server shows new edits.
+        # The service worker and manifest must still be installable and update when they change.
+        if path.endswith("/sw.js") or path.endswith(".webmanifest"):
+            self.send_header("Cache-Control", "no-cache")
+        else:
+            self.send_header("Cache-Control", NO_CACHE)
+            self.send_header("Pragma", "no-cache")
+            self.send_header("Expires", "0")
         super().end_headers()
 
     def log_message(self, fmt: str, *args) -> None:
@@ -96,6 +103,8 @@ def main() -> None:
     # Ensure common types even if system mime is sparse.
     mimetypes.add_type("application/javascript", ".js")
     mimetypes.add_type("text/css", ".css")
+    mimetypes.add_type("application/manifest+json", ".webmanifest")
+    mimetypes.add_type("image/png", ".png")
 
     handler = functools.partial(NoCacheHandler, directory=args.directory)
     httpd = ThreadingHTTPServer((args.bind, args.port), handler)

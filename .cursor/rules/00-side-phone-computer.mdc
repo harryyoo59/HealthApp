@@ -17,7 +17,7 @@ alwaysApply: true
 
 **현재 작업 중인 프로젝트**의 주소를 연다. (이 저장소 = HealthApp → `http://127.0.0.1:43127`)
 
-기본 서버는 이 컴퓨터만 엽니다 (`npm run dev`). 같은 Wi-Fi 폰에서 보려면 `npm run dev:lan` 입니다.
+기본 서버는 이 컴퓨터만 엽니다 (`npm run dev`). 같은 Wi-Fi 폰에서 보려면 `npm run dev:lan` 입니다. 실제 사용은 폰에 설치하는 PWA이고, `npm run dev`는 개발용입니다.
 
 ## 구조 (항상 이것)
 
