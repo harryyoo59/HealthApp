@@ -10678,7 +10678,7 @@
         var OPS_PIN_HASH_KEY = "healthapp.ops.pinHash.v1";
         var OPS_UNLOCK_KEY = "healthapp.ops.unlocked.v1";
         var OPS_DEFAULT_PIN = "0321";
-        var OPS_PREVIOUS_DEFAULT_PIN = "0315";
+        var OPS_RETIRED_PIN = "0315";
         var panel = document.getElementById("ops-panel");
         var toggle = document.getElementById("ops-toggle");
         var body = document.getElementById("ops-body");
@@ -10884,7 +10884,6 @@
         function openPinGate(mode) {
           pinMode = mode || "unlock";
           var needsConfirm = pinMode === "setup" || pinMode === "change";
-          var hasCustom = !!readStoredPinHash();
           if (pinTitle) {
             pinTitle.textContent = pinMode === "setup"
               ? "운영 비밀번호 설정"
@@ -10895,9 +10894,7 @@
               ? "처음입니다. 이 기기에만 저장되는 비밀번호를 정해 주세요. (숫자·글자 4자 이상)"
               : (pinMode === "change"
                 ? "새 비밀번호를 두 번 입력하세요. 이 기기에만 저장됩니다."
-                : (hasCustom
-                  ? "이 기기에만 저장되는 비밀번호로 엽니다. 서버 등록이 아닙니다."
-                  : "기본 비밀번호는 0321 입니다. 연 뒤 「비밀번호 바꾸기」로 바꿀 수 있습니다."));
+                : "이 기기에만 저장되는 비밀번호로 엽니다. 서버 등록이 아닙니다.");
           }
           if (pinLabel) {
             pinLabel.textContent = pinMode === "change" ? "새 비밀번호" : "비밀번호";
@@ -10920,6 +10917,7 @@
         }
 
         function verifyAgainstStoredOrDefault(pin) {
+          if (pin === OPS_RETIRED_PIN) return Promise.resolve(false);
           var stored = readStoredPinHash();
           return hashPin(pin).then(function (hash) {
             if (!stored) {
@@ -10928,12 +10926,12 @@
               });
             }
             if (hash === stored) return true;
-            // 예전 LAN 폴백(32비트)으로 저장된 값
+            // 예전 LAN 폴백(32비트)으로 저장된 값. 폐기된 비밀번호는 위에서 거절한다.
             if (stored === legacyFnvPinHash(pin)) return true;
-            // 기본 0315 가 이미 저장돼 있으면 0321 로도 열고, 성공 시 새 해시로 다시 저장한다.
+            // 폐기된 값이 해시로만 남아 있으면 현재 운영 비밀번호로 바꾸고 연다. 폐기된 값 입력은 열리지 않는다.
             if (pin === OPS_DEFAULT_PIN) {
-              return hashPin(OPS_PREVIOUS_DEFAULT_PIN).then(function (oldHash) {
-                return stored === oldHash || stored === legacyFnvPinHash(OPS_PREVIOUS_DEFAULT_PIN);
+              return hashPin(OPS_RETIRED_PIN).then(function (oldHash) {
+                return stored === oldHash || stored === legacyFnvPinHash(OPS_RETIRED_PIN);
               });
             }
             return false;
@@ -10967,6 +10965,10 @@
         function submitPin() {
           var pin = String(pinInput.value || "").trim();
           var confirmVal = pinConfirm ? String(pinConfirm.value || "").trim() : "";
+          if (pin === OPS_RETIRED_PIN) {
+            setPinError("비밀번호가 맞지 않습니다.");
+            return;
+          }
           if (pin.length < 4) {
             setPinError("비밀번호는 4자 이상으로 해 주세요.");
             return;
