@@ -2593,6 +2593,23 @@
     .records-transfer-status.is-error {
       color: #f0b4b4;
     }
+    .storage-save-banner {
+      position: fixed;
+      left: 12px;
+      right: 12px;
+      top: calc(10px + env(safe-area-inset-top));
+      z-index: 80;
+      margin: 0;
+      padding: 12px 14px;
+      border-radius: 12px;
+      border: 1px solid rgba(240, 180, 180, 0.5);
+      background: #3a1e1e;
+      color: #f6d6d6;
+      font-size: 14px;
+      font-weight: 650;
+      line-height: 1.45;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+    }
     .ops-consent-row,
     .records-consent-row {
       margin-top: 10px;
@@ -3447,6 +3464,7 @@
     </div>
   </div>
 
+  <p id="storage-save-banner" class="storage-save-banner" role="alert" hidden></p>
   <script>
     (function () {
       var STORAGE_KEY = "healthapp.bodyBasics.v1";
@@ -3883,13 +3901,11 @@
       }
 
       function saveFixedMenu() {
-        try {
-          var payload = emptyFixedMenus();
-          Object.keys(payload).forEach(function (mealKey) {
-            payload[mealKey] = cloneFixedMenuList(getFixedMenuList(mealKey));
-          });
-          localStorage.setItem(FIXED_MENU_KEY, JSON.stringify(payload));
-        } catch (e) { /* quota */ }
+        var payload = emptyFixedMenus();
+        Object.keys(payload).forEach(function (mealKey) {
+          payload[mealKey] = cloneFixedMenuList(getFixedMenuList(mealKey));
+        });
+        if (!persistSetItem(FIXED_MENU_KEY, JSON.stringify(payload))) return;
         scheduleBackup();
       }
 
@@ -3979,11 +3995,15 @@
               if (bucket[id]) payload[mealKey][id] = true;
             });
           });
-          localStorage.setItem(SUPPRESSED_DEFAULT_BY_MEAL_KEY, JSON.stringify(payload));
+          if (!persistSetItem(SUPPRESSED_DEFAULT_BY_MEAL_KEY, JSON.stringify(payload))) return false;
           try { localStorage.removeItem(LEGACY_SUPPRESSED_DEFAULT_CHIP_IDS_KEY); } catch (e2) {}
           try { localStorage.removeItem(LEGACY_HIDDEN_DEFAULT_CHIPS_KEY); } catch (e3) {}
-        } catch (e) { /* ignore */ }
+        } catch (e) {
+          showStorageSaveFailure(e);
+          return false;
+        }
         scheduleBackup();
+        return true;
       }
 
       function isDefaultChipSuppressed(chipId, mealKey) {
@@ -4056,7 +4076,7 @@
           if (!suppressedDefaultByMeal) suppressedDefaultByMeal = emptySuppressedDefaultsByMeal();
           suppressedDefaultByMeal.breakfast = {};
           saveSuppressedDefaultsByMeal();
-          localStorage.setItem(BREAKFAST_DEFAULTS_VERSION_KEY, String(BREAKFAST_DEFAULTS_VERSION));
+          persistSetItem(BREAKFAST_DEFAULTS_VERSION_KEY, String(BREAKFAST_DEFAULTS_VERSION));
           return true;
         } catch (e) {
           return false;
@@ -4071,7 +4091,7 @@
           if (!suppressedDefaultByMeal) suppressedDefaultByMeal = emptySuppressedDefaultsByMeal();
           suppressedDefaultByMeal.lunch = {};
           saveSuppressedDefaultsByMeal();
-          localStorage.setItem(LUNCH_DEFAULTS_VERSION_KEY, String(LUNCH_DEFAULTS_VERSION));
+          persistSetItem(LUNCH_DEFAULTS_VERSION_KEY, String(LUNCH_DEFAULTS_VERSION));
           return true;
         } catch (e) {
           return false;
@@ -4086,7 +4106,7 @@
           if (!suppressedDefaultByMeal) suppressedDefaultByMeal = emptySuppressedDefaultsByMeal();
           suppressedDefaultByMeal.dinner = {};
           saveSuppressedDefaultsByMeal();
-          localStorage.setItem(DINNER_DEFAULTS_VERSION_KEY, String(DINNER_DEFAULTS_VERSION));
+          persistSetItem(DINNER_DEFAULTS_VERSION_KEY, String(DINNER_DEFAULTS_VERSION));
           return true;
         } catch (e) {
           return false;
@@ -4101,7 +4121,7 @@
           if (!suppressedDefaultByMeal) suppressedDefaultByMeal = emptySuppressedDefaultsByMeal();
           suppressedDefaultByMeal.snack = {};
           saveSuppressedDefaultsByMeal();
-          localStorage.setItem(SNACK_DEFAULTS_VERSION_KEY, String(SNACK_DEFAULTS_VERSION));
+          persistSetItem(SNACK_DEFAULTS_VERSION_KEY, String(SNACK_DEFAULTS_VERSION));
           return true;
         } catch (e) {
           return false;
@@ -5518,14 +5538,92 @@
         }
       }
 
-      function applyPersistSnapshot(snap) {
+      function isQuotaError(err) {
+        if (!err) return false;
+        var name = String(err.name || "");
+        if (name === "QuotaExceededError" || name === "NS_ERROR_DOM_QUOTA_REACHED") return true;
+        var code = Number(err.code);
+        return code === 22 || code === 1014;
+      }
+
+      var storageSaveBannerTimer = null;
+      function showStorageSaveFailure(err) {
+        var quota = isQuotaError(err);
+        var message = quota
+          ? "저장 공간이 가득 찼습니다. 공간을 비우거나 「기록 저장 하기」로 기록을 내보내 주세요."
+          : "기록을 저장하지 못했습니다. 공간을 비우거나 「기록 저장 하기」로 기록을 내보내 주세요.";
+        var el = document.getElementById("storage-save-banner");
+        if (!el) {
+          window.alert(message);
+          return;
+        }
+        el.textContent = message;
+        el.hidden = false;
+        if (storageSaveBannerTimer) clearTimeout(storageSaveBannerTimer);
+        storageSaveBannerTimer = setTimeout(function () {
+          storageSaveBannerTimer = null;
+          el.hidden = true;
+        }, 9000);
+      }
+
+      function persistSetItem(key, value) {
+        try {
+          localStorage.setItem(key, value);
+          return true;
+        } catch (e) {
+          showStorageSaveFailure(e);
+          return false;
+        }
+      }
+
+      /** 가져오기 때 파일에 없어도 남겨 두는 키. 기록과 섞이지 않고, 지우면 동의·비밀번호·메뉴 버전이 풀린다. */
+      function importKeepKey(name) {
+        return name === CONSENT_KEY ||
+          name === BREAKFAST_DEFAULTS_VERSION_KEY ||
+          name === LUNCH_DEFAULTS_VERSION_KEY ||
+          name === DINNER_DEFAULTS_VERSION_KEY ||
+          name === SNACK_DEFAULTS_VERSION_KEY ||
+          name === "healthapp.ops.pinHash.v1" ||
+          name === "healthapp.novelist.draft.v1";
+      }
+
+      function isAppPersistKey(name) {
+        if (!name) return false;
+        if (PERSIST_KEYS.indexOf(name) !== -1) return true;
+        if (
+          name === LEGACY_HIDDEN_DEFAULT_CHIPS_KEY ||
+          name === LEGACY_SUPPRESSED_DEFAULT_CHIP_IDS_KEY ||
+          name === AUTO_BACKUP_KEY
+        ) return true;
+        return /^healthapp\..+\.v1$/.test(name);
+      }
+
+      function applyPersistSnapshot(snap, opts) {
+        opts = opts || {};
         if (!snapshotLooksUseful(snap)) return false;
         var keys = snap.keys;
+        if (opts.replace) {
+          var incoming = {};
+          Object.keys(keys).forEach(function (k) {
+            if (typeof keys[k] === "string") incoming[k] = true;
+          });
+          var names = [];
+          try {
+            for (var i = 0; i < localStorage.length; i++) {
+              var name = localStorage.key(i);
+              if (name) names.push(name);
+            }
+          } catch (eList) { /* ignore */ }
+          names.forEach(function (name) {
+            if (!isAppPersistKey(name) || incoming[name] || importKeepKey(name)) return;
+            try { localStorage.removeItem(name); } catch (eRemove) { /* ignore */ }
+          });
+        }
+        var failed = false;
         Object.keys(keys).forEach(function (k) {
           if (PERSIST_KEYS.indexOf(k) === -1) return;
-          try {
-            if (typeof keys[k] === "string") localStorage.setItem(k, keys[k]);
-          } catch (e) { /* ignore */ }
+          if (typeof keys[k] !== "string") return;
+          if (!persistSetItem(k, keys[k])) failed = true;
         });
         // 예전 공용 숨김 키가 백업에만 있으면 끼니별로 옮겨 둔 뒤 공용 경로는 쓰지 않음
         try {
@@ -5533,19 +5631,22 @@
             !keys[SUPPRESSED_DEFAULT_BY_MEAL_KEY] &&
             typeof keys[LEGACY_SUPPRESSED_DEFAULT_CHIP_IDS_KEY] === "string"
           ) {
-            localStorage.setItem(
+            if (!persistSetItem(
               LEGACY_SUPPRESSED_DEFAULT_CHIP_IDS_KEY,
               keys[LEGACY_SUPPRESSED_DEFAULT_CHIP_IDS_KEY]
-            );
+            )) failed = true;
           }
           if (typeof keys[LEGACY_HIDDEN_DEFAULT_CHIPS_KEY] === "string") {
             // 일괄 숨기기는 삭제됨 — 가져와도 쓰지 않고 지움
             localStorage.removeItem(LEGACY_HIDDEN_DEFAULT_CHIPS_KEY);
           }
           suppressedDefaultByMeal = loadSuppressedDefaultsByMeal();
-          saveSuppressedDefaultsByMeal();
-        } catch (e2) { /* ignore */ }
-        return true;
+          if (!saveSuppressedDefaultsByMeal()) failed = true;
+        } catch (e2) {
+          showStorageSaveFailure(e2);
+          failed = true;
+        }
+        return !failed;
       }
 
       function openBackupDb() {
@@ -5568,9 +5669,7 @@
 
       function writeBackupNow() {
         var snap = collectPersistSnapshot();
-        try {
-          localStorage.setItem(AUTO_BACKUP_KEY, JSON.stringify(snap));
-        } catch (e) { /* quota */ }
+        persistSetItem(AUTO_BACKUP_KEY, JSON.stringify(snap));
         openBackupDb().then(function (db) {
           return new Promise(function (resolve, reject) {
             var tx = db.transaction(BACKUP_STORE, "readwrite");
@@ -5648,9 +5747,9 @@
       }
 
       function saveDayMeta() {
-        localStorage.setItem(META_KEY, JSON.stringify({
+        if (!persistSetItem(META_KEY, JSON.stringify({
           calendarDate: dayMeta.calendarDate || ""
-        }));
+        }))) return;
         scheduleBackup();
       }
 
@@ -5690,9 +5789,9 @@
       }
 
       function clearLegacyDailyKeys() {
-        localStorage.setItem(MEALS_KEY, JSON.stringify(emptyMeals()));
-        localStorage.setItem(ACTIVITIES_KEY, JSON.stringify([]));
-        localStorage.setItem(WALK_KEY, JSON.stringify(emptyWalk()));
+        persistSetItem(MEALS_KEY, JSON.stringify(emptyMeals()));
+        persistSetItem(ACTIVITIES_KEY, JSON.stringify([]));
+        persistSetItem(WALK_KEY, JSON.stringify(emptyWalk()));
       }
 
       function loadDailyLog() {
@@ -5714,7 +5813,7 @@
       }
 
       function saveDailyLog() {
-        localStorage.setItem(DAILY_KEY, JSON.stringify(dailyLog));
+        if (!persistSetItem(DAILY_KEY, JSON.stringify(dailyLog))) return;
         scheduleBackup();
       }
 
@@ -5858,9 +5957,9 @@
         walkState = { steps: rec.walk.steps, hours: rec.walk.hours };
         // 기본정보는 프로필로 이어가고, 그날 스냅샷만 히스토리에 남김
         rec.bodyBasics = snapshotBodyBasics();
-        localStorage.setItem(MEALS_KEY, JSON.stringify(rec.meals));
-        localStorage.setItem(ACTIVITIES_KEY, JSON.stringify(rec.activities));
-        localStorage.setItem(WALK_KEY, JSON.stringify(rec.walk));
+        persistSetItem(MEALS_KEY, JSON.stringify(rec.meals));
+        persistSetItem(ACTIVITIES_KEY, JSON.stringify(rec.activities));
+        persistSetItem(WALK_KEY, JSON.stringify(rec.walk));
         saveDailyLog();
       }
 
@@ -5906,7 +6005,7 @@
           var bb = dailyLog[keys[i]] && dailyLog[keys[i]].bodyBasics;
           if (bodyBasicsHasData(bb)) {
             state = normalizeBodyBasics(bb);
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+            persistSetItem(STORAGE_KEY, JSON.stringify(state));
             return;
           }
         }
@@ -6089,7 +6188,7 @@
       }
 
       function saveState() {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        if (!persistSetItem(STORAGE_KEY, JSON.stringify(state))) return;
         // 그날 고친 기본정보가 이후 기준 + 편집일 스냅샷에도 반영
         if (editingDayKey) {
           var rec = getDayRecord(editingDayKey);
@@ -6516,12 +6615,10 @@
       }
 
       function saveFoodWarehouse() {
-        try {
-          localStorage.setItem(
-            FOOD_WAREHOUSE_KEY,
-            JSON.stringify(dedupeWarehouseItems(foodWarehouseItems))
-          );
-        } catch (e) { /* quota */ }
+        if (!persistSetItem(
+          FOOD_WAREHOUSE_KEY,
+          JSON.stringify(dedupeWarehouseItems(foodWarehouseItems))
+        )) return;
         scheduleBackup();
       }
 
@@ -7982,13 +8079,11 @@
       }
 
       function saveSymptomAskStore(store) {
-        try {
-          localStorage.setItem(SYMPTOM_ASK_KEY, JSON.stringify({
-            draft: String(store.draft || "").slice(0, 240),
-            pick: normalizeSymptomAskPick(store.pick),
-            items: (Array.isArray(store.items) ? store.items : []).slice(0, 40)
-          }));
-        } catch (e) { /* ignore quota */ }
+        persistSetItem(SYMPTOM_ASK_KEY, JSON.stringify({
+          draft: String(store.draft || "").slice(0, 240),
+          pick: normalizeSymptomAskPick(store.pick),
+          items: (Array.isArray(store.items) ? store.items : []).slice(0, 40)
+        }));
       }
 
       function appendSymptomAskItem(q, a, mode) {
@@ -9908,7 +10003,7 @@
       }
 
       function saveLocalMembers(list) {
-        localStorage.setItem(MEMBERS_KEY, JSON.stringify(Array.isArray(list) ? list : []));
+        persistSetItem(MEMBERS_KEY, JSON.stringify(Array.isArray(list) ? list : []));
       }
 
       /** 로컬 앱: 이 기기에서 앱을 처음 연 시점을 다운로드로 기록 */
@@ -10272,7 +10367,7 @@
               setTransferStatus("저장한 기록 가져오기를 취소했습니다.");
               return;
             }
-            if (!applyPersistSnapshot(snap)) {
+            if (!applyPersistSnapshot(snap, { replace: true })) {
               setTransferStatus("저장한 기록 가져오기에 실패했습니다. 다시 시도해 주세요.", true);
               return;
             }
