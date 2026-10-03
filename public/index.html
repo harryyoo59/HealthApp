@@ -2554,6 +2554,21 @@
     .records-panel {
       margin: 0 0 14px;
     }
+    .app-shell-version {
+      margin: 6px 2px 0;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.4;
+    }
+    .app-shell-actions {
+      margin-top: 12px;
+    }
+    .app-shell-actions .records-transfer-lead {
+      margin-top: 8px;
+    }
+    body:has(#app-update-banner:not([hidden])) #storage-save-banner {
+      top: calc(78px + env(safe-area-inset-top));
+    }
     .records-transfer .ops-section-title {
       margin-bottom: 4px;
     }
@@ -3040,6 +3055,7 @@
         <span data-i18n="records.title">내 기록 관리</span>
         <span class="ops-chevron" aria-hidden="true">▾</span>
       </button>
+      <p class="app-shell-version" id="app-shell-version" data-shell-version="20261003.2">이 화면 버전 20261003.2</p>
       <div class="ops-body" id="records-body" hidden>
         <div class="records-transfer" id="records-transfer" data-i18n-attr="aria-label:records.transferAria" aria-label="기록 저장·옮기기">
           <h3 class="ops-section-title" data-i18n="records.transferTitle">기록 저장·옮기기</h3>
@@ -3051,6 +3067,11 @@
           </div>
           <input type="file" id="records-import-file" accept="application/json,.json" hidden />
           <p class="records-transfer-status" id="records-transfer-status" aria-live="polite"></p>
+        </div>
+        <div class="app-shell-actions">
+          <button type="button" class="records-transfer-btn is-secondary" id="app-shell-refresh">최신으로 새로고침</button>
+          <p class="records-transfer-lead">화면이 예전 그대로면 최신 화면만 다시 받습니다. 건강 기록은 지우지 않습니다.</p>
+          <p class="records-transfer-status" id="app-shell-status" aria-live="polite"></p>
         </div>
         <div class="records-consent-row">
           <button type="button" class="records-consent-link" id="records-consent-revoke" data-i18n="records.revoke">주의사항 다시 보기 · 동의 철회</button>
@@ -3485,6 +3506,7 @@
     </div>
   </div>
 
+  <p id="app-update-banner" class="storage-save-banner" role="status" hidden></p>
   <p id="storage-save-banner" class="storage-save-banner" role="alert" hidden></p>
   <script>
     (function () {
@@ -10578,10 +10600,50 @@
         }
       }
 
+      function setupAppShellControls() {
+        var versionEl = document.getElementById("app-shell-version");
+        var refreshBtn = document.getElementById("app-shell-refresh");
+        var statusEl = document.getElementById("app-shell-status");
+        var version = versionEl ? (versionEl.getAttribute("data-shell-version") || "") : "";
+        if (versionEl && version) versionEl.textContent = "이 화면 버전 " + version;
+        // 새로고침·업데이트 직후 한 번만. 다음 실행에는 다시 말하지 않는다.
+        try {
+          if (sessionStorage.getItem("healthapp.shellRefreshHint.v1") === "1") {
+            sessionStorage.removeItem("healthapp.shellRefreshHint.v1");
+            if (statusEl) statusEl.textContent = "최신 화면으로 열었습니다. 건강 기록은 그대로입니다.";
+          }
+        } catch (eHint) { /* ignore */ }
+        if (!refreshBtn) return;
+        refreshBtn.addEventListener("click", function () {
+          refreshBtn.disabled = true;
+          if (statusEl) statusEl.textContent = "최신 화면을 받는 중… 건강 기록은 지우지 않습니다.";
+          try { sessionStorage.setItem("healthapp.shellRefreshHint.v1", "1"); } catch (eFlag) { /* ignore */ }
+          // 앱 껍데기 캐시와 서비스 워커만 지운다. localStorage 건강 기록은 건드리지 않는다.
+          var clearShell = function () {
+            if (!window.caches || !caches.keys) return Promise.resolve();
+            return caches.keys().then(function (keys) {
+              return Promise.all(keys.map(function (key) {
+                if (String(key).indexOf("healthapp-shell") !== 0) return Promise.resolve();
+                return caches.delete(key);
+              }));
+            });
+          };
+          var unreg = (navigator.serviceWorker && navigator.serviceWorker.getRegistrations)
+            ? navigator.serviceWorker.getRegistrations().then(function (regs) {
+                return Promise.all(regs.map(function (reg) { return reg.unregister(); }));
+              })
+            : Promise.resolve();
+          Promise.resolve(unreg).then(clearShell).catch(function () { return null; }).then(function () {
+            window.location.reload();
+          });
+        });
+      }
+
       function setupRecordsPanel() {
         var panel = document.getElementById("records-panel");
         var toggle = document.getElementById("records-toggle");
         var body = document.getElementById("records-body");
+        setupAppShellControls();
         if (!panel || !toggle || !body) return;
 
         setupTransferButtons();
@@ -11435,11 +11497,57 @@
     })();
   </script>
   <script>
-    if ("serviceWorker" in navigator) {
-      window.addEventListener("load", function () {
-        navigator.serviceWorker.register("/sw.js", { scope: "/" }).catch(function () {});
+    (function () {
+      var banner = document.getElementById("app-update-banner");
+      var noticeKey = "healthapp.shellUpdateNotice.v1";
+      function showUpdateNotice() {
+        try {
+          if (sessionStorage.getItem(noticeKey) === "1") return;
+          sessionStorage.setItem(noticeKey, "1");
+        } catch (e) { /* ignore */ }
+        if (!banner) return;
+        banner.textContent = "앱이 업데이트됐어요. 완전히 닫았다가 다시 열어 주세요.";
+        banner.hidden = false;
+      }
+      if (banner) {
+        banner.addEventListener("click", function () { banner.hidden = true; });
+      }
+      window.addEventListener("healthapp-shell-update", showUpdateNotice);
+
+      function standaloneApp() {
+        var media = window.matchMedia && window.matchMedia("(display-mode: standalone)").matches;
+        return !!media || window.navigator.standalone === true;
+      }
+
+      if (!("serviceWorker" in navigator)) return;
+      var hadController = !!navigator.serviceWorker.controller;
+      navigator.serviceWorker.addEventListener("controllerchange", function () {
+        if (!hadController) {
+          hadController = true;
+          return;
+        }
+        if (!standaloneApp()) {
+          try {
+            if (sessionStorage.getItem("healthapp.shellAutoReload.v1") === "1") {
+              showUpdateNotice();
+              return;
+            }
+            sessionStorage.setItem("healthapp.shellAutoReload.v1", "1");
+            sessionStorage.setItem("healthapp.shellRefreshHint.v1", "1");
+          } catch (eReload) { /* ignore */ }
+          window.location.reload();
+          return;
+        }
+        showUpdateNotice();
       });
-    }
+      window.addEventListener("load", function () {
+        navigator.serviceWorker.register("/sw.js", { scope: "/" }).then(function (reg) {
+          document.addEventListener("visibilitychange", function () {
+            if (document.visibilityState === "visible" && reg && reg.update) reg.update();
+          });
+        }).catch(function () {});
+      });
+    })();
   </script>
 </body>
 </html>

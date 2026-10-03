@@ -1,5 +1,9 @@
-/* App shell for 알고 먹는 내몸 지키기. Bump CACHE when the precache list changes. */
-var CACHE = "healthapp-shell-v1";
+/* App shell for 알고 먹는 내몸 지키기.
+   Bump SHELL_VERSION together with index.html [data-shell-version].
+   A new name drops the previous precache on activate. Diary data lives in
+   localStorage and is never touched here. */
+var SHELL_VERSION = "20261003.2";
+var CACHE = "healthapp-shell-" + SHELL_VERSION;
 var SHELL = ["/", "/index.html", "/manifest.webmanifest", "/icon-192.png", "/icon-512.png"];
 
 function copyWithoutNoStore(response) {
