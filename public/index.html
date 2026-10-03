@@ -2627,6 +2627,7 @@
       font-weight: 650;
       line-height: 1.45;
       box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+      cursor: pointer;
     }
     .ops-consent-row,
     .records-consent-row {
@@ -5569,23 +5570,124 @@
       }
 
       var storageSaveBannerTimer = null;
+      var storageBannerKind = "";
+      var storageSoftWarned = false;
+      var STORAGE_SOFT_RATIO = 0.8;
+      var STORAGE_SOFT_BUDGET = 5 * 1024 * 1024;
+      var STORAGE_SOFT_SESSION_KEY = "healthapp.storageSoftWarn.shown.v1";
+      // 여유 안내(80%)는 이 탭 세션에 한 번만. 새로고침해도 다시 뜨지 않고, 탭을 닫으면 다음 세션에 다시 볼 수 있다.
+      // 처음 사용(공간이 여유)에는 뜨지 않는다. 저장이 실제로 실패하면 showStorageSaveFailure가 이 안내를 덮는다.
+
+      function hideStorageBanner() {
+        if (storageSaveBannerTimer) {
+          clearTimeout(storageSaveBannerTimer);
+          storageSaveBannerTimer = null;
+        }
+        var el = document.getElementById("storage-save-banner");
+        if (!el) return;
+        el.hidden = true;
+        storageBannerKind = "";
+      }
+
+      function presentStorageBanner(message, kind) {
+        var el = document.getElementById("storage-save-banner");
+        if (!el) {
+          if (kind === "hard") window.alert(message);
+          return;
+        }
+        if (kind === "soft" && storageBannerKind === "hard") return;
+        el.textContent = message;
+        el.hidden = false;
+        el.setAttribute("data-kind", kind);
+        storageBannerKind = kind;
+        if (storageSaveBannerTimer) clearTimeout(storageSaveBannerTimer);
+        storageSaveBannerTimer = setTimeout(function () {
+          storageSaveBannerTimer = null;
+          if (storageBannerKind === kind) hideStorageBanner();
+        }, 9000);
+      }
+
       function showStorageSaveFailure(err) {
         var quota = isQuotaError(err);
         var message = quota
           ? "저장 공간이 가득 찼습니다. 공간을 비우거나 「기록 저장 하기」로 기록을 내보내 주세요."
           : "기록을 저장하지 못했습니다. 공간을 비우거나 「기록 저장 하기」로 기록을 내보내 주세요.";
-        var el = document.getElementById("storage-save-banner");
-        if (!el) {
-          window.alert(message);
+        presentStorageBanner(message, "hard");
+      }
+
+      function storageSoftAlreadyShown() {
+        if (storageSoftWarned) return true;
+        try { return sessionStorage.getItem(STORAGE_SOFT_SESSION_KEY) === "1"; } catch (e) { return false; }
+      }
+
+      function markStorageSoftShown() {
+        storageSoftWarned = true;
+        try { sessionStorage.setItem(STORAGE_SOFT_SESSION_KEY, "1"); } catch (e) { /* ignore */ }
+      }
+
+      function approxHealthappLocalBytes() {
+        try {
+          var total = 0;
+          for (var i = 0; i < localStorage.length; i++) {
+            var name = localStorage.key(i);
+            if (!name || name.indexOf("healthapp.") !== 0) continue;
+            var value = localStorage.getItem(name);
+            total += name.length + (value == null ? 0 : String(value).length);
+          }
+          return total * 2;
+        } catch (e) {
+          return null;
+        }
+      }
+
+      function ratioFromStorageEstimate(est) {
+        if (!est) return null;
+        var usage = Number(est.usage);
+        var quota = Number(est.quota);
+        if (!isFinite(usage) || !isFinite(quota) || quota <= 0 || usage < 0) return null;
+        return usage / quota;
+      }
+
+      function considerStorageSoftRatio(ratio) {
+        if (storageSoftAlreadyShown()) return;
+        if (ratio == null || !isFinite(ratio) || ratio < STORAGE_SOFT_RATIO) return;
+        markStorageSoftShown();
+        presentStorageBanner(
+          "저장 공간이 거의 찼어요. 지난 기록이 필요하면 「기록 저장 하기」로 받아 두세요.",
+          "soft"
+        );
+      }
+
+      function warnIfStorageNearlyFull() {
+        if (storageSoftAlreadyShown()) return;
+        var estimateFn = navigator.storage && typeof navigator.storage.estimate === "function"
+          ? navigator.storage.estimate.bind(navigator.storage)
+          : null;
+        function fallback() {
+          var bytes = approxHealthappLocalBytes();
+          if (bytes == null) return;
+          considerStorageSoftRatio(bytes / STORAGE_SOFT_BUDGET);
+        }
+        if (!estimateFn) {
+          fallback();
           return;
         }
-        el.textContent = message;
-        el.hidden = false;
-        if (storageSaveBannerTimer) clearTimeout(storageSaveBannerTimer);
-        storageSaveBannerTimer = setTimeout(function () {
-          storageSaveBannerTimer = null;
-          el.hidden = true;
-        }, 9000);
+        var pending;
+        try { pending = estimateFn(); } catch (e) { fallback(); return; }
+        if (!pending || typeof pending.then !== "function") {
+          fallback();
+          return;
+        }
+        pending.then(function (est) {
+          var ratio = ratioFromStorageEstimate(est);
+          if (ratio == null) fallback();
+          else considerStorageSoftRatio(ratio);
+        }).catch(function () { fallback(); });
+      }
+
+      var storageBannerEl = document.getElementById("storage-save-banner");
+      if (storageBannerEl) {
+        storageBannerEl.addEventListener("click", function () { hideStorageBanner(); });
       }
 
       function persistSetItem(key, value) {
@@ -11265,6 +11367,7 @@
       setupNovelist();
       setupSymptomAsk();
       render();
+      warnIfStorageNearlyFull();
 
       function setupNovelist() {
         var NOVEL_KEY = "healthapp.novelist.draft.v1";
