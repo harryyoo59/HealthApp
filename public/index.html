@@ -1191,6 +1191,16 @@
       line-height: 1;
     }
     .food-wh-remove:active { color: #ffd7a8; }
+    .yesterday-gap-hint {
+      margin: 14px 0 0;
+      padding: 10px 12px;
+      border-radius: 12px;
+      background: rgba(22, 48, 40, 0.72);
+      border: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+    }
     .meals-box {
       margin-top: 14px;
       background: var(--panel);
@@ -2817,6 +2827,8 @@
         </button>
       </div>
     </section>
+
+    <p class="yesterday-gap-hint" id="yesterday-gap-hint" hidden></p>
 
     <section class="meals-box" id="meals-box" data-i18n-attr="aria-label:home.mealsSection" aria-label="먹은 음식">
       <div class="keys">
@@ -9186,7 +9198,9 @@
           var col = document.createElement("div");
           col.className = "kcal-day-col" + (d.intake || d.burn ? "" : " is-empty");
           col.title = formatShortDate(d.key) +
-            " · 섭취 " + d.intake + " / 소비 " + d.burn;
+            ((d.intake || d.burn)
+              ? (" · 섭취 " + d.intake + " / 소비 " + d.burn)
+              : " · 기록 없음");
           var pair = document.createElement("div");
           pair.className = "kcal-day-pair";
           var barIn = document.createElement("div");
@@ -9207,17 +9221,24 @@
         var yStored = editingDayKey ? dayTotals(editingDayKey) : { intake: 0, burn: 0 };
         var intake = mealsHasBits(mealState) ? (lastMealKcal || 0) : yStored.intake;
         var burn = dayActivityHasBits(activityState) ? (lastActivityKcal || 0) : yStored.burn;
-        kcalIntakeVal.textContent = "약 " + intake + " kcal";
-        kcalBurnVal.textContent = "약 " + burn + " kcal";
-        var net = intake - burn;
-        if (!intake && !burn) {
+        var yesterdayEmpty = !intake && !burn && !mealsHasBits(mealState) && !dayActivityHasBits(activityState);
+        if (yesterdayEmpty) {
+          kcalIntakeVal.textContent = "기록 없음";
+          kcalBurnVal.textContent = "기록 없음";
           kcalBalance.textContent = "—";
-        } else if (net === 0) {
-          kcalBalance.textContent = "비슷 (약 " + intake + " kcal)";
-        } else if (net > 0) {
-          kcalBalance.textContent = "+" + net + " kcal";
         } else {
-          kcalBalance.textContent = net + " kcal";
+          kcalIntakeVal.textContent = "약 " + intake + " kcal";
+          kcalBurnVal.textContent = "약 " + burn + " kcal";
+          var net = intake - burn;
+          if (!intake && !burn) {
+            kcalBalance.textContent = "—";
+          } else if (net === 0) {
+            kcalBalance.textContent = "비슷 (약 " + intake + " kcal)";
+          } else if (net > 0) {
+            kcalBalance.textContent = "+" + net + " kcal";
+          } else {
+            kcalBalance.textContent = net + " kcal";
+          }
         }
       }
 
@@ -9502,6 +9523,29 @@
         });
       }
 
+      function weekHasUnloggedPastDay(keys) {
+        var today = getTodayKey();
+        return (keys || []).some(function (key) {
+          return key < today && !dayHasDailyInput(dailyLog[key]);
+        });
+      }
+
+      function updateYesterdayGapHint() {
+        var el = document.getElementById("yesterday-gap-hint");
+        if (!el) return;
+        var key = editingDayKey || getYesterdayKey();
+        var hasLive = mealsHasBits(mealState) || dayActivityHasBits(activityState);
+        var hasSaved = dayHasDailyInput(dailyLog[key]);
+        if (hasLive || hasSaved) {
+          el.hidden = true;
+          el.textContent = "";
+          return;
+        }
+        el.hidden = false;
+        el.textContent =
+          "어제(" + formatShortDate(key) + ")는 기록이 없어 비어 있습니다. 하루가 이어지지 않아도 평균으로 채우지 않습니다. 비교는 덜 정확할 수 있으니, 기억나면 어제 칸에 적어 주세요.";
+      }
+
       function renderWeekBrief() {
         if (!weekBrief || !weekBriefLines) return;
 
@@ -9540,22 +9584,22 @@
         if (cur.intakeAvg != null || prev.intakeAvg != null) {
           var intakeText = deltaPhrase(cur.intakeAvg, prev.intakeAvg, " kcal");
           if (intakeText) {
-            lines.push({ label: "칼로리 섭취(일평균)", text: intakeText });
+            lines.push({ label: "칼로리 섭취(기록한 날)", text: intakeText });
           } else if (cur.intakeAvg != null) {
             lines.push({
-              label: "칼로리 섭취(일평균)",
-              text: "이번 주 약 " + cur.intakeAvg + " kcal · 지난주 기록이 더 있으면 비교합니다."
+              label: "칼로리 섭취(기록한 날)",
+              text: "이번 주 약 " + cur.intakeAvg + " kcal · 지난주 기록이 더 있으면 비교합니다. 빈 날은 채우지 않습니다."
             });
           }
         }
         if (cur.burnAvg != null || prev.burnAvg != null) {
           var burnText = deltaPhrase(cur.burnAvg, prev.burnAvg, " kcal");
           if (burnText) {
-            lines.push({ label: "칼로리 소비(일평균)", text: burnText });
+            lines.push({ label: "칼로리 소비(기록한 날)", text: burnText });
           } else if (cur.burnAvg != null) {
             lines.push({
-              label: "칼로리 소비(일평균)",
-              text: "이번 주 약 " + cur.burnAvg + " kcal · 지난주 기록이 더 있으면 비교합니다."
+              label: "칼로리 소비(기록한 날)",
+              text: "이번 주 약 " + cur.burnAvg + " kcal · 지난주 기록이 더 있으면 비교합니다. 빈 날은 채우지 않습니다."
             });
           }
         }
@@ -9586,7 +9630,10 @@
 
         weekBrief.classList.add("has-data");
         if (weekBriefHint) {
-          weekBriefHint.textContent = "이번 주와 지난 주 비교 · 눌러 보기";
+          weekBriefHint.textContent = "이번 주와 지난 주 비교 · 빈 날은 그대로 · 눌러 보기";
+        }
+        if (weekBriefRange && weekHasUnloggedPastDay(thisKeys.concat(prevKeys))) {
+          weekBriefRange.textContent += " 기록 없는 날은 비워 두었습니다. 평균으로 채우지 않습니다.";
         }
         weekBriefLines.innerHTML = "";
         lines.forEach(function (row) {
@@ -9959,6 +10006,7 @@
         renderActivities();
         renderKcalChart();
         renderWeekBrief();
+        updateYesterdayGapHint();
         refreshSummary();
         refreshOpsMembers();
       }
