@@ -3536,6 +3536,7 @@
       var MEMBERS_KEY = "healthapp.members.v1";
       var SYMPTOM_ASK_KEY = "healthapp.symptomAsk.v1";
       var FIXED_MENU_KEY = "healthapp.fixedMenu.v1";
+      var CHIP_LABEL_CACHE_KEY = "healthapp.chipLabelCache.v1";
       var FOOD_WAREHOUSE_KEY = "healthapp.foodWarehouse.v1";
       var SUPPRESSED_DEFAULT_BY_MEAL_KEY = "healthapp.suppressedDefaultFoodChipsByMeal.v1";
       var LEGACY_HIDDEN_DEFAULT_CHIPS_KEY = "healthapp.hiddenDefaultFoodChips.v1";
@@ -3548,7 +3549,7 @@
       var BACKUP_ID = "latest";
       var PERSIST_KEYS = [
         STORAGE_KEY, MEALS_KEY, ACTIVITIES_KEY, WALK_KEY, DAILY_KEY, META_KEY, MEMBERS_KEY, SYMPTOM_ASK_KEY,
-        FIXED_MENU_KEY, FOOD_WAREHOUSE_KEY, SUPPRESSED_DEFAULT_BY_MEAL_KEY
+        FIXED_MENU_KEY, CHIP_LABEL_CACHE_KEY, FOOD_WAREHOUSE_KEY, SUPPRESSED_DEFAULT_BY_MEAL_KEY
       ];
       var PROJECT_NL_URL = "https://project-nl-peach.vercel.app";
       var OPS_EXCLUDE_NAMES = {
@@ -3969,6 +3970,49 @@
         scheduleBackup();
       }
 
+      function loadChipLabelCache() {
+        try {
+          var raw = localStorage.getItem(CHIP_LABEL_CACHE_KEY);
+          if (!raw) return {};
+          var parsed = JSON.parse(raw);
+          if (!parsed || typeof parsed !== "object") return {};
+          var out = {};
+          Object.keys(parsed).forEach(function (id) {
+            var row = parsed[id];
+            if (!row || typeof row !== "object") return;
+            var label = String(row.label || "").trim();
+            if (!id || !label) return;
+            var kcal = Math.round(Number(row.kcal));
+            if (!isFinite(kcal) || kcal <= 0) kcal = estimateItemKcal(label).kcal;
+            out[id] = { label: label, kcal: Math.min(Math.max(kcal, 10), 2000) };
+          });
+          return out;
+        } catch (e) {
+          return {};
+        }
+      }
+
+      function saveChipLabelCache() {
+        try {
+          localStorage.setItem(CHIP_LABEL_CACHE_KEY, JSON.stringify(chipLabelCache || {}));
+        } catch (e) { /* quota */ }
+      }
+
+      function rememberChipLabel(chipLike, opts) {
+        opts = opts || {};
+        if (!chipLike || !chipLike.id || !chipLike.label) return;
+        var id = String(chipLike.id);
+        var label = String(chipLike.label || "").trim().replace(/\s+/g, " ");
+        if (!id || !label) return;
+        var kcal = Math.round(Number(chipLike.kcal));
+        if (!isFinite(kcal) || kcal <= 0) kcal = estimateItemKcal(label).kcal;
+        kcal = Math.min(Math.max(kcal, 10), 2000);
+        var prev = chipLabelCache[id];
+        if (prev && prev.label === label && prev.kcal === kcal) return;
+        chipLabelCache[id] = { label: label, kcal: kcal };
+        if (!opts.skipSave) saveChipLabelCache();
+      }
+
       function emptySuppressedDefaultsByMeal() {
         return { breakfast: {}, lunch: {}, dinner: {}, snack: {} };
       }
@@ -4279,6 +4323,7 @@
             rebuildMealChipIndexes();
             saveFixedMenu();
           }
+          rememberChipLabel(existing);
           return existing;
         }
         var list = getFixedMenuList(mealKey);
@@ -4299,6 +4344,7 @@
         setFixedMenuList(mealKey, list);
         rebuildMealChipIndexes();
         saveFixedMenu();
+        rememberChipLabel(item);
         return item;
       }
 
@@ -4312,6 +4358,7 @@
           chip = findFixedMenuById(mealKey, chipId);
         }
         if (!chip) return null;
+        rememberChipLabel(chip);
         return ensureInFixedMenu(chip, { mealKey: mealKey });
       }
 
@@ -4333,25 +4380,28 @@
         }
         var lastItem = null;
         var cur = mealDraft[mealKey] || emptyMealSlotDraft();
+        var leftover = [];
         parts.forEach(function (part) {
           var cand = parseFixedMenuCandidate(part);
-          if (!cand) return;
+          if (!cand) {
+            if (String(part || "").trim()) leftover.push(String(part).trim());
+            return;
+          }
           var item = ensureInFixedMenu(cand, { updateKcal: true, mealKey: mealKey });
-          if (!item) return;
+          if (!item) {
+            leftover.push(cand.label || String(part).trim());
+            return;
+          }
+          rememberChipLabel(item);
           lastItem = item;
           if ((cur.chips || []).indexOf(item.id) === -1) {
             cur.chips = (cur.chips || []).concat([item.id]);
           }
         });
         if (!lastItem) return null;
-        if (mealEls[mealKey]) {
-          var note = String(mealEls[mealKey].value || "").trim();
-          var rawTrim = String(raw || "").trim();
-          if (note === rawTrim || parts.length > 1) {
-            mealEls[mealKey].value = "";
-            cur.note = "";
-          }
-        }
+        // 칩으로 올린 단품은 note에서 빼고, 못 올린 것만 남김 (전체 삭제 금지)
+        cur.note = leftover.join(", ");
+        if (mealEls[mealKey]) mealEls[mealKey].value = cur.note;
         mealDraft[mealKey] = cur;
         return lastItem;
       }
@@ -4606,6 +4656,9 @@
       var mealState = { breakfast: "", lunch: "", dinner: "", snack: "" };
       var todayMealState = { breakfast: "", lunch: "", dinner: "", snack: "" };
       var mealDraft = emptyMealDraft();
+      var mealsClearArmed = false;
+      var activityClearArmed = false;
+      var chipLabelCache = {};
       var activityState = null;
       var todayActivityState = null;
       var walkState = { steps: "", hours: "" };
@@ -6023,17 +6076,31 @@
         return total;
       }
 
+      function mergeMealsPreserve(prev, next, allowEmpty) {
+        prev = prev || emptyMeals();
+        next = next || emptyMeals();
+        var out = emptyMeals();
+        Object.keys(MEAL_FIELDS).forEach(function (key) {
+          var n = String((next && next[key]) || "").trim();
+          var p = String((prev && prev[key]) || "").trim();
+          // 빈 값으로 끼니를 지우는 건 「비우기」후 저장일 때만
+          if (!allowEmpty && !n && p) out[key] = p;
+          else out[key] = n;
+        });
+        return out;
+      }
+
       function persistMealsToKey(dayKey, meals, opts) {
         if (!dayKey) return;
         opts = opts || {};
         var rec = getDayRecord(dayKey);
-        var next = {
+        var next = mergeMealsPreserve(rec.meals, {
           breakfast: (meals && meals.breakfast) || "",
           lunch: (meals && meals.lunch) || "",
           dinner: (meals && meals.dinner) || "",
           snack: (meals && meals.snack) || ""
-        };
-        // 자동 저장이 빈 끼니로 기존 섭취 기록을 지우지 않음 (저장·비우기만 allowEmpty)
+        }, !!opts.allowEmpty);
+        // 자동 저장이 빈 끼니로 기존 섭취 기록을 지우지 않음 (비우기+저장만 allowEmpty)
         if (!opts.allowEmpty && !mealsHasBits(next) && (mealsHasBits(rec.meals) || (rec.intake || 0) > 0)) {
           if (!rec.bodyBasics || !bodyBasicsHasData(rec.bodyBasics)) {
             rec.bodyBasics = snapshotBodyBasics();
@@ -6051,6 +6118,8 @@
 
       function persistTodayMeals(opts) {
         persistMealsToKey(getTodayKey(), todayMealState, opts);
+        // 디스크에 보존된 끼니와 메모리 동기화 (빈 값으로 메모리만 비는 현상 방지)
+        todayMealState = loadMealsForDay(getTodayKey());
       }
 
       function persistActivityToKey(dayKey, act, opts) {
@@ -6088,12 +6157,12 @@
         if (!editingDayKey) return;
         opts = opts || {};
         var rec = getDayRecord(editingDayKey);
-        var nextMeals = {
+        var nextMeals = mergeMealsPreserve(rec.meals, {
           breakfast: mealState.breakfast || "",
           lunch: mealState.lunch || "",
           dinner: mealState.dinner || "",
           snack: mealState.snack || ""
-        };
+        }, !!opts.allowEmpty);
         var nextAct = cloneDayActivity(activityState);
         var keepMeals =
           !opts.allowEmpty &&
@@ -6107,6 +6176,14 @@
         if (!keepMeals) {
           rec.meals = nextMeals;
           rec.intake = computeIntakeFromMeals(rec.meals);
+          mealState = {
+            breakfast: rec.meals.breakfast || "",
+            lunch: rec.meals.lunch || "",
+            dinner: rec.meals.dinner || "",
+            snack: rec.meals.snack || ""
+          };
+        } else {
+          mealState = loadMealsForDay(editingDayKey);
         }
         if (!keepAct) {
           rec.dayActivity = nextAct;
@@ -6393,13 +6470,27 @@
       }
 
       function saveMeals() {
-        if (activeField === "meals-today") persistTodayMeals({ allowEmpty: true });
-        else persistEditingDay({ allowEmpty: true });
+        var allowEmpty = !!mealsClearArmed;
+        if (activeField === "meals-today") {
+          persistTodayMeals({ allowEmpty: allowEmpty });
+          todayMealState = loadMealsForDay(getTodayKey());
+        } else {
+          persistEditingDay({ allowEmpty: allowEmpty });
+          mealState = loadMealsForDay(editingDayKey || getYesterdayKey());
+        }
+        mealsClearArmed = false;
       }
 
       function saveActivities() {
-        if (activeField === "activity-today") persistTodayActivity({ allowEmpty: true });
-        else persistEditingDay({ allowEmpty: true });
+        var allowEmpty = !!activityClearArmed;
+        if (activeField === "activity-today") {
+          persistTodayActivity({ allowEmpty: allowEmpty });
+          todayActivityState = loadDayActivityForDay(getTodayKey());
+        } else {
+          persistEditingDay({ allowEmpty: allowEmpty });
+          activityState = loadDayActivityForDay(editingDayKey || getYesterdayKey());
+        }
+        activityClearArmed = false;
       }
 
       function saveWalk() {
@@ -6561,19 +6652,37 @@
       function resolveMealChipDef(id, mealKey) {
         if (!id) return null;
         var chip = MEAL_FOOD_CHIP_BY_ID[id];
-        if (chip) return chip;
+        if (chip) {
+          rememberChipLabel(chip);
+          return chip;
+        }
         if (isMealKey(mealKey)) {
           chip = findFixedMenuById(mealKey, id);
-          if (chip) return chip;
+          if (chip) {
+            rememberChipLabel(chip);
+            return chip;
+          }
         }
         for (var i = 0; i < MEAL_FOOD_CHIPS.length; i++) {
-          if (MEAL_FOOD_CHIPS[i].id === id) return MEAL_FOOD_CHIPS[i];
+          if (MEAL_FOOD_CHIPS[i].id === id) {
+            rememberChipLabel(MEAL_FOOD_CHIPS[i]);
+            return MEAL_FOOD_CHIPS[i];
+          }
         }
         var found = null;
         forEachFixedMenuChip(function (c) {
           if (!found && c.id === id) found = c;
         });
-        return found;
+        if (found) {
+          rememberChipLabel(found);
+          return found;
+        }
+        // 메뉴에서 빠져도 예전에 썼던 라벨은 유지
+        var cached = chipLabelCache[id];
+        if (cached && cached.label) {
+          return { id: id, label: cached.label, kcal: cached.kcal || DEFAULT_ITEM_KCAL };
+        }
+        return null;
       }
 
       function slotChipAlreadyCountsLabel(slot, label) {
@@ -6589,15 +6698,34 @@
         slot = slot || emptyMealSlotDraft();
         var labels = [];
         var seen = {};
+        var seenLabel = {};
         (slot.chips || []).forEach(function (id) {
           if (seen[id]) return;
           var chip = resolveMealChipDef(id, mealKey);
           if (!chip || !chip.label) return;
           seen[id] = true;
-          labels.push(chip.label);
+          var lab = String(chip.label).trim();
+          var labKey = lab.toLowerCase();
+          if (seenLabel[labKey]) return;
+          seenLabel[labKey] = true;
+          rememberChipLabel(chip);
+          labels.push(lab);
         });
         var note = String(slot.note || "").trim();
-        if (note) labels.push(note);
+        if (note) {
+          var noteParts = splitMealParts(note);
+          var kept = [];
+          if (!noteParts.length) noteParts = [note];
+          noteParts.forEach(function (part) {
+            var p = String(part || "").trim();
+            if (!p) return;
+            if (slotChipAlreadyCountsLabel(slot, p)) return;
+            if (seenLabel[p.toLowerCase()]) return;
+            seenLabel[p.toLowerCase()] = true;
+            kept.push(p);
+          });
+          if (kept.length) labels.push(kept.join(", "));
+        }
         return labels.join(", ");
       }
 
@@ -8866,8 +8994,10 @@
         if (!wrap) return;
         var slot = mealDraft[mealKey] || emptyMealSlotDraft();
         wrap.innerHTML = "";
+        var shownIds = {};
         getDefaultFoodChips(mealKey).forEach(function (chip) {
           if (isDefaultChipSuppressed(chip.id, mealKey)) return;
+          shownIds[chip.id] = true;
           var on = isMealChipSelected(slot, chip.id);
           var btn = document.createElement("button");
           btn.type = "button";
@@ -8888,6 +9018,29 @@
           });
           wrap.appendChild(btn);
         });
+        // 메뉴에서 빠져도 선택 중인 칩은 보이게 유지
+        (slot.chips || []).forEach(function (cid) {
+          if (shownIds[cid]) return;
+          if (findFixedMenuById(mealKey, cid)) return;
+          var chip = resolveMealChipDef(cid, mealKey);
+          if (!chip || !chip.label) return;
+          shownIds[cid] = true;
+          var btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = "act-chip";
+          btn.setAttribute("data-food-chip", chip.id);
+          btn.setAttribute("aria-pressed", "true");
+          btn.setAttribute(
+            "aria-label",
+            chip.label + " 약 " + chip.kcal + " kcal. 선택됨 · 탭하면 선택 해제"
+          );
+          btn.title = "선택됨 · 탭하면 선택 해제";
+          btn.textContent = formatFoodChipLabel(chip);
+          btn.addEventListener("click", function () {
+            toggleMealChipSelection(mealKey, chip.id);
+          });
+          wrap.appendChild(btn);
+        });
       }
 
       function paintAllMealFoodChips() {
@@ -8900,8 +9053,17 @@
         var src = activeMealsState();
         mealDraft = emptyMealDraft();
         Object.keys(MEAL_FIELDS).forEach(function (key) {
-          var parsed = parseMealSlotText(src[key] || "", key);
+          var raw = String(src[key] || "").trim();
+          var parsed = parseMealSlotText(raw, key);
           mealDraft[key] = { chips: parsed.chips.slice(), note: parsed.note };
+          // 파싱이 비었는데 원문이 있으면 직접 적기로 복구 (유실 방지)
+          if (raw && !(mealDraft[key].chips.length || String(mealDraft[key].note || "").trim())) {
+            mealDraft[key] = { chips: [], note: raw };
+          }
+          (mealDraft[key].chips || []).forEach(function (cid) {
+            var chip = resolveMealChipDef(cid, key);
+            if (chip) rememberChipLabel(chip);
+          });
           // 메인 메뉴 칩으로 보이게 유지 (직접 적기로 옮기지 않음)
           if (mealEls[key]) mealEls[key].value = (mealDraft[key] && mealDraft[key].note) || "";
         });
@@ -8916,7 +9078,19 @@
           var slot = mealDraft[key] || emptyMealSlotDraft();
           if (mealEls[key]) slot.note = String(mealEls[key].value || "").trim();
           mealDraft[key] = slot;
-          dest[key] = composeMealSlotText(slot, key);
+          var composed = composeMealSlotText(slot, key);
+          // 작성 중인 내용이 있는데 합성이 비면 원문 note라도 남김
+          if (!String(composed || "").trim()) {
+            var fallback = String(slot.note || "").trim();
+            if (!fallback && slot.chips && slot.chips.length) {
+              fallback = slot.chips.map(function (id) {
+                var c = resolveMealChipDef(id, key);
+                return c && c.label ? c.label : "";
+              }).filter(Boolean).join(", ");
+            }
+            composed = fallback;
+          }
+          dest[key] = composed;
         });
       }
 
@@ -8925,6 +9099,7 @@
         Object.keys(MEAL_FIELDS).forEach(function (key) {
           if (mealEls[key]) mealEls[key].value = "";
         });
+        mealsClearArmed = true;
         paintAllMealFoodChips();
         mealsDraftTotal();
       }
@@ -9253,6 +9428,7 @@
         activityDraft = emptyDayActivity();
         extraDraft = { kind: "", minutes: null };
         actModes = emptyActModes();
+        activityClearArmed = true;
         syncActBlockModes();
         paintActivityDraft();
       }
@@ -11137,6 +11313,8 @@
         activeField = field;
         activeMeal = null;
         activeActivityIndex = null;
+        mealsClearArmed = false;
+        activityClearArmed = false;
         var meta = resolveFieldMeta(field);
         titleEl.textContent = meta.title;
         helpEl.textContent = meta.help;
@@ -11194,6 +11372,8 @@
         activeField = null;
         activeMeal = null;
         activeActivityIndex = null;
+        mealsClearArmed = false;
+        activityClearArmed = false;
         setSheetMode("single");
         backdrop.classList.remove("open");
         backdrop.hidden = true;
@@ -11436,6 +11616,10 @@
       saveSuppressedDefaultsByMeal();
       rebuildMealChipIndexes();
       setupFixedMenuControls();
+      chipLabelCache = loadChipLabelCache();
+      MEAL_FOOD_CHIPS.forEach(function (chip) { rememberChipLabel(chip, { skipSave: true }); });
+      forEachFixedMenuChip(function (chip) { rememberChipLabel(chip, { skipSave: true }); });
+      saveChipLabelCache();
       bootstrapDayState();
       stampVitalsOnDay(getTodayKey());
       setupConsentGate();
