@@ -3332,7 +3332,7 @@
         <span data-i18n="records.title">내 기록 관리</span>
         <span class="ops-chevron" aria-hidden="true">▾</span>
       </button>
-      <p class="app-shell-version" id="app-shell-version" data-shell-version="20261005.13">이 화면 버전 20261005.13</p>
+      <p class="app-shell-version" id="app-shell-version" data-shell-version="20261005.14">이 화면 버전 20261005.14</p>
       <div class="ops-body" id="records-body" hidden>
         <div class="records-transfer" id="records-transfer" data-i18n-attr="aria-label:records.transferAria" aria-label="기록 저장·옮기기">
           <h3 class="ops-section-title" data-i18n="records.transferTitle">기록 저장·옮기기</h3>
@@ -4128,7 +4128,7 @@
         { id: "fish-and-chips", label: "피시앤 칩스", kcal: 780 },
         { id: "steak-and-chips", label: "스테이크앤 칩스", kcal: 850 },
         { id: "chicken-and-chips", label: "치킨앤 칩스", kcal: 820 },
-        { id: "mixed-grain-bowl", label: "잡곡 1공기", kcal: 320 }
+        { id: "mixed-grain-bowl", label: "잡곡밥", kcal: 320 }
       ];
       /** 아침 기본 메뉴 (Harry 지정 9개). */
       var BREAKFAST_FOOD_CHIPS = [
@@ -5144,8 +5144,6 @@
         { test: /비빔밥/, kcal: 550, label: "비빔밥" },
         { test: /볶음밥|덮밥/, kcal: 600, label: "볶음·덮밥" },
         { test: /김밥/, kcal: 450, label: "김밥" },
-        { test: /잡곡\s*1공기|잡곡밥|잡곡/, kcal: 320, label: "잡곡 1공기" },
-        { test: /공기밥|흰밥|햇반|밥/, kcal: 300, label: "밥 1공기" },
         { test: /죽|흰죽|전복죽|호박죽/, kcal: 220, label: "죽" },
         { test: /피시앤\s*칩스|피시\s*앤\s*칩스|fish\s*&?\s*chips/i, kcal: 780, label: "피시앤 칩스" },
         { test: /스테이크앤\s*칩스|스테이크\s*앤\s*칩스|steak\s*&?\s*chips/i, kcal: 850, label: "스테이크앤 칩스" },
@@ -7365,12 +7363,65 @@
         if (def) return { kcal: def.kcal, label: def.label };
         var chip = MEAL_FOOD_CHIP_BY_LABEL[raw];
         if (chip) return { kcal: chip.kcal, label: chip.label };
+        var riceEst = estimateRicePortionKcal(raw);
+        if (riceEst) return riceEst;
         for (var i = 0; i < FOOD_KCAL_RULES.length; i++) {
           if (FOOD_KCAL_RULES[i].test.test(item)) {
             return { kcal: FOOD_KCAL_RULES[i].kcal, label: FOOD_KCAL_RULES[i].label };
           }
         }
         return { kcal: DEFAULT_ITEM_KCAL, label: "일반 1회분" };
+      }
+
+      /** 밥·잡곡밥: 기본 1공기. 반공기·한공기반·두공기 등은 1공기 기준으로 배율 계산. */
+      function parseRiceBowlMultiplier(text) {
+        var t = String(text || "").replace(/\s+/g, "");
+        if (!t) return 1;
+        if (/한공기반|일공기반|1공기반|1\.5공기|1½공기|1\s*1\/2공기/.test(t)) return 1.5;
+        if (/두공기반|2공기반|2\.5공기/.test(t)) return 2.5;
+        if (/반공기|½공기|1\/2공기|0\.5공기/.test(t)) return 0.5;
+        if (/1\/3공기|⅓공기/.test(t)) return 1 / 3;
+        if (/1\/4공기|¼공기/.test(t)) return 0.25;
+        if (/세공기|삼공기|3공기/.test(t)) return 3;
+        if (/네공기|4공기/.test(t)) return 4;
+        if (/두공기|이공기|2공기/.test(t)) return 2;
+        var num = t.match(/(\d+(?:\.\d+)?)공기/);
+        if (num) {
+          var n = parseFloat(num[1], 10);
+          if (isFinite(n) && n > 0) return Math.min(Math.max(n, 0.25), 5);
+        }
+        if (/한공기|일공기|1공기/.test(t)) return 1;
+        // 「잡곡밥 반」「밥 반」처럼 공기 없이 반만 적은 경우
+        if (/(밥|잡곡|현미|백미|흰밥|햇반)반$/.test(t) || /반(그릇|공기)?$/.test(t) && /(밥|잡곡|현미|백미)/.test(t)) {
+          return 0.5;
+        }
+        return 1;
+      }
+
+      function estimateRicePortionKcal(item) {
+        var raw = String(item || "").trim();
+        if (!raw) return null;
+        var compact = raw.replace(/\s+/g, "");
+        // 밥이 들어가는 다른 요리는 제외 (비빔밥·국밥 등)
+        if (/비빔밥|볶음밥|덮밥|김밥|초밥|주먹밥|삼각김밥|컵밥|국밥|돌솥밥|비빔|제육덮|불고기덮/.test(compact)) {
+          return null;
+        }
+        var base = 0;
+        var baseName = "";
+        if (/잡곡|현미/.test(compact)) {
+          base = 320;
+          baseName = "잡곡밥";
+        } else if (/백미|흰밥|공기밥|햇반/.test(compact) || /(^|[^가-힣])밥([^가-힣]|$)/.test(raw) || /^밥/.test(compact) || /밥$/.test(compact) || /밥(반|한|두|세|네|1|2|3|½|\/)/.test(compact)) {
+          base = 300;
+          baseName = "밥";
+        } else {
+          return null;
+        }
+        var bowls = parseRiceBowlMultiplier(compact);
+        var kcal = Math.round(base * bowls);
+        kcal = Math.min(Math.max(kcal, 10), 2000);
+        var label = raw.length <= 40 ? raw : baseName;
+        return { kcal: kcal, label: label };
       }
 
       function estimateMealFromSlot(slot) {
