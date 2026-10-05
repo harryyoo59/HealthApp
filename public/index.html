@@ -3263,7 +3263,7 @@
         <span data-i18n="records.title">내 기록 관리</span>
         <span class="ops-chevron" aria-hidden="true">▾</span>
       </button>
-      <p class="app-shell-version" id="app-shell-version" data-shell-version="20261005.1">이 화면 버전 20261005.1</p>
+      <p class="app-shell-version" id="app-shell-version" data-shell-version="20261005.2">이 화면 버전 20261005.2</p>
       <div class="ops-body" id="records-body" hidden>
         <div class="records-transfer" id="records-transfer" data-i18n-attr="aria-label:records.transferAria" aria-label="기록 저장·옮기기">
           <h3 class="ops-section-title" data-i18n="records.transferTitle">기록 저장·옮기기</h3>
@@ -11891,8 +11891,8 @@
       warnIfStorageNearlyFull();
 
       function setupShareSite() {
-        // 공개 HTTPS가 생기면 여기에 고정 주소를 넣습니다. 비어 있으면 지금 열린 주소를 씁니다.
-        var PUBLIC_SITE_URL = "";
+        // 공개 HTTPS 고정 주소. 나중에 도메인 등록하면 여기만 바꾸면 됩니다.
+        var PUBLIC_SITE_URL = "https://healthapp-theta.vercel.app/";
         var openBtn = document.getElementById("share-open");
         var backdrop = document.getElementById("share-modal-backdrop");
         var closeBtn = document.getElementById("share-modal-close");

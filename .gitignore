@@ -1,12 +1,12 @@
-# Local / temp
-.tmp-shots/
-.DS_Store
-*.log
 
+# Local / temp
 # Secrets
+*.key
+*.log
+*.pem
+.DS_Store
 .env
 .env.*
-*.pem
-*.key
+.tmp-shots/
 credentials.json
 node_modules/
