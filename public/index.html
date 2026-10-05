@@ -3280,7 +3280,7 @@
         <span data-i18n="records.title">내 기록 관리</span>
         <span class="ops-chevron" aria-hidden="true">▾</span>
       </button>
-      <p class="app-shell-version" id="app-shell-version" data-shell-version="20261005.5">이 화면 버전 20261005.5</p>
+      <p class="app-shell-version" id="app-shell-version" data-shell-version="20261005.6">이 화면 버전 20261005.6</p>
       <div class="ops-body" id="records-body" hidden>
         <div class="records-transfer" id="records-transfer" data-i18n-attr="aria-label:records.transferAria" aria-label="기록 저장·옮기기">
           <h3 class="ops-section-title" data-i18n="records.transferTitle">기록 저장·옮기기</h3>
@@ -4012,7 +4012,10 @@
         { id: "bread", label: "빵·샌드", kcal: 280 },
         { id: "fruit", label: "과일", kcal: 80 },
         { id: "dairy", label: "유제품", kcal: 150 },
-        { id: "treat", label: "군것질", kcal: 220 }
+        { id: "treat", label: "군것질", kcal: 220 },
+        { id: "fish-and-chips", label: "피시앤 칩스", kcal: 780 },
+        { id: "steak-and-chips", label: "스테이크앤 칩스", kcal: 850 },
+        { id: "chicken-and-chips", label: "치킨앤 칩스", kcal: 820 }
       ];
       /** 아침 기본 메뉴 (Harry 지정 9개). */
       var BREAKFAST_FOOD_CHIPS = [
@@ -4026,16 +4029,25 @@
         { id: "fruit", label: "과일", kcal: 80 },
         { id: "dairy", label: "유제품", kcal: 150 }
       ];
-      /** 점심 기본 메뉴 (Harry 지정 8개). */
+      /** 점심 기본 메뉴 (Harry 지정 17개 — 한국 점심 + 기존 일부). */
       var LUNCH_FOOD_CHIPS = [
-        { id: "fish-and-chips", label: "피시앤 칩스", kcal: 780 },
-        { id: "steak-and-chips", label: "스테이크앤 칩스", kcal: 850 },
-        { id: "pasta", label: "파스타", kcal: 580 },
-        { id: "pizza", label: "피자", kcal: 550 },
-        { id: "chicken-and-chips", label: "치킨앤 칩스", kcal: 820 },
+        { id: "bibimbap", label: "비빔밥", kcal: 650 },
+        { id: "doenjang-jjigae", label: "된장찌개", kcal: 450 },
+        { id: "kimchi-jjigae", label: "김치찌개", kcal: 480 },
+        { id: "jeyuk-deopbap", label: "제육덮밥", kcal: 700 },
+        { id: "bulgogi-deopbap", label: "불고기덮밥", kcal: 680 },
+        { id: "donkatsu", label: "돈까스", kcal: 750 },
+        { id: "sundubu-jjigae", label: "순두부찌개", kcal: 520 },
+        { id: "kalguksu", label: "칼국수", kcal: 580 },
+        { id: "naengmyeon", label: "냉면", kcal: 500 },
+        { id: "hamburger", label: "햄버거", kcal: 650 },
+        { id: "sandwich", label: "샌드위치", kcal: 420 },
+        { id: "convenience-lunch", label: "삼각김밥·편의점 도시락", kcal: 500 },
         { id: "gimbap", label: "김밥", kcal: 450 },
         { id: "jjajangmyeon", label: "짜장면", kcal: 680 },
-        { id: "jjamppong", label: "짬뽕", kcal: 700 }
+        { id: "jjamppong", label: "짬뽕", kcal: 700 },
+        { id: "pasta", label: "파스타", kcal: 580 },
+        { id: "pizza", label: "피자", kcal: 550 }
       ];
       /** 저녁 기본 메뉴 (Harry 지정 6개). */
       var DINNER_FOOD_CHIPS = [
@@ -4069,7 +4081,7 @@
       var BREAKFAST_DEFAULTS_VERSION_KEY = "healthapp.breakfastDefaultsVersion.v1";
       var BREAKFAST_DEFAULTS_VERSION = 1;
       var LUNCH_DEFAULTS_VERSION_KEY = "healthapp.lunchDefaultsVersion.v1";
-      var LUNCH_DEFAULTS_VERSION = 1;
+      var LUNCH_DEFAULTS_VERSION = 2;
       var DINNER_DEFAULTS_VERSION_KEY = "healthapp.dinnerDefaultsVersion.v1";
       var DINNER_DEFAULTS_VERSION = 1;
       var SNACK_DEFAULTS_VERSION_KEY = "healthapp.snackDefaultsVersion.v1";
@@ -4468,7 +4480,7 @@
         }
       }
 
-      /** 점심 기본 메뉴 프리셋 교체 시: 점심 숨김만 비워 새 8개가 보이게 */
+      /** 점심 기본 메뉴 프리셋 교체 시: 점심 숨김만 비워 새 목록이 보이게 */
       function applyLunchDefaultsVersionReset() {
         try {
           var cur = Number(localStorage.getItem(LUNCH_DEFAULTS_VERSION_KEY) || "0");
