@@ -600,12 +600,15 @@
       color: var(--muted);
       font-style: italic;
     }
-    .novelist-entry {
+    .novelist-entry,
+    .share-entry {
       margin-top: 14px;
       margin-bottom: 18px;
       scroll-margin-bottom: 96px;
     }
-    .novelist-bar {
+    .share-entry { margin-bottom: 10px; }
+    .novelist-bar,
+    .share-bar {
       appearance: none;
       display: flex;
       flex-direction: column;
@@ -626,34 +629,53 @@
       min-height: 72px;
       box-shadow: inset 0 1px 0 rgba(255, 230, 190, 0.12);
     }
-    .novelist-bar:focus-visible {
+    .share-bar {
+      border-color: rgba(61, 155, 110, 0.48);
+      background:
+        linear-gradient(135deg, rgba(61, 155, 110, 0.28) 0%, rgba(22, 72, 52, 0.72) 48%, rgba(14, 36, 28, 0.96) 100%),
+        #143028;
+      color: #e8f2ec;
+      box-shadow: inset 0 1px 0 rgba(180, 240, 210, 0.12);
+    }
+    .novelist-bar:focus-visible,
+    .share-bar:focus-visible {
       outline: 2px solid #d4a574;
       outline-offset: 2px;
     }
-    .novelist-bar:active {
+    .share-bar:focus-visible {
+      outline-color: #3d9b6e;
+    }
+    .novelist-bar:active,
+    .share-bar:active {
       transform: scale(0.992);
     }
-    .novelist-bar-kicker {
+    .novelist-bar-kicker,
+    .share-bar-kicker {
       font-size: 11px;
       font-weight: 650;
       letter-spacing: 0.04em;
       color: #e0c29a;
     }
-    .novelist-bar-title {
+    .share-bar-kicker { color: #9fe3bf; }
+    .novelist-bar-title,
+    .share-bar-title {
       font-size: 18px;
       font-weight: 800;
       letter-spacing: -0.02em;
       line-height: 1.25;
       color: #fff4e4;
     }
-    .novelist-bar-row {
+    .share-bar-title { color: #f0faf4; }
+    .novelist-bar-row,
+    .share-bar-row {
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 10px;
       width: 100%;
     }
-    .novelist-bar-go {
+    .novelist-bar-go,
+    .share-bar-go {
       flex: 0 0 auto;
       font-size: 12px;
       font-weight: 700;
@@ -663,7 +685,180 @@
       padding: 6px 10px;
       white-space: nowrap;
     }
-    a.novelist-bar { text-decoration: none; color: inherit; }
+    .share-bar-go {
+      color: #0c1f16;
+      background: #7dcea0;
+    }
+    a.novelist-bar,
+    button.share-bar { text-decoration: none; color: inherit; }
+    .share-modal-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 80;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 18px 14px calc(18px + env(safe-area-inset-bottom));
+      background: rgba(0, 0, 0, 0.62);
+    }
+    .share-modal-backdrop.open { display: flex; }
+    .share-modal {
+      width: min(100%, 420px);
+      max-height: min(90vh, 640px);
+      overflow: auto;
+      border-radius: 16px;
+      border: 1px solid rgba(61, 155, 110, 0.45);
+      background: #12241d;
+      padding: 16px 14px 14px;
+      color: var(--ink);
+      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.35);
+    }
+    .share-modal-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 12px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--line);
+    }
+    .share-modal-head h3 {
+      margin: 0;
+      font-size: 17px;
+      font-weight: 800;
+      color: #9fe3bf;
+      letter-spacing: -0.02em;
+    }
+    .share-modal-close {
+      appearance: none;
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--muted);
+      border-radius: 999px;
+      width: 34px;
+      height: 34px;
+      font: inherit;
+      font-size: 18px;
+      line-height: 1;
+      cursor: pointer;
+    }
+    .share-modal-close:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+    .share-methods-label {
+      display: block;
+      margin: 0 0 8px;
+      font-size: 13px;
+      font-weight: 700;
+      color: #dff5e8;
+    }
+    .share-methods {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+    .share-method-btn {
+      appearance: none;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      min-height: 92px;
+      padding: 10px 6px;
+      border-radius: 10px;
+      border: 1px solid rgba(61, 155, 110, 0.35);
+      background: rgba(61, 155, 110, 0.12);
+      color: #dff5e8;
+      font: inherit;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      text-align: center;
+    }
+    .share-method-btn[data-share="sms"] {
+      border-color: rgba(120, 150, 220, 0.45);
+      background: rgba(80, 100, 180, 0.16);
+      color: #c8d4ff;
+    }
+    .share-method-btn[data-share="copy"] {
+      border-color: rgba(232, 242, 236, 0.18);
+      background: rgba(255, 255, 255, 0.04);
+      color: #e8f2ec;
+    }
+    .share-method-btn:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+    .share-method-icon { font-size: 22px; line-height: 1; }
+    .share-method-hint {
+      font-size: 10px;
+      font-weight: 500;
+      color: rgba(223, 245, 232, 0.65);
+    }
+    .share-method-btn[data-share="sms"] .share-method-hint { color: rgba(200, 212, 255, 0.7); }
+    .share-method-btn[data-share="copy"] .share-method-hint { color: var(--muted); }
+    .share-toast {
+      display: none;
+      margin: 0 0 10px;
+      padding: 10px;
+      border-radius: 10px;
+      border: 1px solid rgba(125, 206, 160, 0.55);
+      background: rgba(61, 155, 110, 0.16);
+      color: #9fe3bf;
+      font-size: 12px;
+      font-weight: 700;
+      text-align: center;
+      line-height: 1.4;
+    }
+    .share-toast.open { display: block; }
+    .share-preview-wrap {
+      margin-bottom: 10px;
+      padding: 12px;
+      border-radius: 10px;
+      border: 1px solid var(--line);
+      background: #0c1a15;
+    }
+    .share-preview-label {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--muted);
+    }
+    .share-preview {
+      max-height: 110px;
+      overflow: auto;
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      background: #163028;
+      color: #c5d9cd;
+      font-size: 12px;
+      line-height: 1.5;
+      white-space: pre-wrap;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    }
+    .share-qr-wrap {
+      text-align: center;
+      padding: 8px;
+      border-radius: 10px;
+      border: 1px dashed rgba(61, 155, 110, 0.35);
+      background: rgba(255, 255, 255, 0.02);
+    }
+    .share-qr-frame {
+      display: inline-block;
+      padding: 6px;
+      border-radius: 8px;
+      background: #fff;
+    }
+    .share-qr-frame img {
+      display: block;
+      width: 90px;
+      height: 90px;
+    }
     .status-note {
       margin: 10px 0 0;
       padding: 0 2px;
@@ -3068,7 +3263,7 @@
         <span data-i18n="records.title">내 기록 관리</span>
         <span class="ops-chevron" aria-hidden="true">▾</span>
       </button>
-      <p class="app-shell-version" id="app-shell-version" data-shell-version="20261004.2">이 화면 버전 20261004.2</p>
+      <p class="app-shell-version" id="app-shell-version" data-shell-version="20261005.1">이 화면 버전 20261005.1</p>
       <div class="ops-body" id="records-body" hidden>
         <div class="records-transfer" id="records-transfer" data-i18n-attr="aria-label:records.transferAria" aria-label="기록 저장·옮기기">
           <h3 class="ops-section-title" data-i18n="records.transferTitle">기록 저장·옮기기</h3>
@@ -3093,6 +3288,22 @@
           <button type="button" class="records-consent-link" id="records-consent-revoke" data-i18n="records.revoke">주의사항 다시 보기 · 동의 철회</button>
         </div>
       </div>
+    </section>
+
+    <section class="share-entry" id="share-entry" data-i18n-attr="aria-label:share.sectionAria" aria-label="지인에게 이 사이트 알리기">
+      <button
+        type="button"
+        class="share-bar"
+        id="share-open"
+        data-i18n-attr="aria-label:share.aria"
+        aria-label="지인에게 이 사이트 알리기 초대장 열기"
+      >
+        <span class="share-bar-kicker" data-i18n="share.kicker">건강 일지 · 초대장 보내기</span>
+        <span class="share-bar-row">
+          <strong class="share-bar-title" data-i18n="share.title">지인에게 이 사이트 알리기</strong>
+          <span class="share-bar-go" data-i18n="share.go">초대장</span>
+        </span>
+      </button>
     </section>
 
     <section class="novelist-entry" id="novelist-entry" data-i18n-attr="aria-label:novelist.sectionAria" aria-label="이제 나도 소설가">
@@ -3519,6 +3730,50 @@
       <div class="sheet-actions">
         <button type="button" class="btn-clear" id="sheet-clear" data-i18n="sheet.clear">비우기</button>
         <button type="button" class="btn-save" id="sheet-save" data-i18n="sheet.save">저장</button>
+      </div>
+    </div>
+  </div>
+
+  <div
+    class="share-modal-backdrop"
+    id="share-modal-backdrop"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="share-modal-title"
+    hidden
+  >
+    <div class="share-modal">
+      <div class="share-modal-head">
+        <h3 id="share-modal-title">건강 일지 초대장</h3>
+        <button type="button" class="share-modal-close" id="share-modal-close" aria-label="초대장 닫기">×</button>
+      </div>
+      <span class="share-methods-label">초청장 전송 방법 선택</span>
+      <div class="share-methods">
+        <button type="button" class="share-method-btn" id="share-kakao-btn" data-share="kakao">
+          <span class="share-method-icon" aria-hidden="true">💬</span>
+          <span id="share-kakao-label">카카오톡/메신저</span>
+          <span class="share-method-hint">1초 바로 공유</span>
+        </button>
+        <button type="button" class="share-method-btn" id="share-sms-btn" data-share="sms">
+          <span class="share-method-icon" aria-hidden="true">📱</span>
+          <span id="share-sms-label">휴대폰 문자(SMS)</span>
+          <span class="share-method-hint">문자 앱 연동</span>
+        </button>
+        <button type="button" class="share-method-btn" id="share-copy-btn" data-share="copy">
+          <span class="share-method-icon" aria-hidden="true">📋</span>
+          <span id="share-copy-label">초대 링크 1초 복사</span>
+          <span class="share-method-hint">클립보드로 복사</span>
+        </button>
+      </div>
+      <p class="share-toast" id="share-toast" role="status" aria-live="polite"></p>
+      <div class="share-preview-wrap">
+        <span class="share-preview-label">친구에게 전송되는 메시지 문구</span>
+        <div class="share-preview" id="share-message-preview"></div>
+      </div>
+      <div class="share-qr-wrap">
+        <div class="share-qr-frame">
+          <img id="share-qr-code-img" src="" alt="접속 QR코드" width="90" height="90" />
+        </div>
       </div>
     </div>
   </div>
@@ -11629,10 +11884,167 @@
       setupRecordsPanel();
       setupWeekBriefToggle();
       setupStatusToggle();
+      setupShareSite();
       setupNovelist();
       setupSymptomAsk();
       render();
       warnIfStorageNearlyFull();
+
+      function setupShareSite() {
+        // 공개 HTTPS가 생기면 여기에 고정 주소를 넣습니다. 비어 있으면 지금 열린 주소를 씁니다.
+        var PUBLIC_SITE_URL = "";
+        var openBtn = document.getElementById("share-open");
+        var backdrop = document.getElementById("share-modal-backdrop");
+        var closeBtn = document.getElementById("share-modal-close");
+        var previewEl = document.getElementById("share-message-preview");
+        var qrImg = document.getElementById("share-qr-code-img");
+        var toastEl = document.getElementById("share-toast");
+        var kakaoBtn = document.getElementById("share-kakao-btn");
+        var smsBtn = document.getElementById("share-sms-btn");
+        var copyBtn = document.getElementById("share-copy-btn");
+        var kakaoLabel = document.getElementById("share-kakao-label");
+        var smsLabel = document.getElementById("share-sms-label");
+        var copyLabel = document.getElementById("share-copy-label");
+        var toastTimer = 0;
+        if (!openBtn || !backdrop || !closeBtn || !previewEl) return;
+
+        function getInviteUrl() {
+          var fixed = String(PUBLIC_SITE_URL || "").trim();
+          if (fixed) {
+            return fixed.replace(/\/?$/, "/");
+          }
+          var origin = String(window.location.origin || "").replace(/\/$/, "");
+          return origin ? origin + "/" : "/";
+        }
+
+        function buildInviteMessage() {
+          var inviteUrl = getInviteUrl();
+          return (
+            "🌿 [알고 먹는 내몸 지키기 - 공식 초대장]\n" +
+            "먹은 음식·하루 활동·몸 상태를 폰에 적어 두는 개인 건강 일지입니다.\n\n" +
+            "의료 진단이 아니며, 기록은 각자 기기에만 저장됩니다.\n" +
+            "식단·생활 챙기기에 참고해 보세요.\n\n" +
+            "🔗 건강 일지 바로가기:\n" +
+            inviteUrl
+          );
+        }
+
+        function safeCopyText(text) {
+          try {
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+              navigator.clipboard.writeText(text);
+              return;
+            }
+          } catch (e) {}
+          try {
+            var ta = document.createElement("textarea");
+            ta.value = text;
+            ta.setAttribute("readonly", "");
+            ta.style.position = "fixed";
+            ta.style.left = "-9999px";
+            document.body.appendChild(ta);
+            ta.select();
+            document.execCommand("copy");
+            document.body.removeChild(ta);
+          } catch (e2) {}
+        }
+
+        function showToast(msg) {
+          if (!toastEl) return;
+          toastEl.textContent = msg;
+          toastEl.classList.add("open");
+          if (toastTimer) window.clearTimeout(toastTimer);
+          toastTimer = window.setTimeout(function () {
+            toastEl.classList.remove("open");
+          }, 4000);
+        }
+
+        function flashLabel(el, nextText, restoreText) {
+          if (!el) return;
+          el.textContent = nextText;
+          window.setTimeout(function () {
+            el.textContent = restoreText;
+          }, 2500);
+        }
+
+        function isMobileDevice() {
+          return /Android|iPhone|iPad|iPod/i.test(navigator.userAgent || "");
+        }
+
+        function openShareModal() {
+          var inviteUrl = getInviteUrl();
+          var message = buildInviteMessage();
+          previewEl.textContent = message;
+          if (qrImg) {
+            qrImg.src =
+              "https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=" +
+              encodeURIComponent(inviteUrl);
+          }
+          backdrop.hidden = false;
+          backdrop.classList.add("open");
+          document.body.classList.add("share-modal-open");
+          closeBtn.focus();
+        }
+
+        function closeShareModal() {
+          backdrop.classList.remove("open");
+          backdrop.hidden = true;
+          document.body.classList.remove("share-modal-open");
+          openBtn.focus();
+        }
+
+        function handleKakaoShare() {
+          var message = buildInviteMessage();
+          safeCopyText(message);
+          flashLabel(kakaoLabel, "카카오톡 여는 중…", "카카오톡/메신저");
+
+          if (navigator.share && isMobileDevice()) {
+            navigator.share({
+              title: "알고 먹는 내몸 지키기",
+              text: message,
+              url: getInviteUrl()
+            }).then(function () {
+              showToast("초대장을 공유했습니다.");
+            }).catch(function () {
+              showToast("초대장이 복사되었습니다. 카카오톡 대화방에 붙여넣기 해 주세요.");
+              try { window.location.href = "kakaotalk://"; } catch (e) {}
+            });
+            return;
+          }
+
+          try {
+            window.location.href = "kakaotalk://";
+          } catch (e) {}
+          showToast("초대장이 복사되었습니다. 카카오톡 대화방에 붙여넣기 해 주세요.");
+        }
+
+        function handleSmsShare() {
+          var message = buildInviteMessage();
+          flashLabel(smsLabel, "문자앱 실행!", "휴대폰 문자(SMS)");
+          showToast("휴대폰 문자(SMS) 앱을 실행합니다.");
+          window.location.href = "sms:?body=" + encodeURIComponent(message);
+        }
+
+        function handleCopyShare() {
+          safeCopyText(buildInviteMessage());
+          flashLabel(copyLabel, "복사 완료!", "초대 링크 1초 복사");
+          showToast("초대 링크가 클립보드에 복사되었습니다!");
+        }
+
+        openBtn.addEventListener("click", openShareModal);
+        closeBtn.addEventListener("click", closeShareModal);
+        backdrop.addEventListener("click", function (e) {
+          if (e.target === backdrop) closeShareModal();
+        });
+        if (kakaoBtn) kakaoBtn.addEventListener("click", handleKakaoShare);
+        if (smsBtn) smsBtn.addEventListener("click", handleSmsShare);
+        if (copyBtn) copyBtn.addEventListener("click", handleCopyShare);
+        document.addEventListener("keydown", function (e) {
+          if (e.key === "Escape" && backdrop.classList.contains("open")) {
+            closeShareModal();
+          }
+        });
+      }
 
       function setupNovelist() {
         var NOVEL_KEY = "healthapp.novelist.draft.v1";
