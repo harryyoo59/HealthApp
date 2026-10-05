@@ -3280,7 +3280,7 @@
         <span data-i18n="records.title">내 기록 관리</span>
         <span class="ops-chevron" aria-hidden="true">▾</span>
       </button>
-      <p class="app-shell-version" id="app-shell-version" data-shell-version="20261005.7">이 화면 버전 20261005.7</p>
+      <p class="app-shell-version" id="app-shell-version" data-shell-version="20261005.8">이 화면 버전 20261005.8</p>
       <div class="ops-body" id="records-body" hidden>
         <div class="records-transfer" id="records-transfer" data-i18n-attr="aria-label:records.transferAria" aria-label="기록 저장·옮기기">
           <h3 class="ops-section-title" data-i18n="records.transferTitle">기록 저장·옮기기</h3>
@@ -3590,18 +3590,60 @@
             <input type="text" class="meals-note-input" id="meal-dinner" maxlength="80" placeholder="예외 메뉴 · 칼로리 숫자 선택" data-i18n-placeholder="meal.ph.dinner" autocomplete="off" />
           </div>
         </div>
-        <div class="meals-field" data-meal-slot="snack">
-          <label><span data-i18n="meal.snack">간식</span> <span class="meals-field-kcal" data-meal-sheet-kcal="snack"></span></label>
+        <div class="meals-field" data-meal-slot="lateNight">
+          <label><span data-i18n="meal.lateNight">야식</span> <span class="meals-field-kcal" data-meal-sheet-kcal="lateNight"></span></label>
           <p class="meals-chip-hint" data-i18n="meal.menu">메뉴</p>
-          <p class="fixed-menu-guide" id="meal-snack-fixed-guide" data-i18n="meal.guide">한 번 탭=선택 · 두 번 탭=목록에서 빼기</p>
-          <div class="meals-menu-wrap" role="group" data-i18n-attr="aria-label:meal.snackMenuAria" aria-label="간식 메뉴">
-            <div class="act-chips meals-food-chips" id="meal-snack-chips"></div>
-            <div class="act-chips meals-food-chips fixed-menu-chips" id="meal-snack-fixed"></div>
-            <p class="fixed-menu-empty" id="meal-snack-fixed-empty" hidden data-i18n="meal.empty">직접 적기로 자주 먹는 걸 올리면 여기에도 쌓입니다</p>
+          <p class="fixed-menu-guide" id="meal-lateNight-fixed-guide" data-i18n="meal.guide">한 번 탭=선택 · 두 번 탭=목록에서 빼기</p>
+          <div class="meals-menu-wrap" role="group" data-i18n-attr="aria-label:meal.lateNightMenuAria" aria-label="야식 메뉴">
+            <div class="act-chips meals-food-chips" id="meal-lateNight-chips"></div>
+            <div class="act-chips meals-food-chips fixed-menu-chips" id="meal-lateNight-fixed"></div>
+            <p class="fixed-menu-empty" id="meal-lateNight-fixed-empty" hidden data-i18n="meal.empty">직접 적기로 자주 먹는 걸 올리면 여기에도 쌓입니다</p>
           </div>
-          <label class="meals-note-label" for="meal-snack" data-i18n="meal.writeOwn">직접 적기</label>
+          <label class="meals-note-label" for="meal-lateNight" data-i18n="meal.writeOwn">직접 적기</label>
           <div class="meals-note-row">
-            <input type="text" class="meals-note-input" id="meal-snack" maxlength="80" placeholder="예: 커피 또는 커피 50" data-i18n-placeholder="meal.ph.snack" autocomplete="off" />
+            <input type="text" class="meals-note-input" id="meal-lateNight" maxlength="80" placeholder="예: 떡볶이. 라면" data-i18n-placeholder="meal.ph.lateNight" autocomplete="off" />
+          </div>
+        </div>
+        <div class="meals-field" data-meal-slot="drink">
+          <label><span data-i18n="meal.drink">음료</span> <span class="meals-field-kcal" data-meal-sheet-kcal="drink"></span></label>
+          <p class="meals-chip-hint" data-i18n="meal.menu">메뉴</p>
+          <p class="fixed-menu-guide" id="meal-drink-fixed-guide" data-i18n="meal.guide">한 번 탭=선택 · 두 번 탭=목록에서 빼기</p>
+          <div class="meals-menu-wrap" role="group" data-i18n-attr="aria-label:meal.drinkMenuAria" aria-label="음료 메뉴">
+            <div class="act-chips meals-food-chips" id="meal-drink-chips"></div>
+            <div class="act-chips meals-food-chips fixed-menu-chips" id="meal-drink-fixed"></div>
+            <p class="fixed-menu-empty" id="meal-drink-fixed-empty" hidden data-i18n="meal.empty">직접 적기로 자주 먹는 걸 올리면 여기에도 쌓입니다</p>
+          </div>
+          <label class="meals-note-label" for="meal-drink" data-i18n="meal.writeOwn">직접 적기</label>
+          <div class="meals-note-row">
+            <input type="text" class="meals-note-input" id="meal-drink" maxlength="80" placeholder="예: 아메리카노. 제로콜라" data-i18n-placeholder="meal.ph.drink" autocomplete="off" />
+          </div>
+        </div>
+        <div class="meals-field" data-meal-slot="alcohol">
+          <label><span data-i18n="meal.alcohol">주류</span> <span class="meals-field-kcal" data-meal-sheet-kcal="alcohol"></span></label>
+          <p class="meals-chip-hint" data-i18n="meal.menu">메뉴</p>
+          <p class="fixed-menu-guide" id="meal-alcohol-fixed-guide" data-i18n="meal.guide">한 번 탭=선택 · 두 번 탭=목록에서 빼기</p>
+          <div class="meals-menu-wrap" role="group" data-i18n-attr="aria-label:meal.alcoholMenuAria" aria-label="주류 메뉴">
+            <div class="act-chips meals-food-chips" id="meal-alcohol-chips"></div>
+            <div class="act-chips meals-food-chips fixed-menu-chips" id="meal-alcohol-fixed"></div>
+            <p class="fixed-menu-empty" id="meal-alcohol-fixed-empty" hidden data-i18n="meal.empty">직접 적기로 자주 먹는 걸 올리면 여기에도 쌓입니다</p>
+          </div>
+          <label class="meals-note-label" for="meal-alcohol" data-i18n="meal.writeOwn">직접 적기</label>
+          <div class="meals-note-row">
+            <input type="text" class="meals-note-input" id="meal-alcohol" maxlength="80" placeholder="예: 소주 1잔. 맥주" data-i18n-placeholder="meal.ph.alcohol" autocomplete="off" />
+          </div>
+        </div>
+        <div class="meals-field" data-meal-slot="dessert">
+          <label><span data-i18n="meal.dessert">간식/디저트</span> <span class="meals-field-kcal" data-meal-sheet-kcal="dessert"></span></label>
+          <p class="meals-chip-hint" data-i18n="meal.menu">메뉴</p>
+          <p class="fixed-menu-guide" id="meal-dessert-fixed-guide" data-i18n="meal.guide">한 번 탭=선택 · 두 번 탭=목록에서 빼기</p>
+          <div class="meals-menu-wrap" role="group" data-i18n-attr="aria-label:meal.dessertMenuAria" aria-label="간식·디저트 메뉴">
+            <div class="act-chips meals-food-chips" id="meal-dessert-chips"></div>
+            <div class="act-chips meals-food-chips fixed-menu-chips" id="meal-dessert-fixed"></div>
+            <p class="fixed-menu-empty" id="meal-dessert-fixed-empty" hidden data-i18n="meal.empty">직접 적기로 자주 먹는 걸 올리면 여기에도 쌓입니다</p>
+          </div>
+          <label class="meals-note-label" for="meal-dessert" data-i18n="meal.writeOwn">직접 적기</label>
+          <div class="meals-note-row">
+            <input type="text" class="meals-note-input" id="meal-dessert" maxlength="80" placeholder="예: 과자. 아이스크림" data-i18n-placeholder="meal.ph.dessert" autocomplete="off" />
           </div>
         </div>
         <div class="meals-sheet-total" aria-live="polite">
@@ -3851,11 +3893,11 @@
         },
         "meals-yesterday": {
           title: "어제 먹은 음식",
-          help: "메뉴를 고르거나 직접 적기 하세요. 한 번 탭=선택, 두 번 탭하면 목록에서 빼기(아침·점심·저녁·간식 독립)."
+          help: "메뉴를 고르거나 직접 적기 하세요. 한 번 탭=선택, 두 번 탭하면 목록에서 빼기(아침·점심·저녁·야식·음료·주류·간식/디저트 독립)."
         },
         "meals-today": {
           title: "오늘 먹은 음식",
-          help: "메뉴를 고르거나 직접 적기 하세요. 한 번 탭=선택, 두 번 탭하면 목록에서 빼기(아침·점심·저녁·간식 독립)."
+          help: "메뉴를 고르거나 직접 적기 하세요. 한 번 탭=선택, 두 번 탭하면 목록에서 빼기(아침·점심·저녁·야식·음료·주류·간식/디저트 독립)."
         },
         "activity-yesterday": {
           title: "어제 하루 행동",
@@ -3996,9 +4038,21 @@
           title: "저녁",
           help: "어제 저녁에 먹은 음식을 적어 주세요. 예: 삼겹살, 쌈채소"
         },
-        snack: {
-          title: "간식",
-          help: "어제 먹은 간식·음료를 적어 주세요. 예: 커피, 과자"
+        lateNight: {
+          title: "야식",
+          help: "어제 먹은 야식을 적어 주세요. 예: 떡볶이, 라면"
+        },
+        drink: {
+          title: "음료",
+          help: "어제 마신 음료를 적어 주세요. 예: 커피, 제로콜라"
+        },
+        alcohol: {
+          title: "주류",
+          help: "어제 마신 술을 적어 주세요. 예: 소주, 맥주"
+        },
+        dessert: {
+          title: "간식/디저트",
+          help: "어제 먹은 간식·디저트를 적어 주세요. 예: 과자, 아이스크림"
         }
       };
 
@@ -4072,21 +4126,59 @@
         { id: "jeyuk-bokkeum", label: "제육볶음", kcal: 480 },
         { id: "buffet", label: "뷔페식", kcal: 1000 }
       ];
-      /** 간식 기본 메뉴만 교체 (Harry 지정 7개). */
-      var SNACK_FOOD_CHIPS = [
+      /** 야식 기본 메뉴 (기존 치킨 + 추천). */
+      var LATE_NIGHT_FOOD_CHIPS = [
+        { id: "seasoned-chicken-whole", label: "양념치킨 1마리", kcal: 2400 },
+        { id: "late-ramen", label: "라면", kcal: 500 },
+        { id: "tteokbokki", label: "떡볶이", kcal: 550 },
+        { id: "chicken-half", label: "치킨 반마리", kcal: 1200 },
+        { id: "jokbal-small", label: "족발 소", kcal: 600 },
+        { id: "pizza-2slices", label: "피자 2조각", kcal: 450 },
+        { id: "cvs-gimbap", label: "편의점 김밥", kcal: 350 },
+        { id: "hotdog", label: "핫도그", kcal: 300 },
+        { id: "egg-roll", label: "계란말이", kcal: 250 }
+      ];
+      /** 음료 기본 메뉴 (기존 + 추천). */
+      var DRINK_FOOD_CHIPS = [
         { id: "coffee", label: "커피", kcal: 50 },
         { id: "cola", label: "콜라", kcal: 140 },
         { id: "soda", label: "탄산음료", kcal: 140 },
+        { id: "iced-americano", label: "아이스아메리카노", kcal: 15 },
+        { id: "cafe-latte", label: "카페라떼", kcal: 180 },
+        { id: "sports-drink", label: "이온음료", kcal: 50 },
+        { id: "juice-cup", label: "주스 1잔", kcal: 120 },
+        { id: "milk-drink", label: "우유", kcal: 130 },
+        { id: "soy-milk", label: "두유", kcal: 120 },
+        { id: "zero-cola", label: "제로콜라", kcal: 5 }
+      ];
+      /** 주류 기본 메뉴 (기존 + 추천). */
+      var ALCOHOL_FOOD_CHIPS = [
         { id: "soju-bottle", label: "소주 1병", kcal: 400 },
         { id: "makgeolli-bottle", label: "막걸리 1병", kcal: 550 },
         { id: "beer-can", label: "캔맥주 1캔", kcal: 150 },
-        { id: "seasoned-chicken-whole", label: "양념치킨 1마리", kcal: 2400 }
+        { id: "soju-shot", label: "소주 1잔", kcal: 70 },
+        { id: "beer-500", label: "맥주 500ml", kcal: 200 },
+        { id: "wine-glass", label: "와인 1잔", kcal: 120 },
+        { id: "highball", label: "하이볼", kcal: 150 },
+        { id: "cheongha-bottle", label: "청하·약주 1병", kcal: 300 }
+      ];
+      /** 간식/디저트 기본 메뉴. */
+      var DESSERT_FOOD_CHIPS = [
+        { id: "snack-bag", label: "과자 1봉지", kcal: 250 },
+        { id: "ice-cream", label: "아이스크림", kcal: 220 },
+        { id: "chocolate", label: "초콜릿", kcal: 150 },
+        { id: "bread-cake", label: "빵·케이크", kcal: 350 },
+        { id: "dessert-fruit", label: "과일", kcal: 80 },
+        { id: "nuts-handful", label: "견과류 한줌", kcal: 180 }
       ];
       var MEAL_DEFAULT_CHIPS_BY_MEAL = {
         breakfast: BREAKFAST_FOOD_CHIPS,
         lunch: LUNCH_FOOD_CHIPS,
         dinner: DINNER_FOOD_CHIPS,
-        snack: SNACK_FOOD_CHIPS
+        lateNight: LATE_NIGHT_FOOD_CHIPS,
+        drink: DRINK_FOOD_CHIPS,
+        alcohol: ALCOHOL_FOOD_CHIPS,
+        dessert: DESSERT_FOOD_CHIPS
       };
       /** 조회·합산용 전체 기본 칩(중복 id는 나중 끼니 값이 덮어씀 — 같은 라벨·kcal). */
       var MEAL_FOOD_CHIPS = [];
@@ -4098,14 +4190,22 @@
       var LUNCH_DEFAULTS_VERSION = 2;
       var DINNER_DEFAULTS_VERSION_KEY = "healthapp.dinnerDefaultsVersion.v1";
       var DINNER_DEFAULTS_VERSION = 2;
-      var SNACK_DEFAULTS_VERSION_KEY = "healthapp.snackDefaultsVersion.v1";
-      var SNACK_DEFAULTS_VERSION = 1;
+      var LATE_NIGHT_DEFAULTS_VERSION_KEY = "healthapp.lateNightDefaultsVersion.v1";
+      var LATE_NIGHT_DEFAULTS_VERSION = 1;
+      var DRINK_DEFAULTS_VERSION_KEY = "healthapp.drinkDefaultsVersion.v1";
+      var DRINK_DEFAULTS_VERSION = 1;
+      var ALCOHOL_DEFAULTS_VERSION_KEY = "healthapp.alcoholDefaultsVersion.v1";
+      var ALCOHOL_DEFAULTS_VERSION = 1;
+      var DESSERT_DEFAULTS_VERSION_KEY = "healthapp.dessertDefaultsVersion.v1";
+      var DESSERT_DEFAULTS_VERSION = 1;
+      var SNACK_SPLIT_VERSION_KEY = "healthapp.snackSplitVersion.v1";
+      var SNACK_SPLIT_VERSION = 1;
 
       function getDefaultFoodChips(mealKey) {
         if (mealKey && MEAL_DEFAULT_CHIPS_BY_MEAL[mealKey]) {
           return MEAL_DEFAULT_CHIPS_BY_MEAL[mealKey];
         }
-        return SNACK_FOOD_CHIPS;
+        return DESSERT_FOOD_CHIPS;
       }
 
       function collectAllDefaultFoodChips() {
@@ -4117,7 +4217,7 @@
           seen[chip.id] = true;
           out.push(chip);
         }
-        ["breakfast", "lunch", "dinner", "snack"].forEach(function (mealKey) {
+        ["breakfast", "lunch", "dinner", "lateNight", "drink", "alcohol", "dessert"].forEach(function (mealKey) {
           (MEAL_DEFAULT_CHIPS_BY_MEAL[mealKey] || []).forEach(pushChip);
         });
         // 예전 공통 칩 id가 기록에 남아도 합산 0이 되지 않게
@@ -4143,7 +4243,7 @@
       var MEAL_INDEPENDENCE_V2 = true; /* 끼니별 기본숨김·일괄숨기기 삭제 */
 
       function emptyFixedMenus() {
-        return { breakfast: [], lunch: [], dinner: [], snack: [] };
+        return { breakfast: [], lunch: [], dinner: [], lateNight: [], drink: [], alcohol: [], dessert: [] };
       }
 
       function cloneFixedMenuList(list) {
@@ -4254,6 +4354,10 @@
             out[mealKey] = expandFixedMenuToSingles(list);
           }
         });
+        // 예전 간식 고정 메뉴 → 간식/디저트로 이전
+        if ((!out.dessert || !out.dessert.length) && Array.isArray(parsed.snack)) {
+          out.dessert = expandFixedMenuToSingles(parsed.snack);
+        }
         return out;
       }
 
@@ -4321,7 +4425,7 @@
       }
 
       function emptySuppressedDefaultsByMeal() {
-        return { breakfast: {}, lunch: {}, dinner: {}, snack: {} };
+        return { breakfast: {}, lunch: {}, dinner: {}, lateNight: {}, drink: {}, alcohol: {}, dessert: {} };
       }
 
       function normalizeSuppressedDefaultsByMeal(parsed) {
@@ -4524,15 +4628,22 @@
         }
       }
 
-      /** 간식 기본 메뉴 프리셋 교체 시: 간식 숨김만 비워 새 7개가 보이게 */
-      function applySnackDefaultsVersionReset() {
+      /** 간식 → 야식·음료·주류·간식/디저트 분리 시 숨김 초기화 */
+      function applySnackSplitDefaultsVersionReset() {
         try {
-          var cur = Number(localStorage.getItem(SNACK_DEFAULTS_VERSION_KEY) || "0");
-          if (cur >= SNACK_DEFAULTS_VERSION) return false;
+          var cur = Number(localStorage.getItem(SNACK_SPLIT_VERSION_KEY) || "0");
+          if (cur >= SNACK_SPLIT_VERSION) return false;
           if (!suppressedDefaultByMeal) suppressedDefaultByMeal = emptySuppressedDefaultsByMeal();
-          suppressedDefaultByMeal.snack = {};
+          suppressedDefaultByMeal.lateNight = {};
+          suppressedDefaultByMeal.drink = {};
+          suppressedDefaultByMeal.alcohol = {};
+          suppressedDefaultByMeal.dessert = {};
           saveSuppressedDefaultsByMeal();
-          persistSetItem(SNACK_DEFAULTS_VERSION_KEY, String(SNACK_DEFAULTS_VERSION));
+          persistSetItem(SNACK_SPLIT_VERSION_KEY, String(SNACK_SPLIT_VERSION));
+          persistSetItem(LATE_NIGHT_DEFAULTS_VERSION_KEY, String(LATE_NIGHT_DEFAULTS_VERSION));
+          persistSetItem(DRINK_DEFAULTS_VERSION_KEY, String(DRINK_DEFAULTS_VERSION));
+          persistSetItem(ALCOHOL_DEFAULTS_VERSION_KEY, String(ALCOHOL_DEFAULTS_VERSION));
+          persistSetItem(DESSERT_DEFAULTS_VERSION_KEY, String(DESSERT_DEFAULTS_VERSION));
           return true;
         } catch (e) {
           return false;
@@ -4960,8 +5071,8 @@
       var dailyLog = {};
       var dayMeta = { calendarDate: "" };
       var editingDayKey = "";
-      var mealState = { breakfast: "", lunch: "", dinner: "", snack: "" };
-      var todayMealState = { breakfast: "", lunch: "", dinner: "", snack: "" };
+      var mealState = { breakfast: "", lunch: "", dinner: "", lateNight: "", drink: "", alcohol: "", dessert: "" };
+      var todayMealState = { breakfast: "", lunch: "", dinner: "", lateNight: "", drink: "", alcohol: "", dessert: "" };
       var mealDraft = emptyMealDraft();
       var mealsClearArmed = false;
       var activityClearArmed = false;
@@ -5062,7 +5173,10 @@
         breakfast: document.getElementById("meal-breakfast"),
         lunch: document.getElementById("meal-lunch"),
         dinner: document.getElementById("meal-dinner"),
-        snack: document.getElementById("meal-snack")
+        lateNight: document.getElementById("meal-lateNight"),
+        drink: document.getElementById("meal-drink"),
+        alcohol: document.getElementById("meal-alcohol"),
+        dessert: document.getElementById("meal-dessert")
       };
       var activityYesterdayKey = document.getElementById("activity-yesterday-key");
       var activityTodayKey = document.getElementById("activity-today-key");
@@ -5356,7 +5470,21 @@
       }
 
       function emptyMeals() {
-        return { breakfast: "", lunch: "", dinner: "", snack: "" };
+        return { breakfast: "", lunch: "", dinner: "", lateNight: "", drink: "", alcohol: "", dessert: "" };
+      }
+
+      /** 끼니 객체 정규화. 예전 snack은 dessert(간식/디저트)로 이어 받음. */
+      function normalizeMealsObject(raw) {
+        var out = emptyMeals();
+        if (!raw || typeof raw !== "object") return out;
+        Object.keys(out).forEach(function (key) {
+          out[key] = String(raw[key] || "");
+        });
+        var legacySnack = String(raw.snack || "").trim();
+        if (legacySnack && !String(out.dessert || "").trim()) {
+          out.dessert = String(raw.snack || "");
+        }
+        return out;
       }
 
       function emptyMealSlotDraft() {
@@ -5368,7 +5496,10 @@
           breakfast: emptyMealSlotDraft(),
           lunch: emptyMealSlotDraft(),
           dinner: emptyMealSlotDraft(),
-          snack: emptyMealSlotDraft()
+          lateNight: emptyMealSlotDraft(),
+          drink: emptyMealSlotDraft(),
+          alcohol: emptyMealSlotDraft(),
+          dessert: emptyMealSlotDraft()
         };
       }
 
@@ -5882,12 +6013,7 @@
         var base = emptyDayRecord();
         if (!raw || typeof raw !== "object") return base;
         var meals = raw.meals || {};
-        base.meals = {
-          breakfast: String(meals.breakfast || ""),
-          lunch: String(meals.lunch || ""),
-          dinner: String(meals.dinner || ""),
-          snack: String(meals.snack || "")
-        };
+        base.meals = normalizeMealsObject(meals);
         if (Array.isArray(raw.activities)) {
           base.activities = raw.activities
             .map(function (item) {
@@ -6118,7 +6244,11 @@
           name === BREAKFAST_DEFAULTS_VERSION_KEY ||
           name === LUNCH_DEFAULTS_VERSION_KEY ||
           name === DINNER_DEFAULTS_VERSION_KEY ||
-          name === SNACK_DEFAULTS_VERSION_KEY ||
+          name === SNACK_SPLIT_VERSION_KEY ||
+          name === LATE_NIGHT_DEFAULTS_VERSION_KEY ||
+          name === DRINK_DEFAULTS_VERSION_KEY ||
+          name === ALCOHOL_DEFAULTS_VERSION_KEY ||
+          name === DESSERT_DEFAULTS_VERSION_KEY ||
           name === "healthapp.ops.pinHash.v1" ||
           name === "healthapp.novelist.draft.v1";
       }
@@ -6313,7 +6443,7 @@
           if (wRaw) legacyWalk = JSON.parse(wRaw);
         } catch (e4) { /* ignore */ }
         var hasLegacy =
-          (legacyMeals && (legacyMeals.breakfast || legacyMeals.lunch || legacyMeals.dinner || legacyMeals.snack)) ||
+          (legacyMeals && mealsHasBits(legacyMeals)) ||
           (Array.isArray(legacyActs) && legacyActs.length) ||
           (legacyWalk && (String(legacyWalk.steps || "").trim() || String(legacyWalk.hours || "").trim()));
         if (!hasLegacy) return null;
@@ -6360,12 +6490,7 @@
 
       function loadMealsForDay(key) {
         var rec = getDayRecord(key);
-        return {
-          breakfast: rec.meals.breakfast,
-          lunch: rec.meals.lunch,
-          dinner: rec.meals.dinner,
-          snack: rec.meals.snack
-        };
+        return normalizeMealsObject(rec.meals);
       }
 
       function loadDayActivityForDay(key) {
@@ -6414,12 +6539,7 @@
         if (!dayKey) return;
         opts = opts || {};
         var rec = getDayRecord(dayKey);
-        var next = mergeMealsPreserve(rec.meals, {
-          breakfast: (meals && meals.breakfast) || "",
-          lunch: (meals && meals.lunch) || "",
-          dinner: (meals && meals.dinner) || "",
-          snack: (meals && meals.snack) || ""
-        }, !!opts.allowEmpty);
+        var next = mergeMealsPreserve(rec.meals, normalizeMealsObject(meals), !!opts.allowEmpty);
         // 자동 저장이 빈 끼니로 기존 섭취 기록을 지우지 않음 (비우기+저장만 allowEmpty)
         if (!opts.allowEmpty && !mealsHasBits(next) && (mealsHasBits(rec.meals) || (rec.intake || 0) > 0)) {
           if (!rec.bodyBasics || !bodyBasicsHasData(rec.bodyBasics)) {
@@ -6477,12 +6597,7 @@
         if (!editingDayKey) return;
         opts = opts || {};
         var rec = getDayRecord(editingDayKey);
-        var nextMeals = mergeMealsPreserve(rec.meals, {
-          breakfast: mealState.breakfast || "",
-          lunch: mealState.lunch || "",
-          dinner: mealState.dinner || "",
-          snack: mealState.snack || ""
-        }, !!opts.allowEmpty);
+        var nextMeals = mergeMealsPreserve(rec.meals, normalizeMealsObject(mealState), !!opts.allowEmpty);
         var nextAct = cloneDayActivity(activityState);
         var keepMeals =
           !opts.allowEmpty &&
@@ -6496,12 +6611,7 @@
         if (!keepMeals) {
           rec.meals = nextMeals;
           rec.intake = computeIntakeFromMeals(rec.meals);
-          mealState = {
-            breakfast: rec.meals.breakfast || "",
-            lunch: rec.meals.lunch || "",
-            dinner: rec.meals.dinner || "",
-            snack: rec.meals.snack || ""
-          };
+          mealState = normalizeMealsObject(rec.meals);
         } else {
           mealState = loadMealsForDay(editingDayKey);
         }
@@ -6545,7 +6655,7 @@
       function dayHasDailyInput(rec) {
         if (!rec) return false;
         var m = rec.meals || {};
-        if (m.breakfast || m.lunch || m.dinner || m.snack) return true;
+        if (mealsHasBits(m)) return true;
         if (dayActivityHasBits(rec.dayActivity)) return true;
         if (rec.activities && rec.activities.length) return true;
         var w = rec.walk || {};
@@ -6576,12 +6686,7 @@
        * 메모리에 값이 있으면 우선, 없으면 그 날짜 키의 로그를 쓴다.
        */
       function resolveEndingTodayMeals(endedDateKey) {
-        if (mealsHasBits(todayMealState)) return {
-          breakfast: todayMealState.breakfast || "",
-          lunch: todayMealState.lunch || "",
-          dinner: todayMealState.dinner || "",
-          snack: todayMealState.snack || ""
-        };
+        if (mealsHasBits(todayMealState)) return normalizeMealsObject(todayMealState);
         if (endedDateKey) return loadMealsForDay(endedDateKey);
         return emptyMeals();
       }
@@ -11932,7 +12037,7 @@
       applyBreakfastDefaultsVersionReset();
       applyLunchDefaultsVersionReset();
       applyDinnerDefaultsVersionReset();
-      applySnackDefaultsVersionReset();
+      applySnackSplitDefaultsVersionReset();
       saveSuppressedDefaultsByMeal();
       rebuildMealChipIndexes();
       setupFixedMenuControls();
