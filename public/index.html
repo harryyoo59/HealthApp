@@ -3263,7 +3263,7 @@
         <span data-i18n="records.title">내 기록 관리</span>
         <span class="ops-chevron" aria-hidden="true">▾</span>
       </button>
-      <p class="app-shell-version" id="app-shell-version" data-shell-version="20261005.2">이 화면 버전 20261005.2</p>
+      <p class="app-shell-version" id="app-shell-version" data-shell-version="20261005.3">이 화면 버전 20261005.3</p>
       <div class="ops-body" id="records-body" hidden>
         <div class="records-transfer" id="records-transfer" data-i18n-attr="aria-label:records.transferAria" aria-label="기록 저장·옮기기">
           <h3 class="ops-section-title" data-i18n="records.transferTitle">기록 저장·옮기기</h3>
@@ -3675,8 +3675,8 @@
           <div class="act-path act-path-adjust" data-act-path="adjust">
             <span class="act-path-label">+/- 조절</span>
             <div class="act-row">
-              <span class="muted">분</span>
-              <div class="stepper" data-act-stepper="driveMinutes" role="group" aria-label="운전 분">
+              <span class="muted">시간</span>
+              <div class="stepper" data-act-stepper="driveHours" role="group" aria-label="운전 시간">
                 <button type="button" class="step-btn" data-dir="-1" aria-label="운전 줄이기">−</button>
                 <span class="step-val is-empty" id="act-drive-val" aria-live="polite">눌러 고르기</span>
                 <button type="button" class="step-btn" data-dir="1" aria-label="운전 늘리기">+</button>
@@ -5330,7 +5330,7 @@
           walkMinutes: null,
           walkSteps: null,
           sitHours: null,
-          driveMinutes: null,
+          driveHours: null,
           exerciseKind: "",
           exerciseMinutes: null,
           extras: []
@@ -5342,7 +5342,7 @@
       var SLEEP_PRESETS = [5, 6, 7, 8, 9];
       var WALK_MIN_PRESETS = [15, 30, 45, 60, 90];
       var SIT_PRESETS = [2, 4, 6, 8, 10];
-      var DRIVE_PRESETS = [15, 30, 60, 90];
+      var DRIVE_PRESETS = [0.5, 1, 1.5, 2];
       var EXERCISE_MIN_PRESETS = [20, 30, 40, 60];
       var EXTRA_MIN_PRESETS = [15, 30, 40, 60];
       var ACT_STEPPER_CFG = {
@@ -5350,9 +5350,21 @@
         walkMinutes: { min: 0, max: 300, step: 5, fallback: 30, unit: "분", decimals: 0 },
         walkSteps: { min: 0, max: 50000, step: 500, fallback: 5000, unit: "보", decimals: 0 },
         sitHours: { min: 0, max: 16, step: 0.5, fallback: 6, unit: "시간", decimals: 1 },
-        driveMinutes: { min: 0, max: 300, step: 5, fallback: 30, unit: "분", decimals: 0 },
+        driveHours: { min: 0, max: 12, step: 0.5, fallback: 1, unit: "시간", decimals: 1 },
         exerciseMinutes: { min: 0, max: 180, step: 5, fallback: 40, unit: "분", decimals: 0 }
       };
+
+      function normalizeDriveHours(src) {
+        if (!src) return null;
+        if (src.driveHours != null && isFinite(src.driveHours) && Number(src.driveHours) > 0) {
+          return Math.round(Number(src.driveHours) * 2) / 2;
+        }
+        // 예전 분 단위 기록 → 시간으로 변환
+        if (src.driveMinutes != null && isFinite(src.driveMinutes) && Number(src.driveMinutes) > 0) {
+          return Math.round((Number(src.driveMinutes) / 60) * 2) / 2;
+        }
+        return null;
+      }
 
       function cloneDayActivity(src) {
         src = src || emptyDayActivity();
@@ -5361,7 +5373,7 @@
           walkMinutes: src.walkMinutes == null ? null : Number(src.walkMinutes),
           walkSteps: src.walkSteps == null ? null : Number(src.walkSteps),
           sitHours: src.sitHours == null ? null : Number(src.sitHours),
-          driveMinutes: src.driveMinutes == null ? null : Number(src.driveMinutes),
+          driveHours: normalizeDriveHours(src),
           exerciseKind: String(src.exerciseKind || ""),
           exerciseMinutes: src.exerciseMinutes == null ? null : Number(src.exerciseMinutes),
           extras: Array.isArray(src.extras)
@@ -5381,7 +5393,7 @@
         if (act.walkMinutes != null && act.walkMinutes > 0) return true;
         if (act.walkSteps != null && act.walkSteps > 0) return true;
         if (act.sitHours != null && act.sitHours > 0) return true;
-        if (act.driveMinutes != null && act.driveMinutes > 0) return true;
+        if (act.driveHours != null && act.driveHours > 0) return true;
         if (act.exerciseKind && act.exerciseMinutes != null && act.exerciseMinutes > 0) return true;
         if (act.extras && act.extras.length) return true;
         return false;
@@ -5406,8 +5418,8 @@
         if (act.sitHours != null && act.sitHours > 0) {
           lines.push("앉아있기 " + formatActHours(act.sitHours) + "시간");
         }
-        if (act.driveMinutes != null && act.driveMinutes > 0) {
-          lines.push("운전 " + Math.round(act.driveMinutes) + "분");
+        if (act.driveHours != null && act.driveHours > 0) {
+          lines.push("운전 " + formatActHours(act.driveHours) + "시간");
         }
         if (act.exerciseKind && act.exerciseMinutes != null && act.exerciseMinutes > 0) {
           lines.push(act.exerciseKind + " " + Math.round(act.exerciseMinutes) + "분");
@@ -5462,7 +5474,8 @@
             return;
           }
           if (/운전|차량|드라이브/.test(t)) {
-            out.driveMinutes = minutes != null ? minutes : 30;
+            if (minutes != null) out.driveHours = Math.round((minutes / 60) * 2) / 2;
+            else out.driveHours = 1;
             return;
           }
           if (/걷기|산책|워킹|속보/.test(t)) {
@@ -5519,11 +5532,11 @@
         return { kcal: kcal, basis: "앉아있기 " + formatActHours(h) + "시간 기준 추정" };
       }
 
-      function estimateDrive(minutes) {
-        if (minutes == null || minutes <= 0) return { kcal: 0, basis: "" };
-        var m = Math.min(Math.max(Math.round(minutes), 5), 300);
-        var kcal = Math.round(m * 2);
-        return { kcal: kcal, basis: "운전 " + m + "분 기준 추정" };
+      function estimateDrive(hours) {
+        if (hours == null || hours <= 0) return { kcal: 0, basis: "" };
+        var h = Math.min(Math.max(Number(hours), 0.5), 12);
+        var kcal = Math.round(h * 120);
+        return { kcal: kcal, basis: "운전 " + formatActHours(h) + "시간 기준 추정" };
       }
 
       function estimateKindMinutes(kind, minutes, fallbackKind) {
@@ -5540,7 +5553,7 @@
           act.walkMinutes != null ? (act.walkMinutes / 60) : 0
         );
         var sit = estimateSit(act.sitHours);
-        var drive = estimateDrive(act.driveMinutes);
+        var drive = estimateDrive(act.driveHours);
         var exercise = { kcal: 0, basis: "" };
         if (act.exerciseKind && act.exerciseMinutes != null && act.exerciseMinutes > 0) {
           exercise = estimateKindMinutes(act.exerciseKind, act.exerciseMinutes, "헬스");
@@ -9426,7 +9439,7 @@
         if (key === "sleepHours") return "sleep";
         if (key === "walkMinutes" || key === "walkSteps") return "walk";
         if (key === "sitHours") return "sit";
-        if (key === "driveMinutes") return "drive";
+        if (key === "driveHours") return "drive";
         if (key === "exerciseMinutes") return "exercise";
         return "";
       }
@@ -9461,8 +9474,8 @@
         if (d.sitHours != null && d.sitHours > 0) {
           actModes.sit = valueInPresets(d.sitHours, SIT_PRESETS) ? "preset" : "adjust";
         }
-        if (d.driveMinutes != null && d.driveMinutes > 0) {
-          actModes.drive = valueInPresets(d.driveMinutes, DRIVE_PRESETS) ? "preset" : "adjust";
+        if (d.driveHours != null && d.driveHours > 0) {
+          actModes.drive = valueInPresets(d.driveHours, DRIVE_PRESETS) ? "preset" : "adjust";
         }
         if (d.exerciseMinutes != null && d.exerciseMinutes > 0) {
           actModes.exercise = valueInPresets(d.exerciseMinutes, EXERCISE_MIN_PRESETS) ? "preset" : "adjust";
@@ -9530,7 +9543,7 @@
         paintActStep(actWalkMinVal, "walkMinutes", actModes.walk === "adjust" ? d.walkMinutes : null);
         paintActStep(actWalkStepVal, "walkSteps", actModes.walk === "steps" ? d.walkSteps : null);
         paintActStep(actSitVal, "sitHours", actModes.sit === "adjust" ? d.sitHours : null);
-        paintActStep(actDriveVal, "driveMinutes", actModes.drive === "adjust" ? d.driveMinutes : null);
+        paintActStep(actDriveVal, "driveHours", actModes.drive === "adjust" ? d.driveHours : null);
         paintActStep(actExerciseMinVal, "exerciseMinutes", actModes.exercise === "adjust" ? d.exerciseMinutes : null);
 
         fillChipGroup("act-sleep-chips", SLEEP_PRESETS, function (v) {
@@ -9549,9 +9562,9 @@
           pickActPreset("sit", "sitHours", v, SIT_PRESETS);
         });
         fillChipGroup("act-drive-chips", DRIVE_PRESETS, function (v) {
-          return v + "분";
-        }, actModes.drive === "preset" ? d.driveMinutes : null, function (v) {
-          pickActPreset("drive", "driveMinutes", v, DRIVE_PRESETS);
+          return formatActHours(v) + "시간";
+        }, actModes.drive === "preset" ? d.driveHours : null, function (v) {
+          pickActPreset("drive", "driveHours", v, DRIVE_PRESETS);
         });
         fillKindChips("act-exercise-kind-chips", EXERCISE_KINDS, d.exerciseKind, function (kind) {
           activityDraft.exerciseKind = (activityDraft.exerciseKind === kind) ? "" : kind;
