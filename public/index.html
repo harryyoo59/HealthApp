@@ -2877,6 +2877,23 @@
       outline: 2px solid var(--accent);
       outline-offset: 2px;
     }
+    .records-contact {
+      margin-top: 14px;
+      padding-top: 12px;
+      border-top: 1px solid rgba(232, 242, 236, 0.08);
+    }
+    .records-contact .ops-section-title {
+      margin-bottom: 6px;
+    }
+    .records-contact-mail {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      margin-top: 8px;
+      text-decoration: none;
+      box-sizing: border-box;
+    }
   </style>
 </head>
 <body>
@@ -3263,7 +3280,7 @@
         <span data-i18n="records.title">내 기록 관리</span>
         <span class="ops-chevron" aria-hidden="true">▾</span>
       </button>
-      <p class="app-shell-version" id="app-shell-version" data-shell-version="20261005.3">이 화면 버전 20261005.3</p>
+      <p class="app-shell-version" id="app-shell-version" data-shell-version="20261005.4">이 화면 버전 20261005.4</p>
       <div class="ops-body" id="records-body" hidden>
         <div class="records-transfer" id="records-transfer" data-i18n-attr="aria-label:records.transferAria" aria-label="기록 저장·옮기기">
           <h3 class="ops-section-title" data-i18n="records.transferTitle">기록 저장·옮기기</h3>
@@ -3280,6 +3297,15 @@
           <button type="button" class="records-transfer-btn is-secondary" id="app-shell-refresh">최신으로 새로고침</button>
           <p class="records-transfer-lead">화면이 예전 그대로면 최신 화면만 다시 받습니다. 건강 기록은 지우지 않습니다.</p>
           <p class="records-transfer-status" id="app-shell-status" aria-live="polite"></p>
+        </div>
+        <div class="records-contact" id="records-contact" aria-label="운영자에게 메일 보내기">
+          <h3 class="ops-section-title">운영자에게 메일 보내기</h3>
+          <p class="records-transfer-lead">의견·오류·문의는 메일로 보내 주세요. 누르면 메일 앱이 열립니다.</p>
+          <a
+            class="records-transfer-btn records-contact-mail"
+            id="records-contact-mail"
+            href="mailto:harryyoo59@gmail.com?subject=%EC%95%8C%EA%B3%A0%20%EB%A8%B9%EB%8A%94%20%EB%82%B4%EB%AA%B8%20%EC%A7%80%ED%82%A4%EA%B8%B0%20%EB%AC%B8%EC%9D%98"
+          >harryyoo59@gmail.com</a>
         </div>
         <div class="records-consent-row">
           <a class="records-consent-link" href="/privacy/">데이터 저장 안내</a>
