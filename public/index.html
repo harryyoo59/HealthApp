@@ -2865,6 +2865,42 @@
       box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
       cursor: pointer;
     }
+    .data-protect-undo {
+      position: fixed;
+      left: 12px;
+      right: 12px;
+      bottom: calc(72px + env(safe-area-inset-bottom));
+      z-index: 85;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 0;
+      padding: 12px 14px;
+      border-radius: 12px;
+      border: 1px solid rgba(125, 206, 160, 0.45);
+      background: #163028;
+      color: #d8f0e2;
+      font-size: 13px;
+      font-weight: 650;
+      line-height: 1.4;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+    }
+    .data-protect-undo[hidden] { display: none; }
+    .data-protect-undo-msg {
+      flex: 1;
+      min-width: 0;
+    }
+    .data-protect-undo-btn {
+      flex: 0 0 auto;
+      border: 0;
+      border-radius: 999px;
+      padding: 8px 12px;
+      background: #3d9b6e;
+      color: #fff;
+      font-size: 13px;
+      font-weight: 800;
+      cursor: pointer;
+    }
     .ops-consent-row,
     .records-consent-row {
       margin-top: 10px;
@@ -3296,7 +3332,7 @@
         <span data-i18n="records.title">내 기록 관리</span>
         <span class="ops-chevron" aria-hidden="true">▾</span>
       </button>
-      <p class="app-shell-version" id="app-shell-version" data-shell-version="20261005.12">이 화면 버전 20261005.12</p>
+      <p class="app-shell-version" id="app-shell-version" data-shell-version="20261005.13">이 화면 버전 20261005.13</p>
       <div class="ops-body" id="records-body" hidden>
         <div class="records-transfer" id="records-transfer" data-i18n-attr="aria-label:records.transferAria" aria-label="기록 저장·옮기기">
           <h3 class="ops-section-title" data-i18n="records.transferTitle">기록 저장·옮기기</h3>
@@ -3305,6 +3341,7 @@
           <div class="records-transfer-actions">
             <button type="button" class="records-transfer-btn" id="records-export-btn" data-i18n="records.export">기록 저장 하기</button>
             <button type="button" class="records-transfer-btn is-secondary" id="records-import-btn" data-i18n="records.import">저장한 기록 가져오기</button>
+            <button type="button" class="records-transfer-btn is-secondary" id="records-restore-pre-import-btn" hidden>가져오기 직전으로 되돌리기</button>
           </div>
           <input type="file" id="records-import-file" accept="application/json,.json" hidden />
           <p class="records-transfer-status" id="records-transfer-status" aria-live="polite"></p>
@@ -3864,6 +3901,10 @@
 
   <p id="app-update-banner" class="storage-save-banner" role="status" hidden></p>
   <p id="storage-save-banner" class="storage-save-banner" role="alert" hidden></p>
+  <div id="data-protect-undo" class="data-protect-undo" role="status" aria-live="polite" hidden>
+    <span class="data-protect-undo-msg" id="data-protect-undo-msg"></span>
+    <button type="button" class="data-protect-undo-btn" id="data-protect-undo-btn">되돌리기</button>
+  </div>
   <script>
     (function () {
       var STORAGE_KEY = "healthapp.bodyBasics.v1";
@@ -3883,6 +3924,7 @@
       var CONSENT_KEY = "healthapp.legalNoticeConsent.v1";
       var CONSENT_VERSION = 4;
       var AUTO_BACKUP_KEY = "healthapp.autoBackup.v1";
+      var PRE_IMPORT_BACKUP_KEY = "healthapp.preImportBackup.v1";
       var BACKUP_DB_NAME = "healthappBackup";
       var BACKUP_STORE = "snapshots";
       var BACKUP_ID = "latest";
@@ -4599,14 +4641,11 @@
         return null;
       }
 
-      /** 아침 기본 메뉴 프리셋 교체 시: 아침 숨김만 비워 새 9개가 보이게 */
+      /** 기본 메뉴 프리셋 버전만 갱신. 유저가 뺀(숨긴) 목록은 절대 비우지 않음 — 새 칩은 숨김에 없으니 그대로 보임 */
       function applyBreakfastDefaultsVersionReset() {
         try {
           var cur = Number(localStorage.getItem(BREAKFAST_DEFAULTS_VERSION_KEY) || "0");
           if (cur >= BREAKFAST_DEFAULTS_VERSION) return false;
-          if (!suppressedDefaultByMeal) suppressedDefaultByMeal = emptySuppressedDefaultsByMeal();
-          suppressedDefaultByMeal.breakfast = {};
-          saveSuppressedDefaultsByMeal();
           persistSetItem(BREAKFAST_DEFAULTS_VERSION_KEY, String(BREAKFAST_DEFAULTS_VERSION));
           return true;
         } catch (e) {
@@ -4614,14 +4653,11 @@
         }
       }
 
-      /** 점심 기본 메뉴 프리셋 교체 시: 점심 숨김만 비워 새 목록이 보이게 */
+      /** 점심 기본 메뉴 프리셋 버전만 갱신. 점심 숨김·고정 메뉴는 보존 */
       function applyLunchDefaultsVersionReset() {
         try {
           var cur = Number(localStorage.getItem(LUNCH_DEFAULTS_VERSION_KEY) || "0");
           if (cur >= LUNCH_DEFAULTS_VERSION) return false;
-          if (!suppressedDefaultByMeal) suppressedDefaultByMeal = emptySuppressedDefaultsByMeal();
-          suppressedDefaultByMeal.lunch = {};
-          saveSuppressedDefaultsByMeal();
           persistSetItem(LUNCH_DEFAULTS_VERSION_KEY, String(LUNCH_DEFAULTS_VERSION));
           return true;
         } catch (e) {
@@ -4629,14 +4665,11 @@
         }
       }
 
-      /** 저녁 기본 메뉴 프리셋 교체 시: 저녁 숨김만 비워 새 목록이 보이게 */
+      /** 저녁 기본 메뉴 프리셋 버전만 갱신. 저녁 숨김·고정 메뉴는 보존 */
       function applyDinnerDefaultsVersionReset() {
         try {
           var cur = Number(localStorage.getItem(DINNER_DEFAULTS_VERSION_KEY) || "0");
           if (cur >= DINNER_DEFAULTS_VERSION) return false;
-          if (!suppressedDefaultByMeal) suppressedDefaultByMeal = emptySuppressedDefaultsByMeal();
-          suppressedDefaultByMeal.dinner = {};
-          saveSuppressedDefaultsByMeal();
           persistSetItem(DINNER_DEFAULTS_VERSION_KEY, String(DINNER_DEFAULTS_VERSION));
           return true;
         } catch (e) {
@@ -4644,17 +4677,11 @@
         }
       }
 
-      /** 간식 → 야식·음료·주류·간식/디저트 분리 시 숨김 초기화 */
+      /** 간식 분리 버전만 갱신. 야식·음료·주류·디저트 숨김은 비우지 않음 */
       function applySnackSplitDefaultsVersionReset() {
         try {
           var cur = Number(localStorage.getItem(SNACK_SPLIT_VERSION_KEY) || "0");
           if (cur >= SNACK_SPLIT_VERSION) return false;
-          if (!suppressedDefaultByMeal) suppressedDefaultByMeal = emptySuppressedDefaultsByMeal();
-          suppressedDefaultByMeal.lateNight = {};
-          suppressedDefaultByMeal.drink = {};
-          suppressedDefaultByMeal.alcohol = {};
-          suppressedDefaultByMeal.dessert = {};
-          saveSuppressedDefaultsByMeal();
           persistSetItem(SNACK_SPLIT_VERSION_KEY, String(SNACK_SPLIT_VERSION));
           persistSetItem(LATE_NIGHT_DEFAULTS_VERSION_KEY, String(LATE_NIGHT_DEFAULTS_VERSION));
           persistSetItem(DRINK_DEFAULTS_VERSION_KEY, String(DRINK_DEFAULTS_VERSION));
@@ -4869,6 +4896,87 @@
         return changed;
       }
 
+      function confirmDangerTwice(firstMsg, secondMsg) {
+        if (!window.confirm(firstMsg)) return false;
+        if (!window.confirm(secondMsg)) return false;
+        return true;
+      }
+
+      var dataProtectUndo = null;
+      var dataProtectUndoTimer = null;
+
+      function hideDataProtectUndo() {
+        if (dataProtectUndoTimer) {
+          clearTimeout(dataProtectUndoTimer);
+          dataProtectUndoTimer = null;
+        }
+        dataProtectUndo = null;
+        var bar = document.getElementById("data-protect-undo");
+        if (bar) bar.hidden = true;
+      }
+
+      function restoreFixedMenuItemExact(mealKey, chip) {
+        if (!isMealKey(mealKey) || !chip || !chip.id || !chip.label) return false;
+        var list = getFixedMenuList(mealKey);
+        if (findFixedMenuById(mealKey, chip.id) || findFixedMenuByLabel(mealKey, chip.label)) {
+          return true;
+        }
+        var item = normalizeFixedMenuItem({
+          id: chip.id,
+          label: chip.label,
+          kcal: chip.kcal
+        });
+        if (!item) return false;
+        if (list.length >= 40) list.shift();
+        list.push(item);
+        setFixedMenuList(mealKey, list);
+        rebuildMealChipIndexes();
+        saveFixedMenu();
+        rememberChipLabel(item);
+        return true;
+      }
+
+      function applyDataProtectUndo() {
+        var action = dataProtectUndo;
+        hideDataProtectUndo();
+        if (!action) return;
+        if (action.kind === "fixed") {
+          if (restoreFixedMenuItemExact(action.mealKey, action.chip)) {
+            paintAllMealFoodChips();
+            mealsDraftTotal();
+          }
+          return;
+        }
+        if (action.kind === "suppress") {
+          if (unsuppressDefaultFoodChip(action.chipId, action.mealKey)) {
+            paintAllMealFoodChips();
+            mealsDraftTotal();
+          }
+        }
+      }
+
+      function offerDataProtectUndo(action) {
+        hideDataProtectUndo();
+        dataProtectUndo = action || null;
+        var bar = document.getElementById("data-protect-undo");
+        var msg = document.getElementById("data-protect-undo-msg");
+        if (!bar || !msg || !dataProtectUndo) return;
+        msg.textContent = String(dataProtectUndo.message || "방금 변경을 되돌릴 수 있습니다.");
+        bar.hidden = false;
+        dataProtectUndoTimer = setTimeout(function () {
+          hideDataProtectUndo();
+        }, 12000);
+      }
+
+      function setupDataProtectUndo() {
+        var btn = document.getElementById("data-protect-undo-btn");
+        if (!btn || btn.getAttribute("data-bound") === "1") return;
+        btn.setAttribute("data-bound", "1");
+        btn.addEventListener("click", function () {
+          applyDataProtectUndo();
+        });
+      }
+
       function removeFixedMenuItem(id, opts) {
         opts = opts || {};
         var mealKey = opts.mealKey;
@@ -4880,9 +4988,17 @@
         }
         if (!item) return false;
         if (!opts.skipConfirm) {
-          var ok = window.confirm("「" + item.label + "」 빼할까요?");
+          var ok = confirmDangerTwice(
+            "「" + item.label + "」을(를) 이 끼니 목록에서 빼면, 다시 직접 적기 전까지 안 보입니다. 빼할까요?",
+            "한 번 더 확인: 정말 「" + item.label + "」을(를) 목록에서 뺄까요?"
+          );
           if (!ok) return false;
         }
+        var removedCopy = {
+          id: item.id,
+          label: item.label,
+          kcal: item.kcal
+        };
         setFixedMenuList(mealKey, list.filter(function (x) { return x.id !== id; }));
         var slot = mealDraft[mealKey] || emptyMealSlotDraft();
         slot.chips = (slot.chips || []).filter(function (cid) { return cid !== id; });
@@ -4891,6 +5007,12 @@
         saveFixedMenu();
         paintAllMealFoodChips();
         mealsDraftTotal();
+        offerDataProtectUndo({
+          kind: "fixed",
+          mealKey: mealKey,
+          chip: removedCopy,
+          message: "「" + removedCopy.label + "」을(를) 목록에서 뺐습니다."
+        });
         return true;
       }
 
@@ -4936,7 +5058,10 @@
         if (!chip) return false;
         if (isDefaultChipSuppressed(chipId, mealKey)) return false;
         if (!opts.skipConfirm) {
-          var ok = window.confirm("「" + chip.label + "」 이 끼니에서만 빼할까요?");
+          var ok = confirmDangerTwice(
+            "「" + chip.label + "」을(를) 이 끼니 기본 목록에서만 숨깁니다. 다른 끼니는 그대로입니다. 숨길까요?",
+            "한 번 더 확인: 정말 「" + chip.label + "」을(를) 이 끼니에서 숨길까요?"
+          );
           if (!ok) return false;
         }
         if (!suppressedDefaultByMeal[mealKey]) suppressedDefaultByMeal[mealKey] = {};
@@ -4947,6 +5072,13 @@
         saveSuppressedDefaultsByMeal();
         paintAllMealFoodChips();
         mealsDraftTotal();
+        offerDataProtectUndo({
+          kind: "suppress",
+          mealKey: mealKey,
+          chipId: chipId,
+          label: chip.label,
+          message: "「" + chip.label + "」을(를) 이 끼니에서 숨겼습니다."
+        });
         return true;
       }
 
@@ -6257,6 +6389,7 @@
       /** 가져오기 때 파일에 없어도 남겨 두는 키. 기록과 섞이지 않고, 지우면 동의·비밀번호·메뉴 버전이 풀린다. */
       function importKeepKey(name) {
         return name === CONSENT_KEY ||
+          name === PRE_IMPORT_BACKUP_KEY ||
           name === BREAKFAST_DEFAULTS_VERSION_KEY ||
           name === LUNCH_DEFAULTS_VERSION_KEY ||
           name === DINNER_DEFAULTS_VERSION_KEY ||
@@ -6415,6 +6548,62 @@
             keys: row.keys
           });
         }).catch(function () { return false; });
+      }
+
+      function stashPreImportBackup() {
+        try {
+          var snap = collectPersistSnapshot();
+          if (!snapshotLooksUseful(snap)) return false;
+          return persistSetItem(PRE_IMPORT_BACKUP_KEY, JSON.stringify(snap));
+        } catch (e) {
+          return false;
+        }
+      }
+
+      function readPreImportBackup() {
+        try {
+          var raw = localStorage.getItem(PRE_IMPORT_BACKUP_KEY);
+          if (!raw) return null;
+          return JSON.parse(raw);
+        } catch (e) {
+          return null;
+        }
+      }
+
+      function hasPreImportBackup() {
+        return snapshotLooksUseful(readPreImportBackup());
+      }
+
+      function refreshPreImportRestoreButton() {
+        var btn = document.getElementById("records-restore-pre-import-btn");
+        if (!btn) return;
+        btn.hidden = !hasPreImportBackup();
+      }
+
+      function restorePreImportBackupManual() {
+        var snap = readPreImportBackup();
+        if (!snapshotLooksUseful(snap)) {
+          setTransferStatus("가져오기 직전 백업이 없습니다.", true);
+          refreshPreImportRestoreButton();
+          return;
+        }
+        var ok = confirmDangerTwice(
+          "가져오기 직전 상태로 지금 기록을 되돌립니다. 지금 화면 내용은 그 직전 백업으로 바뀝니다. 계속할까요?",
+          "한 번 더 확인: 정말 가져오기 직전으로 되돌릴까요?"
+        );
+        if (!ok) {
+          setTransferStatus("가져오기 직전 되돌리기를 취소했습니다.");
+          return;
+        }
+        if (!applyPersistSnapshot(snap, { replace: true })) {
+          setTransferStatus("가져오기 직전 되돌리기에 실패했습니다.", true);
+          return;
+        }
+        writeBackupNow();
+        setTransferStatus("가져오기 직전으로 되돌렸습니다. 화면을 다시 불러옵니다…");
+        setTimeout(function () {
+          window.location.reload();
+        }, 400);
       }
 
       function loadDayMeta() {
@@ -11187,18 +11376,22 @@
               setTransferStatus("이 파일에서는 건강 기록을 찾지 못했습니다. 다른 파일을 골라 주세요.", true);
               return;
             }
-            var ok = window.confirm(
-              "저장한 기록을 가져오면 지금 이 폰의 기록이 파일 내용으로 바뀝니다. 계속할까요?"
+            var ok = confirmDangerTwice(
+              "저장한 기록을 가져오면 지금 이 폰의 기록이 파일 내용으로 바뀝니다. 가져오기 직전 상태는 따로 남겨 두어 되돌릴 수 있습니다. 계속할까요?",
+              "한 번 더 확인: 정말 지금 기록을 파일 내용으로 바꿀까요?"
             );
             if (!ok) {
               setTransferStatus("저장한 기록 가져오기를 취소했습니다.");
               return;
             }
+            stashPreImportBackup();
             if (!applyPersistSnapshot(snap, { replace: true })) {
               setTransferStatus("저장한 기록 가져오기에 실패했습니다. 다시 시도해 주세요.", true);
+              refreshPreImportRestoreButton();
               return;
             }
             writeBackupNow();
+            refreshPreImportRestoreButton();
             setTransferStatus("저장한 기록을 가져왔습니다. 화면을 다시 불러옵니다…");
             setTimeout(function () {
               window.location.reload();
@@ -11217,6 +11410,7 @@
         var exportBtn = document.getElementById("records-export-btn");
         var importBtn = document.getElementById("records-import-btn");
         var fileInput = document.getElementById("records-import-file");
+        var restoreBtn = document.getElementById("records-restore-pre-import-btn");
         if (exportBtn) {
           exportBtn.addEventListener("click", function () {
             exportPersistFile();
@@ -11232,6 +11426,12 @@
             if (file) importPersistFile(file);
           });
         }
+        if (restoreBtn) {
+          restoreBtn.addEventListener("click", function () {
+            restorePreImportBackupManual();
+          });
+        }
+        refreshPreImportRestoreButton();
       }
 
       function setupAppShellControls() {
@@ -12057,6 +12257,7 @@
       saveSuppressedDefaultsByMeal();
       rebuildMealChipIndexes();
       setupFixedMenuControls();
+      setupDataProtectUndo();
       chipLabelCache = loadChipLabelCache();
       MEAL_FOOD_CHIPS.forEach(function (chip) { rememberChipLabel(chip, { skipSave: true }); });
       forEachFixedMenuChip(function (chip) { rememberChipLabel(chip, { skipSave: true }); });
