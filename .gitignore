@@ -9,3 +9,4 @@
 *.pem
 *.key
 credentials.json
+node_modules/
