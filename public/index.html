@@ -1457,10 +1457,27 @@
       gap: 6px;
     }
     .meals-field > label {
-      margin: 0;
-      color: var(--muted);
+      display: flex;
+      align-items: baseline;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 2px 0 4px;
+      color: var(--ink);
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1.2;
+    }
+    .meals-field > label > span[data-i18n] {
+      color: var(--ink);
+      font-size: inherit;
+      font-weight: inherit;
+    }
+    .meals-field-kcal {
+      color: var(--accent);
       font-size: 13px;
-      font-weight: 600;
+      font-weight: 650;
+      letter-spacing: 0;
     }
     .meals-chip-hint {
       margin: 0;
@@ -1643,11 +1660,6 @@
       font-size: 16px;
       font-weight: 700;
       white-space: nowrap;
-    }
-    .meals-field-kcal {
-      color: var(--accent);
-      font-size: 11px;
-      font-weight: 600;
     }
     .activity-box {
       margin-top: 14px;
@@ -3280,7 +3292,7 @@
         <span data-i18n="records.title">내 기록 관리</span>
         <span class="ops-chevron" aria-hidden="true">▾</span>
       </button>
-      <p class="app-shell-version" id="app-shell-version" data-shell-version="20261005.8">이 화면 버전 20261005.8</p>
+      <p class="app-shell-version" id="app-shell-version" data-shell-version="20261005.9">이 화면 버전 20261005.9</p>
       <div class="ops-body" id="records-body" hidden>
         <div class="records-transfer" id="records-transfer" data-i18n-attr="aria-label:records.transferAria" aria-label="기록 저장·옮기기">
           <h3 class="ops-section-title" data-i18n="records.transferTitle">기록 저장·옮기기</h3>
@@ -4231,7 +4243,7 @@
         MEAL_FOOD_CHIP_BY_LABEL[chip.label] = chip;
       });
 
-      /** 끼니별 고정 메뉴 (아침/점심/저녁/간식 독립) */
+      /** 끼니별 고정 메뉴 (아침/점심/저녁/야식·음료·주류·간식/디저트 독립) */
       var fixedMenus = emptyFixedMenus();
       /** 끼니별 기본 메뉴 숨김: { breakfast:{id:true}, ... } */
       var suppressedDefaultByMeal = emptySuppressedDefaultsByMeal();
