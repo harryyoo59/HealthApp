@@ -3280,7 +3280,7 @@
         <span data-i18n="records.title">내 기록 관리</span>
         <span class="ops-chevron" aria-hidden="true">▾</span>
       </button>
-      <p class="app-shell-version" id="app-shell-version" data-shell-version="20261005.6">이 화면 버전 20261005.6</p>
+      <p class="app-shell-version" id="app-shell-version" data-shell-version="20261005.7">이 화면 버전 20261005.7</p>
       <div class="ops-body" id="records-body" hidden>
         <div class="records-transfer" id="records-transfer" data-i18n-attr="aria-label:records.transferAria" aria-label="기록 저장·옮기기">
           <h3 class="ops-section-title" data-i18n="records.transferTitle">기록 저장·옮기기</h3>
@@ -4015,7 +4015,8 @@
         { id: "treat", label: "군것질", kcal: 220 },
         { id: "fish-and-chips", label: "피시앤 칩스", kcal: 780 },
         { id: "steak-and-chips", label: "스테이크앤 칩스", kcal: 850 },
-        { id: "chicken-and-chips", label: "치킨앤 칩스", kcal: 820 }
+        { id: "chicken-and-chips", label: "치킨앤 칩스", kcal: 820 },
+        { id: "mixed-grain-bowl", label: "잡곡 1공기", kcal: 320 }
       ];
       /** 아침 기본 메뉴 (Harry 지정 9개). */
       var BREAKFAST_FOOD_CHIPS = [
@@ -4049,9 +4050,22 @@
         { id: "pasta", label: "파스타", kcal: 580 },
         { id: "pizza", label: "피자", kcal: 550 }
       ];
-      /** 저녁 기본 메뉴 (Harry 지정 6개). */
+      /** 저녁 기본 메뉴 (Harry 지정 19개 — 한국 저녁 + 기존 일부). */
       var DINNER_FOOD_CHIPS = [
-        { id: "mixed-grain-bowl", label: "잡곡 1공기", kcal: 320 },
+        { id: "samgyeopsal", label: "삼겹살", kcal: 850 },
+        { id: "fried-chicken", label: "치킨", kcal: 900 },
+        { id: "dwaeji-gukbap", label: "돼지국밥", kcal: 650 },
+        { id: "seolleongtang", label: "설렁탕", kcal: 550 },
+        { id: "bossam", label: "보쌈", kcal: 780 },
+        { id: "bulgogi", label: "불고기", kcal: 620 },
+        { id: "grilled-fish-set", label: "생선구이 정식", kcal: 550 },
+        { id: "doenjang-baekban", label: "된장찌개 백반", kcal: 580 },
+        { id: "kimchi-baekban", label: "김치찌개 백반", kcal: 600 },
+        { id: "ramen", label: "라면", kcal: 500 },
+        { id: "pizza-chicken-mu", label: "치킨무 포함 피자", kcal: 900 },
+        { id: "jokbal", label: "족발", kcal: 800 },
+        { id: "shabu-shabu", label: "샤브샤브", kcal: 700 },
+        { id: "sushi-sashimi", label: "초밥·회", kcal: 650 },
         { id: "yukgaejang", label: "육개장", kcal: 380 },
         { id: "galbitang", label: "갈비탕", kcal: 580 },
         { id: "maeuntang", label: "매운탕", kcal: 480 },
@@ -4083,7 +4097,7 @@
       var LUNCH_DEFAULTS_VERSION_KEY = "healthapp.lunchDefaultsVersion.v1";
       var LUNCH_DEFAULTS_VERSION = 2;
       var DINNER_DEFAULTS_VERSION_KEY = "healthapp.dinnerDefaultsVersion.v1";
-      var DINNER_DEFAULTS_VERSION = 1;
+      var DINNER_DEFAULTS_VERSION = 2;
       var SNACK_DEFAULTS_VERSION_KEY = "healthapp.snackDefaultsVersion.v1";
       var SNACK_DEFAULTS_VERSION = 1;
 
@@ -4495,7 +4509,7 @@
         }
       }
 
-      /** 저녁 기본 메뉴 프리셋 교체 시: 저녁 숨김만 비워 새 6개가 보이게 */
+      /** 저녁 기본 메뉴 프리셋 교체 시: 저녁 숨김만 비워 새 목록이 보이게 */
       function applyDinnerDefaultsVersionReset() {
         try {
           var cur = Number(localStorage.getItem(DINNER_DEFAULTS_VERSION_KEY) || "0");
