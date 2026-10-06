@@ -2585,6 +2585,117 @@
       outline: 2px solid var(--accent);
       outline-offset: 1px;
     }
+    .labs-block {
+      gap: 8px;
+    }
+    .labs-block-title {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 600;
+    }
+    .labs-hint {
+      margin: 0;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+    .labs-group {
+      margin: 8px 0 0;
+      color: var(--ink);
+      font-size: 13px;
+      font-weight: 700;
+    }
+    .lab-fields {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .lab-row {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+    .lab-row-label {
+      margin: 0;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 600;
+      line-height: 1.35;
+    }
+    .lab-row-alias {
+      color: rgba(155, 181, 168, 0.85);
+      font-weight: 500;
+    }
+    .lab-input,
+    .lab-row input {
+      width: 100%;
+      border-radius: 10px;
+      border: 1px solid var(--line);
+      background: var(--key);
+      color: var(--ink);
+      font: inherit;
+      font-size: 14px;
+      line-height: 1.4;
+      padding: 10px 12px;
+    }
+    .lab-input:focus,
+    .lab-row input:focus,
+    #labs-memo:focus {
+      outline: 2px solid var(--accent);
+      outline-offset: 1px;
+    }
+    .lab-history {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .lab-history-empty {
+      margin: 0;
+      color: var(--muted);
+      font-size: 12px;
+    }
+    .lab-history-item {
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 10px 12px;
+      background: rgba(26, 58, 48, 0.55);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .lab-history-meta {
+      margin: 0;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--ink);
+    }
+    .lab-history-sum {
+      margin: 0;
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.4;
+    }
+    .lab-history-actions {
+      display: flex;
+      gap: 8px;
+    }
+    .lab-history-actions button {
+      appearance: none;
+      flex: 1;
+      border-radius: 8px;
+      border: 1px solid var(--line);
+      background: var(--key);
+      color: var(--ink);
+      font: inherit;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 8px 6px;
+      cursor: pointer;
+    }
+    .lab-history-actions button.is-danger {
+      color: #f0c4c0;
+    }
     .sheet-actions {
       display: grid;
       grid-template-columns: 1fr 1.4fr;
@@ -3396,7 +3507,7 @@
         <span data-i18n="records.title">내 기록 관리</span>
         <span class="ops-chevron" aria-hidden="true">▾</span>
       </button>
-      <p class="app-shell-version" id="app-shell-version" data-shell-version="20261006.2">이 화면 버전 20261006.2</p>
+      <p class="app-shell-version" id="app-shell-version" data-shell-version="20261006.3">이 화면 버전 20261006.3</p>
       <div class="ops-body" id="records-body" hidden>
         <div class="records-transfer" id="records-transfer" data-i18n-attr="aria-label:records.transferAria" aria-label="기록 저장·옮기기">
           <h3 class="ops-section-title" data-i18n="records.transferTitle">기록 저장·옮기기</h3>
@@ -3651,9 +3762,22 @@
           <label for="meds-supp">건강식품</label>
           <textarea id="meds-supp" rows="2" placeholder="예: 오메가3, 유산균, 비타민"></textarea>
         </div>
-        <div class="meds-field">
-          <label for="meds-labs">검사기록</label>
-          <textarea id="meds-labs" rows="2" placeholder="예: 2026-03 건강검진"></textarea>
+        <div class="meds-field labs-block" id="labs-block">
+          <p class="labs-block-title" id="labs-block-title">검사기록</p>
+          <p class="labs-hint">결과표에서 같은 이름을 찾아 숫자만 넣으세요. 없으면 비워 두세요.</p>
+          <label for="lab-date">검사일</label>
+          <input type="date" class="lab-input" id="lab-date" />
+          <p class="labs-group">혈액</p>
+          <div class="lab-fields" id="lab-fields-blood"></div>
+          <p class="labs-group">소변</p>
+          <div class="lab-fields" id="lab-fields-urine"></div>
+          <label for="lab-note">이번 검사 메모 (선택)</label>
+          <input type="text" class="lab-input" id="lab-note" maxlength="120" placeholder="예: 공복 검사" autocomplete="off" />
+          <p class="labs-group">저장된 검사</p>
+          <div class="lab-history" id="lab-history" aria-live="polite"></div>
+          <label for="labs-memo">기타·예전 기록 (선택)</label>
+          <textarea id="labs-memo" rows="2" placeholder="목록에 없는 수치·예전 메모"></textarea>
+          <textarea id="meds-labs" hidden aria-hidden="true" tabindex="-1"></textarea>
         </div>
         <div class="meds-field">
           <label for="meds-surgery">수술 이력</label>
@@ -4017,7 +4141,7 @@
         },
         meds: {
           title: "처방및 병명",
-          help: "처방약·진단 병명·일반약·건강식품·검사기록·수술 이력·완치된 병명을 적어 주세요."
+          help: "처방약·진단·일반약·건강식품과 함께, 검사표 주요 수치는 아래 칸에 숫자만 넣어 주세요."
         },
         "meals-yesterday": {
           title: "어제 먹은 음식",
@@ -4153,6 +4277,23 @@
         surgery: "수술 이력",
         cured: "완치된 병명"
       };
+      var LAB_PANEL_FIELDS = [
+        { id: "fastingGlucose", group: "blood", label: "공복혈당", alias: "Glucose, FBS", placeholder: "예: 98" },
+        { id: "hba1c", group: "blood", label: "당화혈색소", alias: "HbA1c", placeholder: "예: 5.6" },
+        { id: "totalChol", group: "blood", label: "총콜레스테롤", alias: "Total Cholesterol, TC", placeholder: "예: 200" },
+        { id: "hdl", group: "blood", label: "HDL", alias: "HDL-C", placeholder: "예: 55" },
+        { id: "ldl", group: "blood", label: "LDL", alias: "LDL-C", placeholder: "예: 120" },
+        { id: "tg", group: "blood", label: "중성지방", alias: "Triglyceride, TG", placeholder: "예: 140" },
+        { id: "ast", group: "blood", label: "AST", alias: "GOT, AST", placeholder: "예: 25" },
+        { id: "alt", group: "blood", label: "ALT", alias: "GPT, ALT", placeholder: "예: 28" },
+        { id: "creatinine", group: "blood", label: "크레아티닌", alias: "Creatinine", placeholder: "예: 0.9" },
+        { id: "egfr", group: "blood", label: "eGFR", alias: "GFR, eGFR", placeholder: "예: 85" },
+        { id: "uricAcid", group: "blood", label: "요산", alias: "Uric acid", placeholder: "예: 5.5" },
+        { id: "hemoglobin", group: "blood", label: "혈색소", alias: "Hemoglobin, Hb", placeholder: "예: 14.2" },
+        { id: "urineProtein", group: "urine", label: "단백", alias: "Protein, Albumin", placeholder: "예: (-) / ± / (+)" },
+        { id: "urineBlood", group: "urine", label: "잠혈", alias: "Occult blood, OB", placeholder: "예: (-)" },
+        { id: "urineGlucose", group: "urine", label: "당", alias: "Glucose", placeholder: "예: (-)" }
+      ];
       var MEAL_FIELDS = {
         breakfast: {
           title: "아침",
@@ -5281,7 +5422,8 @@
 
       var state = {
         sex: "", age: "", height: "", weight: "", bp: "",
-        rx: "", dx: "", otc: "", supp: "", labs: "", surgery: "", cured: "",
+        rx: "", dx: "", otc: "", supp: "", labs: "", labsMemo: "", labPanels: [],
+        surgery: "", cured: "",
         questionnaire: null
       };
       var dailyLog = {};
@@ -5339,6 +5481,14 @@
         surgery: document.getElementById("meds-surgery"),
         cured: document.getElementById("meds-cured")
       };
+      var labDateEl = document.getElementById("lab-date");
+      var labNoteEl = document.getElementById("lab-note");
+      var labsMemoEl = document.getElementById("labs-memo");
+      var labHistoryEl = document.getElementById("lab-history");
+      var labFieldsBloodEl = document.getElementById("lab-fields-blood");
+      var labFieldsUrineEl = document.getElementById("lab-fields-urine");
+      var labFormEditIndex = -1;
+      var labFieldInputMap = {};
       var profileDraft = {
         sex: "",
         age: null,
@@ -5988,7 +6138,8 @@
           vitals: { weight: "", bp: "", at: 0 },
           bodyBasics: {
             sex: "", age: "", height: "", weight: "", bp: "",
-            rx: "", dx: "", otc: "", supp: "", labs: "", surgery: "", cured: "",
+            rx: "", dx: "", otc: "", supp: "", labs: "", labsMemo: "", labPanels: [],
+            surgery: "", cured: "",
             questionnaire: emptyQuestionnaire()
           }
         };
@@ -6198,13 +6349,219 @@
         return n;
       }
 
+      function emptyLabPanel() {
+        var values = {};
+        LAB_PANEL_FIELDS.forEach(function (f) { values[f.id] = ""; });
+        return { date: "", values: values, note: "" };
+      }
+
+      function normalizeLabPanel(raw) {
+        var base = emptyLabPanel();
+        if (!raw || typeof raw !== "object") return base;
+        base.date = String(raw.date || "").trim();
+        base.note = String(raw.note || "").trim();
+        var src = raw.values && typeof raw.values === "object" ? raw.values : raw;
+        LAB_PANEL_FIELDS.forEach(function (f) {
+          base.values[f.id] = String(src[f.id] || "").trim();
+        });
+        return base;
+      }
+
+      function normalizeLabPanels(raw) {
+        if (!Array.isArray(raw)) return [];
+        return raw.map(normalizeLabPanel).filter(function (p) {
+          return labPanelHasBits(p);
+        });
+      }
+
+      function labPanelHasBits(panel) {
+        panel = normalizeLabPanel(panel);
+        if (panel.date || panel.note) return true;
+        return LAB_PANEL_FIELDS.some(function (f) {
+          return !!panel.values[f.id];
+        });
+      }
+
+      function labPanelsHasBits(list) {
+        return normalizeLabPanels(list).length > 0;
+      }
+
+      function formatLabPanelLine(panel) {
+        panel = normalizeLabPanel(panel);
+        var bits = [];
+        LAB_PANEL_FIELDS.forEach(function (f) {
+          var v = panel.values[f.id];
+          if (v) bits.push(f.label + " " + v);
+        });
+        if (panel.note) bits.push(panel.note);
+        var head = panel.date || "날짜 없음";
+        return bits.length ? (head + " · " + bits.join(", ")) : head;
+      }
+
+      function formatLabPanelsAsText(panels, memo) {
+        var lines = normalizeLabPanels(panels).map(formatLabPanelLine);
+        var m = String(memo || "").trim();
+        if (m) lines.push(m);
+        return lines.join("\n");
+      }
+
+      function syncLabsTextFromState() {
+        state.labPanels = normalizeLabPanels(state.labPanels);
+        state.labsMemo = String(state.labsMemo || "").trim();
+        state.labs = formatLabPanelsAsText(state.labPanels, state.labsMemo);
+        if (medsEls.labs) medsEls.labs.value = state.labs;
+      }
+
+      function buildLabFieldInputs() {
+        if (!labFieldsBloodEl || !labFieldsUrineEl) return;
+        labFieldsBloodEl.innerHTML = "";
+        labFieldsUrineEl.innerHTML = "";
+        labFieldInputMap = {};
+        LAB_PANEL_FIELDS.forEach(function (f) {
+          var row = document.createElement("div");
+          row.className = "lab-row";
+          var label = document.createElement("label");
+          label.className = "lab-row-label";
+          label.setAttribute("for", "lab-field-" + f.id);
+          label.innerHTML = f.label + ' <span class="lab-row-alias">(' + f.alias + ")</span>";
+          var input = document.createElement("input");
+          input.type = "text";
+          input.id = "lab-field-" + f.id;
+          input.setAttribute("inputmode", "decimal");
+          input.setAttribute("autocomplete", "off");
+          input.setAttribute("maxlength", "24");
+          input.placeholder = f.placeholder || "";
+          row.appendChild(label);
+          row.appendChild(input);
+          (f.group === "urine" ? labFieldsUrineEl : labFieldsBloodEl).appendChild(row);
+          labFieldInputMap[f.id] = input;
+        });
+      }
+
+      function clearLabFormInputs() {
+        labFormEditIndex = -1;
+        if (labDateEl) labDateEl.value = "";
+        if (labNoteEl) labNoteEl.value = "";
+        Object.keys(labFieldInputMap).forEach(function (id) {
+          labFieldInputMap[id].value = "";
+        });
+      }
+
+      function writeLabForm(panel) {
+        panel = normalizeLabPanel(panel);
+        if (labDateEl) labDateEl.value = panel.date || "";
+        if (labNoteEl) labNoteEl.value = panel.note || "";
+        LAB_PANEL_FIELDS.forEach(function (f) {
+          if (labFieldInputMap[f.id]) labFieldInputMap[f.id].value = panel.values[f.id] || "";
+        });
+      }
+
+      function readLabForm() {
+        var panel = emptyLabPanel();
+        panel.date = labDateEl ? String(labDateEl.value || "").trim() : "";
+        panel.note = labNoteEl ? String(labNoteEl.value || "").trim() : "";
+        LAB_PANEL_FIELDS.forEach(function (f) {
+          panel.values[f.id] = labFieldInputMap[f.id]
+            ? String(labFieldInputMap[f.id].value || "").trim()
+            : "";
+        });
+        return panel;
+      }
+
+      function paintLabHistory() {
+        if (!labHistoryEl) return;
+        labHistoryEl.innerHTML = "";
+        var list = normalizeLabPanels(state.labPanels);
+        if (!list.length) {
+          var empty = document.createElement("p");
+          empty.className = "lab-history-empty";
+          empty.textContent = "아직 저장된 검사가 없습니다. 위에서 넣고 저장하면 여기에 쌓입니다.";
+          labHistoryEl.appendChild(empty);
+          return;
+        }
+        list.forEach(function (panel, idx) {
+          var item = document.createElement("div");
+          item.className = "lab-history-item";
+          var meta = document.createElement("p");
+          meta.className = "lab-history-meta";
+          meta.textContent = panel.date || "날짜 없음";
+          var sum = document.createElement("p");
+          sum.className = "lab-history-sum";
+          sum.textContent = formatLabPanelLine(panel);
+          var actions = document.createElement("div");
+          actions.className = "lab-history-actions";
+          var loadBtn = document.createElement("button");
+          loadBtn.type = "button";
+          loadBtn.textContent = "불러오기";
+          loadBtn.addEventListener("click", function () {
+            labFormEditIndex = idx;
+            writeLabForm(panel);
+            if (labDateEl) labDateEl.focus();
+          });
+          var delBtn = document.createElement("button");
+          delBtn.type = "button";
+          delBtn.className = "is-danger";
+          delBtn.textContent = "삭제";
+          delBtn.addEventListener("click", function () {
+            var ok = confirmDangerTwice(
+              "이 검사 기록을 목록에서 뺄까요?",
+              "한 번 더 확인합니다. 이 검사 기록을 삭제할까요?"
+            );
+            if (!ok) return;
+            state.labPanels = normalizeLabPanels(state.labPanels);
+            state.labPanels.splice(idx, 1);
+            if (labFormEditIndex === idx) clearLabFormInputs();
+            else if (labFormEditIndex > idx) labFormEditIndex -= 1;
+            syncLabsTextFromState();
+            paintLabHistory();
+          });
+          actions.appendChild(loadBtn);
+          actions.appendChild(delBtn);
+          item.appendChild(meta);
+          item.appendChild(sum);
+          item.appendChild(actions);
+          labHistoryEl.appendChild(item);
+        });
+      }
+
+      function upsertLabPanelFromForm() {
+        var panel = readLabForm();
+        if (!labPanelHasBits(panel)) return;
+        if (!panel.date) panel.date = getTodayKey();
+        state.labPanels = normalizeLabPanels(state.labPanels);
+        var found = -1;
+        if (labFormEditIndex >= 0 && labFormEditIndex < state.labPanels.length) {
+          found = labFormEditIndex;
+        } else {
+          for (var i = 0; i < state.labPanels.length; i++) {
+            if (state.labPanels[i].date === panel.date) {
+              found = i;
+              break;
+            }
+          }
+        }
+        if (found >= 0) state.labPanels[found] = panel;
+        else state.labPanels.unshift(panel);
+        state.labPanels.sort(function (a, b) {
+          return String(b.date || "").localeCompare(String(a.date || ""));
+        });
+        labFormEditIndex = -1;
+      }
+
       function normalizeBodyBasics(raw) {
         raw = raw || {};
         var ageNum = parseNumberLoose(raw.age);
         var heightNum = parseNumberLoose(raw.height);
         var weightNum = parseNumberLoose(raw.weight);
         var bp = parseBpParts(raw.bp);
-        return {
+        var labPanels = normalizeLabPanels(raw.labPanels);
+        var labsMemo = String(raw.labsMemo || "").trim();
+        var labs = String(raw.labs || "").trim();
+        if (!labPanels.length && labs && !labsMemo) {
+          labsMemo = labs;
+          labs = "";
+        }
+        var out = {
           sex: normalizeSex(raw.sex),
           age: ageNum == null ? String(raw.age || "").trim() : String(Math.round(ageNum)),
           height: heightNum == null ? String(raw.height || "").trim() : formatStepperValue("height", heightNum),
@@ -6214,11 +6571,15 @@
           dx: String(raw.dx || ""),
           otc: String(raw.otc || ""),
           supp: String(raw.supp || ""),
-          labs: String(raw.labs || ""),
+          labs: "",
+          labsMemo: labsMemo,
+          labPanels: labPanels,
           surgery: String(raw.surgery || ""),
           cured: String(raw.cured || ""),
           questionnaire: normalizeQuestionnaire(raw.questionnaire)
         };
+        out.labs = formatLabPanelsAsText(out.labPanels, out.labsMemo) || labs;
+        return out;
       }
 
       function snapshotBodyBasics() {
@@ -6919,6 +7280,8 @@
           String(bb.otc || "").trim() ||
           String(bb.supp || "").trim() ||
           String(bb.labs || "").trim() ||
+          String(bb.labsMemo || "").trim() ||
+          labPanelsHasBits(bb.labPanels) ||
           String(bb.surgery || "").trim() ||
           String(bb.cured || "").trim() ||
           questionnaireHasData(bb.questionnaire)
@@ -7575,7 +7938,8 @@
 
       function hasMedsBits() {
         return !!(state.rx.trim() || state.dx.trim() || state.otc.trim() ||
-          state.supp.trim() || state.labs.trim() ||
+          state.supp.trim() || state.labs.trim() || String(state.labsMemo || "").trim() ||
+          labPanelsHasBits(state.labPanels) ||
           state.surgery.trim() || state.cured.trim());
       }
 
@@ -10749,20 +11113,37 @@
 
       function fillMedsInputs() {
         MEDS_KEYS.forEach(function (key) {
-          medsEls[key].value = state[key] || "";
+          if (key === "labs") return;
+          if (medsEls[key]) medsEls[key].value = state[key] || "";
         });
+        if (labsMemoEl) labsMemoEl.value = state.labsMemo || "";
+        clearLabFormInputs();
+        paintLabHistory();
+        if (medsEls.labs) medsEls.labs.value = state.labs || "";
       }
 
       function readMedsInputs() {
         MEDS_KEYS.forEach(function (key) {
-          state[key] = String(medsEls[key].value || "").trim();
+          if (key === "labs") return;
+          if (medsEls[key]) state[key] = String(medsEls[key].value || "").trim();
         });
+        state.labsMemo = labsMemoEl ? String(labsMemoEl.value || "").trim() : "";
+        upsertLabPanelFromForm();
+        syncLabsTextFromState();
+        paintLabHistory();
+        clearLabFormInputs();
       }
 
       function clearMedsInputs() {
         MEDS_KEYS.forEach(function (key) {
-          medsEls[key].value = "";
+          if (key === "labs") return;
+          if (medsEls[key]) medsEls[key].value = "";
         });
+        if (labsMemoEl) labsMemoEl.value = "";
+        clearLabFormInputs();
+        // 저장된 검사 목록은 지우지 않음. 항목별 삭제로만 제거.
+        syncLabsTextFromState();
+        paintLabHistory();
       }
 
       function setSexSelection(value) {
@@ -12354,9 +12735,10 @@
         if (name === "labs") {
           openSheet("meds");
           setTimeout(function () {
-            if (!medsEls.labs) return;
-            medsEls.labs.scrollIntoView({ block: "center", behavior: "smooth" });
-            medsEls.labs.focus();
+            var target = document.getElementById("labs-block") || labDateEl;
+            if (!target) return;
+            target.scrollIntoView({ block: "start", behavior: "smooth" });
+            if (labDateEl) labDateEl.focus();
           }, 40);
           return;
         }
@@ -12551,6 +12933,7 @@
       });
 
       setupQuestionnaireControls();
+      buildLabFieldInputs();
       fixedMenus = loadFixedMenu();
       saveFixedMenu();
       foodWarehouseItems = loadFoodWarehouse();
