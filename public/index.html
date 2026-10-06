@@ -2601,6 +2601,42 @@
       font-weight: 600;
       line-height: 1.5;
     }
+    .lab-date-row {
+      display: flex;
+      align-items: center;
+      flex-wrap: nowrap;
+      gap: 4px;
+      width: 100%;
+    }
+    .lab-date-row input {
+      width: 100%;
+      min-width: 0;
+      text-align: center;
+      border-radius: 10px;
+      border: 1px solid var(--line);
+      background: var(--key);
+      color: var(--ink);
+      font: inherit;
+      font-size: 15px;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      line-height: 1.4;
+      padding: 10px 6px;
+    }
+    .lab-date-row input#lab-date-y { flex: 1.35 1 0; max-width: 5.2em; }
+    .lab-date-row input#lab-date-m,
+    .lab-date-row input#lab-date-d { flex: 0.85 1 0; max-width: 3.2em; }
+    .lab-date-row input:focus {
+      outline: 2px solid var(--accent);
+      outline-offset: 1px;
+    }
+    .lab-date-unit {
+      flex: 0 0 auto;
+      color: var(--ink);
+      font-size: 14px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
     .labs-group {
       margin: 8px 0 0;
       color: var(--ink);
@@ -3508,7 +3544,7 @@
         <span data-i18n="records.title">내 기록 관리</span>
         <span class="ops-chevron" aria-hidden="true">▾</span>
       </button>
-      <p class="app-shell-version" id="app-shell-version" data-shell-version="20261006.3">이 화면 버전 20261006.3</p>
+      <p class="app-shell-version" id="app-shell-version" data-shell-version="20261006.5">이 화면 버전 20261006.5</p>
       <div class="ops-body" id="records-body" hidden>
         <div class="records-transfer" id="records-transfer" data-i18n-attr="aria-label:records.transferAria" aria-label="기록 저장·옮기기">
           <h3 class="ops-section-title" data-i18n="records.transferTitle">기록 저장·옮기기</h3>
@@ -3766,8 +3802,15 @@
         <div class="meds-field labs-block" id="labs-block">
           <p class="labs-block-title" id="labs-block-title">검사기록</p>
           <p class="labs-hint">결과표에서 같은 이름을 찾아 숫자만 넣으세요. 없으면 비워 두세요.</p>
-          <label for="lab-date">검사일</label>
-          <input type="date" class="lab-input" id="lab-date" />
+          <label id="lab-date-label">검사일</label>
+          <div class="lab-date-row" role="group" aria-labelledby="lab-date-label">
+            <input type="text" id="lab-date-y" inputmode="numeric" pattern="[0-9]*" maxlength="4" placeholder="0000" autocomplete="off" aria-label="년도" />
+            <span class="lab-date-unit">년</span>
+            <input type="text" id="lab-date-m" inputmode="numeric" pattern="[0-9]*" maxlength="2" placeholder="00" autocomplete="off" aria-label="월" />
+            <span class="lab-date-unit">월</span>
+            <input type="text" id="lab-date-d" inputmode="numeric" pattern="[0-9]*" maxlength="2" placeholder="00" autocomplete="off" aria-label="일" />
+            <span class="lab-date-unit">일</span>
+          </div>
           <p class="labs-group">혈액</p>
           <div class="lab-fields" id="lab-fields-blood"></div>
           <p class="labs-group">소변</p>
@@ -5482,7 +5525,9 @@
         surgery: document.getElementById("meds-surgery"),
         cured: document.getElementById("meds-cured")
       };
-      var labDateEl = document.getElementById("lab-date");
+      var labDateYEl = document.getElementById("lab-date-y");
+      var labDateMEl = document.getElementById("lab-date-m");
+      var labDateDEl = document.getElementById("lab-date-d");
       var labNoteEl = document.getElementById("lab-note");
       var labsMemoEl = document.getElementById("labs-memo");
       var labHistoryEl = document.getElementById("lab-history");
@@ -6395,7 +6440,7 @@
           if (v) bits.push(f.label + " " + v);
         });
         if (panel.note) bits.push(panel.note);
-        var head = panel.date || "날짜 없음";
+        var head = formatLabDateKo(panel.date);
         return bits.length ? (head + " · " + bits.join(", ")) : head;
       }
 
@@ -6439,9 +6484,80 @@
         });
       }
 
+      function digitsOnly(value, maxLen) {
+        var t = String(value || "").replace(/\D+/g, "");
+        if (maxLen > 0 && t.length > maxLen) t = t.slice(0, maxLen);
+        return t;
+      }
+
+      function pad2(n) {
+        var s = String(n == null ? "" : n);
+        if (s.length === 1) return "0" + s;
+        return s;
+      }
+
+      function formatLabDateKo(iso) {
+        var m = String(iso || "").trim().match(/^(\d{4})-(\d{2})-(\d{2})$/);
+        if (!m) return String(iso || "").trim() || "날짜 없음";
+        return m[1] + "년 " + m[2] + "월 " + m[3] + "일";
+      }
+
+      function clearLabDateParts() {
+        if (labDateYEl) labDateYEl.value = "";
+        if (labDateMEl) labDateMEl.value = "";
+        if (labDateDEl) labDateDEl.value = "";
+      }
+
+      function writeLabDateParts(iso) {
+        var m = String(iso || "").trim().match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
+        if (!m) {
+          clearLabDateParts();
+          return;
+        }
+        if (labDateYEl) labDateYEl.value = m[1];
+        if (labDateMEl) labDateMEl.value = pad2(m[2]);
+        if (labDateDEl) labDateDEl.value = pad2(m[3]);
+      }
+
+      function readLabDateIso() {
+        var y = digitsOnly(labDateYEl && labDateYEl.value, 4);
+        var mo = digitsOnly(labDateMEl && labDateMEl.value, 2);
+        var d = digitsOnly(labDateDEl && labDateDEl.value, 2);
+        if (!y && !mo && !d) return "";
+        if (y.length !== 4 || !mo || !d) return "";
+        var yi = Number(y);
+        var mi = Number(mo);
+        var di = Number(d);
+        if (!isFinite(yi) || !isFinite(mi) || !isFinite(di)) return "";
+        if (yi < 1900 || yi > 2100) return "";
+        if (mi < 1 || mi > 12) return "";
+        if (di < 1 || di > 31) return "";
+        var dt = new Date(yi, mi - 1, di);
+        if (dt.getFullYear() !== yi || dt.getMonth() !== mi - 1 || dt.getDate() !== di) return "";
+        return y + "-" + pad2(mi) + "-" + pad2(di);
+      }
+
+      function bindLabDateDigitInputs() {
+        function wire(el, maxLen, nextEl) {
+          if (!el) return;
+          el.addEventListener("input", function () {
+            el.value = digitsOnly(el.value, maxLen);
+            if (nextEl && el.value.length >= maxLen) nextEl.focus();
+          });
+          el.addEventListener("blur", function () {
+            if (el === labDateYEl) return;
+            var v = digitsOnly(el.value, maxLen);
+            if (v) el.value = pad2(v);
+          });
+        }
+        wire(labDateYEl, 4, labDateMEl);
+        wire(labDateMEl, 2, labDateDEl);
+        wire(labDateDEl, 2, null);
+      }
+
       function clearLabFormInputs() {
         labFormEditIndex = -1;
-        if (labDateEl) labDateEl.value = "";
+        clearLabDateParts();
         if (labNoteEl) labNoteEl.value = "";
         Object.keys(labFieldInputMap).forEach(function (id) {
           labFieldInputMap[id].value = "";
@@ -6450,7 +6566,7 @@
 
       function writeLabForm(panel) {
         panel = normalizeLabPanel(panel);
-        if (labDateEl) labDateEl.value = panel.date || "";
+        writeLabDateParts(panel.date || "");
         if (labNoteEl) labNoteEl.value = panel.note || "";
         LAB_PANEL_FIELDS.forEach(function (f) {
           if (labFieldInputMap[f.id]) labFieldInputMap[f.id].value = panel.values[f.id] || "";
@@ -6459,7 +6575,7 @@
 
       function readLabForm() {
         var panel = emptyLabPanel();
-        panel.date = labDateEl ? String(labDateEl.value || "").trim() : "";
+        panel.date = readLabDateIso();
         panel.note = labNoteEl ? String(labNoteEl.value || "").trim() : "";
         LAB_PANEL_FIELDS.forEach(function (f) {
           panel.values[f.id] = labFieldInputMap[f.id]
@@ -6485,7 +6601,7 @@
           item.className = "lab-history-item";
           var meta = document.createElement("p");
           meta.className = "lab-history-meta";
-          meta.textContent = panel.date || "날짜 없음";
+          meta.textContent = formatLabDateKo(panel.date);
           var sum = document.createElement("p");
           sum.className = "lab-history-sum";
           sum.textContent = formatLabPanelLine(panel);
@@ -6497,7 +6613,7 @@
           loadBtn.addEventListener("click", function () {
             labFormEditIndex = idx;
             writeLabForm(panel);
-            if (labDateEl) labDateEl.focus();
+            if (labDateYEl) labDateYEl.focus();
           });
           var delBtn = document.createElement("button");
           delBtn.type = "button";
@@ -12736,10 +12852,10 @@
         if (name === "labs") {
           openSheet("meds");
           setTimeout(function () {
-            var target = document.getElementById("labs-block") || labDateEl;
+            var target = document.getElementById("labs-block") || labDateYEl;
             if (!target) return;
             target.scrollIntoView({ block: "start", behavior: "smooth" });
-            if (labDateEl) labDateEl.focus();
+            if (labDateYEl) labDateYEl.focus();
           }, 40);
           return;
         }
@@ -12935,6 +13051,7 @@
 
       setupQuestionnaireControls();
       buildLabFieldInputs();
+      bindLabDateDigitInputs();
       fixedMenus = loadFixedMenu();
       saveFixedMenu();
       foodWarehouseItems = loadFoodWarehouse();
