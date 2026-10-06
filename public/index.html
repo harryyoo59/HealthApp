@@ -3544,7 +3544,7 @@
         <span data-i18n="records.title">내 기록 관리</span>
         <span class="ops-chevron" aria-hidden="true">▾</span>
       </button>
-      <p class="app-shell-version" id="app-shell-version" data-shell-version="20261006.5">이 화면 버전 20261006.5</p>
+      <p class="app-shell-version" id="app-shell-version" data-shell-version="20261006.6">이 화면 버전 20261006.6</p>
       <div class="ops-body" id="records-body" hidden>
         <div class="records-transfer" id="records-transfer" data-i18n-attr="aria-label:records.transferAria" aria-label="기록 저장·옮기기">
           <h3 class="ops-section-title" data-i18n="records.transferTitle">기록 저장·옮기기</h3>
@@ -6436,7 +6436,6 @@
           var v = panel.values[f.id];
           if (v) bits.push(f.label + " " + v);
         });
-        if (panel.note) bits.push(panel.note);
         var head = formatLabDateKo(panel.date);
         return bits.length ? (head + " · " + bits.join(", ")) : head;
       }
@@ -6555,7 +6554,6 @@
       function clearLabFormInputs() {
         labFormEditIndex = -1;
         clearLabDateParts();
-        if (labNoteEl) labNoteEl.value = "";
         Object.keys(labFieldInputMap).forEach(function (id) {
           labFieldInputMap[id].value = "";
         });
@@ -6564,7 +6562,6 @@
       function writeLabForm(panel) {
         panel = normalizeLabPanel(panel);
         writeLabDateParts(panel.date || "");
-        if (labNoteEl) labNoteEl.value = panel.note || "";
         LAB_PANEL_FIELDS.forEach(function (f) {
           if (labFieldInputMap[f.id]) labFieldInputMap[f.id].value = panel.values[f.id] || "";
         });
@@ -6573,7 +6570,7 @@
       function readLabForm() {
         var panel = emptyLabPanel();
         panel.date = readLabDateIso();
-        panel.note = labNoteEl ? String(labNoteEl.value || "").trim() : "";
+        panel.note = "";
         LAB_PANEL_FIELDS.forEach(function (f) {
           panel.values[f.id] = labFieldInputMap[f.id]
             ? String(labFieldInputMap[f.id].value || "").trim()
