@@ -2713,25 +2713,11 @@
       color: var(--muted);
       line-height: 1.4;
     }
-    .lab-history-actions {
-      display: flex;
-      gap: 8px;
-    }
-    .lab-history-actions button {
-      appearance: none;
-      flex: 1;
-      border-radius: 8px;
-      border: 1px solid var(--line);
-      background: var(--key);
-      color: var(--ink);
-      font: inherit;
+    .lab-history-hint {
+      margin: 0 0 4px;
       font-size: 12px;
-      font-weight: 600;
-      padding: 8px 6px;
-      cursor: pointer;
-    }
-    .lab-history-actions button.is-danger {
-      color: #f0c4c0;
+      color: var(--muted);
+      line-height: 1.4;
     }
     .sheet-actions {
       display: grid;
@@ -3544,7 +3530,7 @@
         <span data-i18n="records.title">내 기록 관리</span>
         <span class="ops-chevron" aria-hidden="true">▾</span>
       </button>
-      <p class="app-shell-version" id="app-shell-version" data-shell-version="20261006.7">이 화면 버전 20261006.7</p>
+      <p class="app-shell-version" id="app-shell-version" data-shell-version="20261006.8">이 화면 버전 20261006.8</p>
       <div class="ops-body" id="records-body" hidden>
         <div class="records-transfer" id="records-transfer" data-i18n-attr="aria-label:records.transferAria" aria-label="기록 저장·옮기기">
           <h3 class="ops-section-title" data-i18n="records.transferTitle">기록 저장·옮기기</h3>
@@ -3816,6 +3802,7 @@
           <p class="labs-group">소변</p>
           <div class="lab-fields" id="lab-fields-urine"></div>
           <p class="labs-group">저장된 검사</p>
+          <p class="lab-history-hint">읽기만 됩니다. 고치려면 위에서 같은 날짜로 다시 넣고 저장하세요.</p>
           <div class="lab-history" id="lab-history" aria-live="polite"></div>
           <label for="labs-memo">기타·예전 기록 (선택)</label>
           <textarea id="labs-memo" rows="2" placeholder="목록에 없는 수치·예전 메모"></textarea>
@@ -5530,7 +5517,6 @@
       var labHistoryEl = document.getElementById("lab-history");
       var labFieldsBloodEl = document.getElementById("lab-fields-blood");
       var labFieldsUrineEl = document.getElementById("lab-fields-urine");
-      var labFormEditIndex = -1;
       var labFieldInputMap = {};
       var profileDraft = {
         sex: "",
@@ -6551,7 +6537,6 @@
       }
 
       function clearLabFormInputs() {
-        labFormEditIndex = -1;
         clearLabDateParts();
         Object.keys(labFieldInputMap).forEach(function (id) {
           labFieldInputMap[id].value = "";
@@ -6588,7 +6573,7 @@
           labHistoryEl.appendChild(empty);
           return;
         }
-        list.forEach(function (panel, idx) {
+        list.forEach(function (panel) {
           var item = document.createElement("div");
           item.className = "lab-history-item";
           var meta = document.createElement("p");
@@ -6597,38 +6582,8 @@
           var sum = document.createElement("p");
           sum.className = "lab-history-sum";
           sum.textContent = formatLabPanelLine(panel);
-          var actions = document.createElement("div");
-          actions.className = "lab-history-actions";
-          var loadBtn = document.createElement("button");
-          loadBtn.type = "button";
-          loadBtn.textContent = "불러오기";
-          loadBtn.addEventListener("click", function () {
-            labFormEditIndex = idx;
-            writeLabForm(panel);
-            if (labDateYEl) labDateYEl.focus();
-          });
-          var delBtn = document.createElement("button");
-          delBtn.type = "button";
-          delBtn.className = "is-danger";
-          delBtn.textContent = "삭제";
-          delBtn.addEventListener("click", function () {
-            var ok = confirmDangerTwice(
-              "이 검사 기록을 목록에서 뺄까요?",
-              "한 번 더 확인합니다. 이 검사 기록을 삭제할까요?"
-            );
-            if (!ok) return;
-            state.labPanels = normalizeLabPanels(state.labPanels);
-            state.labPanels.splice(idx, 1);
-            if (labFormEditIndex === idx) clearLabFormInputs();
-            else if (labFormEditIndex > idx) labFormEditIndex -= 1;
-            syncLabsTextFromState();
-            paintLabHistory();
-          });
-          actions.appendChild(loadBtn);
-          actions.appendChild(delBtn);
           item.appendChild(meta);
           item.appendChild(sum);
-          item.appendChild(actions);
           labHistoryEl.appendChild(item);
         });
       }
@@ -6639,14 +6594,10 @@
         if (!panel.date) panel.date = getTodayKey();
         state.labPanels = normalizeLabPanels(state.labPanels);
         var found = -1;
-        if (labFormEditIndex >= 0 && labFormEditIndex < state.labPanels.length) {
-          found = labFormEditIndex;
-        } else {
-          for (var i = 0; i < state.labPanels.length; i++) {
-            if (state.labPanels[i].date === panel.date) {
-              found = i;
-              break;
-            }
+        for (var i = 0; i < state.labPanels.length; i++) {
+          if (state.labPanels[i].date === panel.date) {
+            found = i;
+            break;
           }
         }
         if (found >= 0) state.labPanels[found] = panel;
@@ -6654,7 +6605,6 @@
         state.labPanels.sort(function (a, b) {
           return String(b.date || "").localeCompare(String(a.date || ""));
         });
-        labFormEditIndex = -1;
       }
 
       function normalizeBodyBasics(raw) {
