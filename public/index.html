@@ -2865,6 +2865,60 @@
       box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
       cursor: pointer;
     }
+    .q-weekly-remind {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      margin: 0 0 14px;
+      padding: 12px 12px 12px 14px;
+      border-radius: 12px;
+      border: 1px solid rgba(125, 206, 160, 0.4);
+      background: rgba(61, 155, 110, 0.14);
+      color: #dff5e8;
+    }
+    .q-weekly-remind[hidden] { display: none; }
+    .q-weekly-remind-body {
+      flex: 1;
+      min-width: 0;
+    }
+    .q-weekly-remind-title {
+      margin: 0 0 4px;
+      font-size: 12px;
+      font-weight: 800;
+      color: #9fe3bf;
+    }
+    .q-weekly-remind-msg {
+      margin: 0;
+      font-size: 14px;
+      font-weight: 650;
+      line-height: 1.45;
+    }
+    .q-weekly-remind-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      flex: 0 0 auto;
+    }
+    .q-weekly-remind-edit,
+    .q-weekly-remind-dismiss {
+      appearance: none;
+      border: 0;
+      border-radius: 999px;
+      padding: 8px 12px;
+      font: inherit;
+      font-size: 12px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+    .q-weekly-remind-edit {
+      background: #3d9b6e;
+      color: #fff;
+    }
+    .q-weekly-remind-dismiss {
+      background: transparent;
+      color: #9fb9ac;
+      border: 1px solid rgba(232, 242, 236, 0.18);
+    }
     .data-protect-undo {
       position: fixed;
       left: 12px;
@@ -3105,6 +3159,16 @@
       </div>
     </div>
     <p class="lead" data-i18n="home.lead">먹은 음식·하루 활동·기본 몸 상태를 기록해 두고, 식단과 생활 챙기기에 참고하는 건강 일지 홈입니다.</p>
+    <div class="q-weekly-remind" id="q-weekly-remind" role="status" aria-live="polite" hidden>
+      <div class="q-weekly-remind-body">
+        <p class="q-weekly-remind-title">주간 문진 확인</p>
+        <p class="q-weekly-remind-msg" id="q-weekly-remind-msg">기존에 입력하신 문진 내용이 변화가 있으면 수정 부탁 합니다</p>
+      </div>
+      <div class="q-weekly-remind-actions">
+        <button type="button" class="q-weekly-remind-edit" id="q-weekly-remind-edit">문진표 보기</button>
+        <button type="button" class="q-weekly-remind-dismiss" id="q-weekly-remind-dismiss">닫기</button>
+      </div>
+    </div>
     <section class="info-box" aria-labelledby="basic-info-title">
       <h2 id="basic-info-title" data-i18n="home.basicInfo">내몸 기본 정보</h2>
       <div class="keys">
@@ -3332,7 +3396,7 @@
         <span data-i18n="records.title">내 기록 관리</span>
         <span class="ops-chevron" aria-hidden="true">▾</span>
       </button>
-      <p class="app-shell-version" id="app-shell-version" data-shell-version="20261005.14">이 화면 버전 20261005.14</p>
+      <p class="app-shell-version" id="app-shell-version" data-shell-version="20261006.1">이 화면 버전 20261006.1</p>
       <div class="ops-body" id="records-body" hidden>
         <div class="records-transfer" id="records-transfer" data-i18n-attr="aria-label:records.transferAria" aria-label="기록 저장·옮기기">
           <h3 class="ops-section-title" data-i18n="records.transferTitle">기록 저장·옮기기</h3>
@@ -3925,6 +3989,10 @@
       var CONSENT_VERSION = 4;
       var AUTO_BACKUP_KEY = "healthapp.autoBackup.v1";
       var PRE_IMPORT_BACKUP_KEY = "healthapp.preImportBackup.v1";
+      var Q_WEEKLY_REMIND_KEY = "healthapp.qWeeklyRemind.v1";
+      /** 0=일 … 6=토 — 매주 같은 요일에 문진 수정 안내 */
+      var Q_WEEKLY_REMIND_WEEKDAY = 0;
+      var Q_WEEKLY_REMIND_MSG = "기존에 입력하신 문진 내용이 변화가 있으면 수정 부탁 합니다";
       var BACKUP_DB_NAME = "healthappBackup";
       var BACKUP_STORE = "snapshots";
       var BACKUP_ID = "latest";
@@ -11244,6 +11312,106 @@
         } catch (e) { /* ignore */ }
       }
 
+      function loadQWeeklyRemindMeta() {
+        try {
+          var raw = localStorage.getItem(Q_WEEKLY_REMIND_KEY);
+          if (!raw) return { dismissedDateKey: "", notifiedDateKey: "" };
+          var parsed = JSON.parse(raw);
+          return {
+            dismissedDateKey: String((parsed && parsed.dismissedDateKey) || ""),
+            notifiedDateKey: String((parsed && parsed.notifiedDateKey) || "")
+          };
+        } catch (e) {
+          return { dismissedDateKey: "", notifiedDateKey: "" };
+        }
+      }
+
+      function saveQWeeklyRemindMeta(meta) {
+        try {
+          localStorage.setItem(Q_WEEKLY_REMIND_KEY, JSON.stringify({
+            dismissedDateKey: String((meta && meta.dismissedDateKey) || ""),
+            notifiedDateKey: String((meta && meta.notifiedDateKey) || "")
+          }));
+        } catch (e) { /* ignore */ }
+      }
+
+      function shouldShowQWeeklyRemind() {
+        if (!hasLegalConsent()) return false;
+        if (!questionnaireHasData(state && state.questionnaire)) return false;
+        var today = new Date();
+        if (today.getDay() !== Q_WEEKLY_REMIND_WEEKDAY) return false;
+        var todayKey = dateKeyFromDate(today);
+        var meta = loadQWeeklyRemindMeta();
+        if (meta.dismissedDateKey === todayKey) return false;
+        return true;
+      }
+
+      function maybeNotifyQWeeklyRemind() {
+        if (!shouldShowQWeeklyRemind()) return;
+        if (typeof Notification === "undefined") return;
+        if (Notification.permission !== "granted") return;
+        var todayKey = getTodayKey();
+        var meta = loadQWeeklyRemindMeta();
+        if (meta.notifiedDateKey === todayKey) return;
+        try {
+          new Notification("알고 먹는 내몸 지키기", {
+            body: Q_WEEKLY_REMIND_MSG,
+            tag: "healthapp-q-weekly-" + todayKey
+          });
+          meta.notifiedDateKey = todayKey;
+          saveQWeeklyRemindMeta(meta);
+        } catch (e) { /* ignore */ }
+      }
+
+      function refreshQWeeklyRemind() {
+        var box = document.getElementById("q-weekly-remind");
+        var msgEl = document.getElementById("q-weekly-remind-msg");
+        if (msgEl) msgEl.textContent = Q_WEEKLY_REMIND_MSG;
+        if (!box) return;
+        if (shouldShowQWeeklyRemind()) {
+          box.hidden = false;
+          maybeNotifyQWeeklyRemind();
+        } else {
+          box.hidden = true;
+        }
+      }
+
+      function dismissQWeeklyRemindForToday() {
+        var meta = loadQWeeklyRemindMeta();
+        meta.dismissedDateKey = getTodayKey();
+        saveQWeeklyRemindMeta(meta);
+        refreshQWeeklyRemind();
+      }
+
+      function openQuestionnaireFromWeeklyRemind() {
+        dismissQWeeklyRemindForToday();
+        openSheet("profile");
+        setTimeout(function () {
+          var section = document.getElementById("questionnaire-section");
+          if (section && typeof section.scrollIntoView === "function") {
+            section.scrollIntoView({ block: "start", behavior: "smooth" });
+          }
+        }, 80);
+      }
+
+      function setupQWeeklyRemind() {
+        var editBtn = document.getElementById("q-weekly-remind-edit");
+        var dismissBtn = document.getElementById("q-weekly-remind-dismiss");
+        if (editBtn && editBtn.getAttribute("data-bound") !== "1") {
+          editBtn.setAttribute("data-bound", "1");
+          editBtn.addEventListener("click", function () {
+            openQuestionnaireFromWeeklyRemind();
+          });
+        }
+        if (dismissBtn && dismissBtn.getAttribute("data-bound") !== "1") {
+          dismissBtn.setAttribute("data-bound", "1");
+          dismissBtn.addEventListener("click", function () {
+            dismissQWeeklyRemindForToday();
+          });
+        }
+        refreshQWeeklyRemind();
+      }
+
       function showConsentGate() {
         var gate = document.getElementById("consent-gate");
         var check = document.getElementById("consent-agree");
@@ -11267,6 +11435,7 @@
           gate.hidden = true;
           gate.setAttribute("aria-hidden", "true");
         }
+        refreshQWeeklyRemind();
       }
 
       function closeCollapsiblePanel(panelId, toggleId, bodyId) {
@@ -11980,6 +12149,7 @@
           }
           applyLocalMidnightRollover(ended, key);
           render();
+          refreshQWeeklyRemind();
           return;
         }
         if (!dayMeta.calendarDate) {
@@ -11991,6 +12161,7 @@
           reloadEditingDayFromLog();
           render();
         }
+        refreshQWeeklyRemind();
       }
 
       function tapPickLabel() {
@@ -12316,6 +12487,7 @@
       bootstrapDayState();
       stampVitalsOnDay(getTodayKey());
       setupConsentGate();
+      setupQWeeklyRemind();
       shownDateKey = fillTodayDate();
       scheduleMidnightRefresh();
       setupOpsPanel();
@@ -12326,6 +12498,7 @@
       setupNovelist();
       setupSymptomAsk();
       render();
+      refreshQWeeklyRemind();
       warnIfStorageNearlyFull();
 
       function setupShareSite() {
