@@ -3161,7 +3161,7 @@
     <p class="lead" data-i18n="home.lead">먹은 음식·하루 활동·기본 몸 상태를 기록해 두고, 식단과 생활 챙기기에 참고하는 건강 일지 홈입니다.</p>
     <div class="q-weekly-remind" id="q-weekly-remind" role="status" aria-live="polite" hidden>
       <div class="q-weekly-remind-body">
-        <p class="q-weekly-remind-title">주간 문진 확인</p>
+        <p class="q-weekly-remind-title" id="q-weekly-remind-title">주간 문진 확인</p>
         <p class="q-weekly-remind-msg" id="q-weekly-remind-msg">기존에 입력하신 문진 내용이 변화가 있으면 수정 부탁 합니다</p>
       </div>
       <div class="q-weekly-remind-actions">
@@ -3396,7 +3396,7 @@
         <span data-i18n="records.title">내 기록 관리</span>
         <span class="ops-chevron" aria-hidden="true">▾</span>
       </button>
-      <p class="app-shell-version" id="app-shell-version" data-shell-version="20261006.1">이 화면 버전 20261006.1</p>
+      <p class="app-shell-version" id="app-shell-version" data-shell-version="20261006.2">이 화면 버전 20261006.2</p>
       <div class="ops-body" id="records-body" hidden>
         <div class="records-transfer" id="records-transfer" data-i18n-attr="aria-label:records.transferAria" aria-label="기록 저장·옮기기">
           <h3 class="ops-section-title" data-i18n="records.transferTitle">기록 저장·옮기기</h3>
@@ -3993,6 +3993,8 @@
       /** 0=일 … 6=토 — 매주 같은 요일에 문진 수정 안내 */
       var Q_WEEKLY_REMIND_WEEKDAY = 0;
       var Q_WEEKLY_REMIND_MSG = "기존에 입력하신 문진 내용이 변화가 있으면 수정 부탁 합니다";
+      var Q_COMEBACK_REMIND_MSG = "문진 내용을 다시 입력하여 주시기 바랍니다";
+      var Q_COMEBACK_GAP_DAYS = 7;
       var BACKUP_DB_NAME = "healthappBackup";
       var BACKUP_STORE = "snapshots";
       var BACKUP_ID = "latest";
@@ -11315,72 +11317,156 @@
       function loadQWeeklyRemindMeta() {
         try {
           var raw = localStorage.getItem(Q_WEEKLY_REMIND_KEY);
-          if (!raw) return { dismissedDateKey: "", notifiedDateKey: "" };
+          if (!raw) {
+            return {
+              lastVisitDateKey: "",
+              dismissedDateKey: "",
+              notifiedDateKey: "",
+              comebackActive: false,
+              skipSoftThroughDateKey: ""
+            };
+          }
           var parsed = JSON.parse(raw);
           return {
+            lastVisitDateKey: String((parsed && parsed.lastVisitDateKey) || ""),
             dismissedDateKey: String((parsed && parsed.dismissedDateKey) || ""),
-            notifiedDateKey: String((parsed && parsed.notifiedDateKey) || "")
+            notifiedDateKey: String((parsed && parsed.notifiedDateKey) || ""),
+            comebackActive: !!(parsed && parsed.comebackActive),
+            skipSoftThroughDateKey: String((parsed && parsed.skipSoftThroughDateKey) || "")
           };
         } catch (e) {
-          return { dismissedDateKey: "", notifiedDateKey: "" };
+          return {
+            lastVisitDateKey: "",
+            dismissedDateKey: "",
+            notifiedDateKey: "",
+            comebackActive: false,
+            skipSoftThroughDateKey: ""
+          };
         }
       }
 
       function saveQWeeklyRemindMeta(meta) {
         try {
           localStorage.setItem(Q_WEEKLY_REMIND_KEY, JSON.stringify({
+            lastVisitDateKey: String((meta && meta.lastVisitDateKey) || ""),
             dismissedDateKey: String((meta && meta.dismissedDateKey) || ""),
-            notifiedDateKey: String((meta && meta.notifiedDateKey) || "")
+            notifiedDateKey: String((meta && meta.notifiedDateKey) || ""),
+            comebackActive: !!(meta && meta.comebackActive),
+            skipSoftThroughDateKey: String((meta && meta.skipSoftThroughDateKey) || "")
           }));
         } catch (e) { /* ignore */ }
       }
 
-      function shouldShowQWeeklyRemind() {
-        if (!hasLegalConsent()) return false;
-        if (!questionnaireHasData(state && state.questionnaire)) return false;
-        var today = new Date();
-        if (today.getDay() !== Q_WEEKLY_REMIND_WEEKDAY) return false;
-        var todayKey = dateKeyFromDate(today);
-        var meta = loadQWeeklyRemindMeta();
-        if (meta.dismissedDateKey === todayKey) return false;
-        return true;
+      function daysBetweenDateKeys(fromKey, toKey) {
+        var a = parseDateKey(fromKey);
+        var b = parseDateKey(toKey);
+        if (!a || !b) return null;
+        var ms = Date.UTC(b.getFullYear(), b.getMonth(), b.getDate()) -
+          Date.UTC(a.getFullYear(), a.getMonth(), a.getDate());
+        return Math.round(ms / 86400000);
       }
 
-      function maybeNotifyQWeeklyRemind() {
-        if (!shouldShowQWeeklyRemind()) return;
+      /** 해당 날짜가 속한 주(월~일)의 일요일 날짜 키 */
+      function sundayDateKeyOf(dateOrKey) {
+        var d = dateOrKey instanceof Date ? new Date(dateOrKey.getTime()) : parseDateKey(dateOrKey);
+        if (!d) d = new Date();
+        var day = d.getDay();
+        var add = day === 0 ? 0 : 7 - day;
+        d.setDate(d.getDate() + add);
+        return dateKeyFromDate(d);
+      }
+
+      /** 방문 기록. 7일 이상 비었으면 복귀 안내 활성화 + 그 주 일요일 안내 건너뜀 */
+      function noteQWeeklyVisit() {
+        if (!hasLegalConsent()) return;
+        var todayKey = getTodayKey();
+        var meta = loadQWeeklyRemindMeta();
+        var prev = meta.lastVisitDateKey;
+        if (prev && prev !== todayKey) {
+          var gap = daysBetweenDateKeys(prev, todayKey);
+          if (
+            gap != null &&
+            gap >= Q_COMEBACK_GAP_DAYS &&
+            questionnaireHasData(state && state.questionnaire)
+          ) {
+            meta.comebackActive = true;
+            meta.skipSoftThroughDateKey = sundayDateKeyOf(todayKey);
+            meta.dismissedDateKey = "";
+          }
+        }
+        meta.lastVisitDateKey = todayKey;
+        saveQWeeklyRemindMeta(meta);
+      }
+
+      function currentQRemindMode() {
+        if (!hasLegalConsent()) return "";
+        if (!questionnaireHasData(state && state.questionnaire)) return "";
+        var meta = loadQWeeklyRemindMeta();
+        var todayKey = getTodayKey();
+        if (meta.comebackActive) return "comeback";
+        var today = new Date();
+        if (today.getDay() !== Q_WEEKLY_REMIND_WEEKDAY) return "";
+        if (meta.dismissedDateKey === todayKey) return "";
+        if (meta.skipSoftThroughDateKey && todayKey <= meta.skipSoftThroughDateKey) return "";
+        return "sunday";
+      }
+
+      function shouldShowQWeeklyRemind() {
+        return !!currentQRemindMode();
+      }
+
+      function maybeNotifyQWeeklyRemind(mode) {
+        if (!mode) return;
         if (typeof Notification === "undefined") return;
         if (Notification.permission !== "granted") return;
         var todayKey = getTodayKey();
         var meta = loadQWeeklyRemindMeta();
-        if (meta.notifiedDateKey === todayKey) return;
+        var tag = mode === "comeback"
+          ? "healthapp-q-comeback-" + todayKey
+          : "healthapp-q-weekly-" + todayKey;
+        if (meta.notifiedDateKey === tag) return;
+        var body = mode === "comeback" ? Q_COMEBACK_REMIND_MSG : Q_WEEKLY_REMIND_MSG;
         try {
-          new Notification("알고 먹는 내몸 지키기", {
-            body: Q_WEEKLY_REMIND_MSG,
-            tag: "healthapp-q-weekly-" + todayKey
-          });
-          meta.notifiedDateKey = todayKey;
+          new Notification("알고 먹는 내몸 지키기", { body: body, tag: tag });
+          meta.notifiedDateKey = tag;
           saveQWeeklyRemindMeta(meta);
         } catch (e) { /* ignore */ }
       }
 
       function refreshQWeeklyRemind() {
+        noteQWeeklyVisit();
         var box = document.getElementById("q-weekly-remind");
         var msgEl = document.getElementById("q-weekly-remind-msg");
-        if (msgEl) msgEl.textContent = Q_WEEKLY_REMIND_MSG;
+        var titleEl = document.getElementById("q-weekly-remind-title");
         if (!box) return;
-        if (shouldShowQWeeklyRemind()) {
-          box.hidden = false;
-          maybeNotifyQWeeklyRemind();
-        } else {
+        var mode = currentQRemindMode();
+        if (!mode) {
           box.hidden = true;
+          return;
         }
+        if (titleEl) {
+          titleEl.textContent = mode === "comeback" ? "문진 다시 입력" : "주간 문진 확인";
+        }
+        if (msgEl) {
+          msgEl.textContent = mode === "comeback" ? Q_COMEBACK_REMIND_MSG : Q_WEEKLY_REMIND_MSG;
+        }
+        box.hidden = false;
+        maybeNotifyQWeeklyRemind(mode);
       }
 
       function dismissQWeeklyRemindForToday() {
         var meta = loadQWeeklyRemindMeta();
-        meta.dismissedDateKey = getTodayKey();
+        var mode = currentQRemindMode();
+        if (mode === "comeback") {
+          meta.comebackActive = false;
+        } else {
+          meta.dismissedDateKey = getTodayKey();
+        }
         saveQWeeklyRemindMeta(meta);
-        refreshQWeeklyRemind();
+        // 방문 기록은 이미 note에 있음. 닫기 후 다시 note가 복귀를 재발동하지 않게 lastVisit 유지
+        var box = document.getElementById("q-weekly-remind");
+        if (box) box.hidden = true;
+        // refresh 없이 숨김만 — noteQWeeklyVisit가 같은 날 재호출되어도 comeback은 이미 false
       }
 
       function openQuestionnaireFromWeeklyRemind() {
