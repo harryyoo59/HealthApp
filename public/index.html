@@ -3530,7 +3530,7 @@
         <span data-i18n="records.title">내 기록 관리</span>
         <span class="ops-chevron" aria-hidden="true">▾</span>
       </button>
-      <p class="app-shell-version" id="app-shell-version" data-shell-version="20261006.8">이 화면 버전 20261006.8</p>
+      <p class="app-shell-version" id="app-shell-version" data-shell-version="20261008.1">이 화면 버전 20261008.1</p>
       <div class="ops-body" id="records-body" hidden>
         <div class="records-transfer" id="records-transfer" data-i18n-attr="aria-label:records.transferAria" aria-label="기록 저장·옮기기">
           <h3 class="ops-section-title" data-i18n="records.transferTitle">기록 저장·옮기기</h3>
@@ -3711,6 +3711,10 @@
             <div class="act-chips q-chips" id="q-bedtime-chips" role="group" aria-label="취침 시각"></div>
           </div>
           <div class="q-block">
+            <p class="q-block-label">잠든 뒤 소변 보러 일어나는 횟수</p>
+            <div class="act-chips q-chips" id="q-night-urine-chips" role="group" aria-label="잠든 뒤 소변 보러 일어나는 횟수"></div>
+          </div>
+          <div class="q-block">
             <p class="q-block-label">흡연</p>
             <div class="act-chips q-chips" id="q-smoking-chips" role="group" aria-label="흡연"></div>
           </div>
@@ -3737,6 +3741,19 @@
           <div class="q-block">
             <p class="q-block-label">최근 몸무게 변화</p>
             <div class="act-chips q-chips" id="q-weight-change-chips" role="group" aria-label="최근 몸무게 변화"></div>
+          </div>
+          <div class="q-block">
+            <p class="q-block-label">가족력 (부모·형제·자매)</p>
+            <div class="q-mode-toggle" role="group" aria-label="가족력 여부" id="q-family-mode">
+              <button type="button" class="q-mode-btn" data-q-mode="family" data-value="none">없음</button>
+              <button type="button" class="q-mode-btn" data-q-mode="family" data-value="has">있음</button>
+            </div>
+            <div class="q-detail-wrap" id="q-family-chips-wrap" hidden>
+              <div class="act-chips q-chips" id="q-family-chips" role="group" aria-label="가족력 종류"></div>
+              <div class="q-detail-wrap" id="q-family-detail-wrap" hidden>
+                <input type="text" class="q-detail-input" id="q-family-detail" maxlength="80" placeholder="항목 (예: 전립선, 신장)" autocomplete="off" />
+              </div>
+            </div>
           </div>
           <div class="q-block">
             <p class="q-block-label">응급 신호 — 가슴 통증·한쪽 마비·심한 숨참 같은 급증상</p>
@@ -4242,6 +4259,20 @@
         { id: "before12", label: "12시 전" },
         { id: "twelve2", label: "12–2시" },
         { id: "after2", label: "그 이후" }
+      ];
+      var Q_NIGHT_URINE_OPTS = [
+        { id: "zero", label: "0회" },
+        { id: "one", label: "1회" },
+        { id: "two", label: "2회" },
+        { id: "threeUp", label: "3회↑" }
+      ];
+      var Q_FAMILY_HISTORY_OPTS = [
+        { id: "hypertension", label: "고혈압" },
+        { id: "diabetes", label: "당뇨" },
+        { id: "heart", label: "심장병" },
+        { id: "stroke", label: "뇌졸중" },
+        { id: "cancer", label: "암" },
+        { id: "other", label: "기타" }
       ];
       var Q_SMOKING_OPTS = [
         { id: "none", label: "안 함" },
@@ -5530,6 +5561,9 @@
       var qAllergyDetailEl = document.getElementById("q-allergy-detail");
       var qAllergyDetailWrap = document.getElementById("q-allergy-detail-wrap");
       var qAvoidChipsWrap = document.getElementById("q-avoid-chips-wrap");
+      var qFamilyChipsWrap = document.getElementById("q-family-chips-wrap");
+      var qFamilyDetailEl = document.getElementById("q-family-detail");
+      var qFamilyDetailWrap = document.getElementById("q-family-detail-wrap");
       var STEPPER_CFG = {
         age: { min: 1, max: 120, step: 1, fallback: 60, unit: "세", decimals: 0 },
         height: { min: 100, max: 220, step: 1, fallback: 165, unit: "cm", decimals: 0 },
@@ -6184,6 +6218,7 @@
           peakTime: "",
           sleepBand: "",
           bedtime: "",
+          nightUrine: "",
           smoking: "",
           drinking: "",
           waterIntake: "",
@@ -6191,6 +6226,9 @@
           bowelChange: "",
           homeMeasure: "",
           weightChange: "",
+          familyHistoryMode: "",
+          familyHistories: [],
+          familyHistoryDetail: "",
           emergencyFlag: "",
           allergyMode: "",
           allergyDetail: "",
@@ -6224,6 +6262,7 @@
         base.peakTime = String(raw.peakTime || "").trim();
         base.sleepBand = String(raw.sleepBand || "").trim();
         base.bedtime = String(raw.bedtime || "").trim();
+        base.nightUrine = String(raw.nightUrine || "").trim();
         base.smoking = String(raw.smoking || "").trim();
         base.drinking = String(raw.drinking || "").trim();
         base.waterIntake = String(raw.waterIntake || "").trim();
@@ -6231,12 +6270,26 @@
         base.bowelChange = String(raw.bowelChange || "").trim();
         base.homeMeasure = String(raw.homeMeasure || "").trim();
         base.weightChange = String(raw.weightChange || "").trim();
+        base.familyHistoryMode = String(raw.familyHistoryMode || "").trim();
+        base.familyHistories = normalizeStringList(raw.familyHistories);
+        base.familyHistoryDetail = String(raw.familyHistoryDetail || "").trim();
         base.emergencyFlag = String(raw.emergencyFlag || "").trim();
         base.allergyMode = String(raw.allergyMode || "").trim();
         base.allergyDetail = String(raw.allergyDetail || "").trim();
         base.avoidFoodMode = String(raw.avoidFoodMode || "").trim();
         base.avoidFoods = normalizeStringList(raw.avoidFoods);
         base.goals = normalizeStringList(raw.goals);
+        if (base.familyHistoryMode !== "has") {
+          base.familyHistoryMode = base.familyHistoryMode === "none"
+            ? "none"
+            : (base.familyHistories.length || base.familyHistoryDetail ? "has" : base.familyHistoryMode);
+        }
+        if (base.familyHistoryMode !== "has") {
+          base.familyHistories = [];
+          base.familyHistoryDetail = "";
+        } else if (base.familyHistories.indexOf("other") < 0) {
+          base.familyHistoryDetail = "";
+        }
         if (base.allergyMode !== "has") {
           base.allergyMode = base.allergyMode === "none" ? "none" : (base.allergyDetail ? "has" : base.allergyMode);
         }
@@ -6253,9 +6306,10 @@
         if (q.symptoms.length) return true;
         if (q.symptomFreq || q.symptomDuration) return true;
         if (q.bodyAreas.length || q.severity || q.peakTime) return true;
-        if (q.sleepBand || q.bedtime || q.smoking || q.drinking) return true;
+        if (q.sleepBand || q.bedtime || q.nightUrine || q.smoking || q.drinking) return true;
         if (q.waterIntake || q.stress || q.bowelChange) return true;
         if (q.homeMeasure || q.weightChange || q.emergencyFlag) return true;
+        if (q.familyHistoryMode === "has" || q.familyHistoryMode === "none") return true;
         if (q.allergyMode === "has" || q.allergyMode === "none") return true;
         if (q.avoidFoodMode === "has" || q.avoidFoodMode === "none") return true;
         if (q.goals.length) return true;
@@ -6297,6 +6351,7 @@
         if (q.peakTime) lines.push("심한 때: " + qLabelById(Q_PEAK_TIME_OPTS, q.peakTime));
         if (q.sleepBand) lines.push("수면: " + qLabelById(Q_SLEEP_OPTS, q.sleepBand));
         if (q.bedtime) lines.push("취침: " + qLabelById(Q_BEDTIME_OPTS, q.bedtime));
+        if (q.nightUrine) lines.push("야간 배뇨: " + qLabelById(Q_NIGHT_URINE_OPTS, q.nightUrine));
         if (q.smoking) lines.push("흡연: " + qLabelById(Q_SMOKING_OPTS, q.smoking));
         if (q.drinking) lines.push("음주: " + qLabelById(Q_DRINKING_OPTS, q.drinking));
         if (q.waterIntake) lines.push("물: " + qLabelById(Q_WATER_OPTS, q.waterIntake));
@@ -6304,6 +6359,14 @@
         if (q.bowelChange) lines.push("배변 변화: " + qLabelById(Q_BOWEL_OPTS, q.bowelChange));
         if (q.homeMeasure) lines.push("집 측정: " + qLabelById(Q_HOME_MEASURE_OPTS, q.homeMeasure));
         if (q.weightChange) lines.push("몸무게 변화: " + qLabelById(Q_WEIGHT_CHANGE_OPTS, q.weightChange));
+        if (q.familyHistoryMode === "none") lines.push("가족력: 없음");
+        else if (q.familyHistoryMode === "has" && q.familyHistories.length) {
+          lines.push("가족력: " + q.familyHistories.map(function (id) {
+            return qLabelById(Q_FAMILY_HISTORY_OPTS, id);
+          }).join(", ") + (q.familyHistories.indexOf("other") >= 0 && q.familyHistoryDetail ? " (기타 입력됨)" : ""));
+        } else if (q.familyHistoryMode === "has") {
+          lines.push("가족력: 있음");
+        }
         if (q.emergencyFlag) lines.push("응급 신호: " + qLabelById(Q_EMERGENCY_OPTS, q.emergencyFlag));
         if (q.allergyMode === "none") lines.push("알레르기: 없음");
         else if (q.allergyMode === "has") {
@@ -11313,6 +11376,13 @@
         if (modeKey === "avoid") {
           if (qAvoidChipsWrap) qAvoidChipsWrap.hidden = value !== "has";
         }
+        if (modeKey === "family") {
+          if (qFamilyChipsWrap) qFamilyChipsWrap.hidden = value !== "has";
+          if (value !== "has") {
+            if (qFamilyDetailWrap) qFamilyDetailWrap.hidden = true;
+            if (qFamilyDetailEl) qFamilyDetailEl.value = "";
+          }
+        }
       }
 
       function fillQuestionnaireOptionChips(containerId, options, selectedList, multi, exclusiveNoneId, onChange) {
@@ -11371,6 +11441,10 @@
           q.bedtime = qPickSingle(q.bedtime, id);
           paintQuestionnaireDraft();
         });
+        fillQuestionnaireOptionChips("q-night-urine-chips", Q_NIGHT_URINE_OPTS, q.nightUrine, false, "", function (id) {
+          q.nightUrine = qPickSingle(q.nightUrine, id);
+          paintQuestionnaireDraft();
+        });
         fillQuestionnaireOptionChips("q-smoking-chips", Q_SMOKING_OPTS, q.smoking, false, "", function (id) {
           q.smoking = qPickSingle(q.smoking, id);
           paintQuestionnaireDraft();
@@ -11399,6 +11473,15 @@
           q.weightChange = qPickSingle(q.weightChange, id);
           paintQuestionnaireDraft();
         });
+        paintQuestionnaireMode("family", q.familyHistoryMode || "");
+        fillQuestionnaireOptionChips("q-family-chips", Q_FAMILY_HISTORY_OPTS, q.familyHistories, true, "", function (id) {
+          q.familyHistories = qToggleMulti(q.familyHistories, id, "");
+          if (q.familyHistories.indexOf("other") < 0) q.familyHistoryDetail = "";
+          paintQuestionnaireDraft();
+        });
+        var showFamilyDetail = q.familyHistoryMode === "has" && q.familyHistories.indexOf("other") >= 0;
+        if (qFamilyDetailWrap) qFamilyDetailWrap.hidden = !showFamilyDetail;
+        if (qFamilyDetailEl) qFamilyDetailEl.value = showFamilyDetail ? (q.familyHistoryDetail || "") : "";
         fillQuestionnaireOptionChips("q-emergency-chips", Q_EMERGENCY_OPTS, q.emergencyFlag, false, "", function (id) {
           q.emergencyFlag = qPickSingle(q.emergencyFlag, id);
           paintQuestionnaireDraft();
@@ -11428,6 +11511,12 @@
             } else if (modeKey === "avoid") {
               q.avoidFoodMode = q.avoidFoodMode === val ? "" : val;
               if (q.avoidFoodMode !== "has") q.avoidFoods = [];
+            } else if (modeKey === "family") {
+              q.familyHistoryMode = q.familyHistoryMode === val ? "" : val;
+              if (q.familyHistoryMode !== "has") {
+                q.familyHistories = [];
+                q.familyHistoryDetail = "";
+              }
             }
             paintQuestionnaireDraft();
           });
@@ -11437,6 +11526,14 @@
             var q = getProfileQuestionnaireDraft();
             if (q.allergyMode === "has") {
               q.allergyDetail = String(qAllergyDetailEl.value || "").trim();
+            }
+          });
+        }
+        if (qFamilyDetailEl) {
+          qFamilyDetailEl.addEventListener("input", function () {
+            var q = getProfileQuestionnaireDraft();
+            if (q.familyHistoryMode === "has" && q.familyHistories.indexOf("other") >= 0) {
+              q.familyHistoryDetail = String(qFamilyDetailEl.value || "").trim();
             }
           });
         }
@@ -11474,6 +11571,9 @@
         var q = normalizeQuestionnaire(getProfileQuestionnaireDraft());
         if (qAllergyDetailEl && q.allergyMode === "has") {
           q.allergyDetail = String(qAllergyDetailEl.value || "").trim();
+        }
+        if (qFamilyDetailEl && q.familyHistoryMode === "has" && q.familyHistories.indexOf("other") >= 0) {
+          q.familyHistoryDetail = String(qFamilyDetailEl.value || "").trim();
         }
         state.questionnaire = q;
       }
