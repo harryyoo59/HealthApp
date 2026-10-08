@@ -3530,7 +3530,7 @@
         <span data-i18n="records.title">내 기록 관리</span>
         <span class="ops-chevron" aria-hidden="true">▾</span>
       </button>
-      <p class="app-shell-version" id="app-shell-version" data-shell-version="20261008.1">이 화면 버전 20261008.1</p>
+      <p class="app-shell-version" id="app-shell-version" data-shell-version="20261008.2">이 화면 버전 20261008.2</p>
       <div class="ops-body" id="records-body" hidden>
         <div class="records-transfer" id="records-transfer" data-i18n-attr="aria-label:records.transferAria" aria-label="기록 저장·옮기기">
           <h3 class="ops-section-title" data-i18n="records.transferTitle">기록 저장·옮기기</h3>
@@ -3743,6 +3743,10 @@
             <div class="act-chips q-chips" id="q-weight-change-chips" role="group" aria-label="최근 몸무게 변화"></div>
           </div>
           <div class="q-block">
+            <p class="q-block-label">응급 신호 — 가슴 통증·한쪽 마비·심한 숨참 같은 급증상</p>
+            <div class="act-chips q-chips" id="q-emergency-chips" role="group" aria-label="응급 신호"></div>
+          </div>
+          <div class="q-block">
             <p class="q-block-label">가족력 (부모·형제·자매)</p>
             <div class="q-mode-toggle" role="group" aria-label="가족력 여부" id="q-family-mode">
               <button type="button" class="q-mode-btn" data-q-mode="family" data-value="none">없음</button>
@@ -3754,10 +3758,6 @@
                 <input type="text" class="q-detail-input" id="q-family-detail" maxlength="80" placeholder="항목 (예: 전립선, 신장)" autocomplete="off" />
               </div>
             </div>
-          </div>
-          <div class="q-block">
-            <p class="q-block-label">응급 신호 — 가슴 통증·한쪽 마비·심한 숨참 같은 급증상</p>
-            <div class="act-chips q-chips" id="q-emergency-chips" role="group" aria-label="응급 신호"></div>
           </div>
           <div class="q-block">
             <p class="q-block-label">알레르기</p>
@@ -6359,6 +6359,7 @@
         if (q.bowelChange) lines.push("배변 변화: " + qLabelById(Q_BOWEL_OPTS, q.bowelChange));
         if (q.homeMeasure) lines.push("집 측정: " + qLabelById(Q_HOME_MEASURE_OPTS, q.homeMeasure));
         if (q.weightChange) lines.push("몸무게 변화: " + qLabelById(Q_WEIGHT_CHANGE_OPTS, q.weightChange));
+        if (q.emergencyFlag) lines.push("응급 신호: " + qLabelById(Q_EMERGENCY_OPTS, q.emergencyFlag));
         if (q.familyHistoryMode === "none") lines.push("가족력: 없음");
         else if (q.familyHistoryMode === "has" && q.familyHistories.length) {
           lines.push("가족력: " + q.familyHistories.map(function (id) {
@@ -6367,7 +6368,6 @@
         } else if (q.familyHistoryMode === "has") {
           lines.push("가족력: 있음");
         }
-        if (q.emergencyFlag) lines.push("응급 신호: " + qLabelById(Q_EMERGENCY_OPTS, q.emergencyFlag));
         if (q.allergyMode === "none") lines.push("알레르기: 없음");
         else if (q.allergyMode === "has") {
           lines.push("알레르기: 있음" + (q.allergyDetail ? " (항목 입력됨)" : ""));
@@ -11473,6 +11473,10 @@
           q.weightChange = qPickSingle(q.weightChange, id);
           paintQuestionnaireDraft();
         });
+        fillQuestionnaireOptionChips("q-emergency-chips", Q_EMERGENCY_OPTS, q.emergencyFlag, false, "", function (id) {
+          q.emergencyFlag = qPickSingle(q.emergencyFlag, id);
+          paintQuestionnaireDraft();
+        });
         paintQuestionnaireMode("family", q.familyHistoryMode || "");
         fillQuestionnaireOptionChips("q-family-chips", Q_FAMILY_HISTORY_OPTS, q.familyHistories, true, "", function (id) {
           q.familyHistories = qToggleMulti(q.familyHistories, id, "");
@@ -11482,10 +11486,6 @@
         var showFamilyDetail = q.familyHistoryMode === "has" && q.familyHistories.indexOf("other") >= 0;
         if (qFamilyDetailWrap) qFamilyDetailWrap.hidden = !showFamilyDetail;
         if (qFamilyDetailEl) qFamilyDetailEl.value = showFamilyDetail ? (q.familyHistoryDetail || "") : "";
-        fillQuestionnaireOptionChips("q-emergency-chips", Q_EMERGENCY_OPTS, q.emergencyFlag, false, "", function (id) {
-          q.emergencyFlag = qPickSingle(q.emergencyFlag, id);
-          paintQuestionnaireDraft();
-        });
         paintQuestionnaireMode("allergy", q.allergyMode || "");
         if (qAllergyDetailEl) qAllergyDetailEl.value = q.allergyMode === "has" ? (q.allergyDetail || "") : "";
         paintQuestionnaireMode("avoid", q.avoidFoodMode || "");
