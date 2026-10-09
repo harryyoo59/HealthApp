@@ -1901,12 +1901,67 @@
       outline-offset: 2px;
     }
 
+    .vitals-status-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-top: 14px;
+      margin-bottom: 4px;
+      align-items: stretch;
+    }
+    .vitals-status-row .vitals-box,
+    .vitals-status-row .status-block {
+      margin-top: 0;
+      margin-bottom: 0;
+      min-width: 0;
+      height: 100%;
+    }
     .vitals-box {
       margin-top: 14px;
       background: var(--panel);
       border: 1px solid var(--line);
       border-radius: 16px;
       padding: 12px;
+    }
+    .vitals-status-row .vitals-box {
+      padding: 0;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+    .vitals-status-row .vitals-box-lead { display: none; }
+    .vitals-status-row .vitals-box .keys {
+      flex: 1;
+      display: flex;
+      min-height: 0;
+    }
+    .vitals-status-row .vitals-box .key {
+      flex: 1;
+      width: 100%;
+      border: 0;
+      border-radius: 0;
+      background: transparent;
+      box-shadow: none;
+      padding: 14px 12px;
+      min-height: 52px;
+      align-items: flex-start;
+    }
+    .vitals-status-row .status-toggle {
+      height: 100%;
+      align-items: flex-start;
+    }
+    .vitals-status-row .status-toggle-text strong,
+    .vitals-status-row .vitals-box .key strong {
+      font-size: 14px;
+    }
+    .vitals-status-row .status-hint,
+    .vitals-status-row .vitals-box .key .hint,
+    .vitals-status-row .vitals-box .key .preview {
+      white-space: normal;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
     }
     .vitals-box-lead {
       margin: 0 0 10px;
@@ -3683,34 +3738,36 @@
       </div>
     </section>
 
-    <section class="vitals-box" id="vitals-box" aria-label="몸 수치">
-      <p class="vitals-box-lead">집에서 혈압·혈당을 재는 분만 쓰세요. 일반 생활만 적으실 분은 켜지 않아도 됩니다.</p>
-      <div class="keys">
-        <button class="key" type="button" id="vitals-key" aria-label="몸 수치 기록">
-          <strong>몸 수치</strong>
-          <span class="hint" id="vitals-key-hint">필요한 분만 · 눌러서 켜기</span>
-          <span class="preview" data-preview="vitals" id="vitals-key-preview"></span>
-        </button>
-      </div>
-    </section>
-
-    <section class="status-block" id="status-block" aria-labelledby="body-status-title">
-      <button type="button" class="status-toggle" id="status-toggle" aria-expanded="false" aria-controls="status-panel">
-        <span class="status-toggle-text">
-          <strong id="body-status-title" data-i18n="status.title">현재 내몸 상태</strong>
-          <span class="status-hint" id="status-hint" data-i18n="status.hint">입력하면 참고 요약이 나타납니다</span>
-        </span>
-        <span class="chev" aria-hidden="true">▾</span>
-      </button>
-      <div class="status-panel" id="status-panel" role="region" aria-labelledby="body-status-title" hidden>
-        <p class="status-mode" id="status-mode"></p>
-        <p class="status-empty" id="status-empty" data-i18n="status.empty">입력하면 참고 요약이 나타납니다</p>
-        <div class="status-body" id="status-body">
-          <p class="status-filled" id="status-filled" aria-live="polite"></p>
+    <div class="vitals-status-row" id="vitals-status-row">
+      <section class="vitals-box" id="vitals-box" aria-label="몸 수치">
+        <p class="vitals-box-lead">집에서 혈압·혈당을 재는 분만 쓰세요. 일반 생활만 적으실 분은 켜지 않아도 됩니다.</p>
+        <div class="keys">
+          <button class="key" type="button" id="vitals-key" aria-label="몸 수치 기록">
+            <strong>몸 수치</strong>
+            <span class="hint" id="vitals-key-hint">필요한 분만 · 눌러서 켜기</span>
+            <span class="preview" data-preview="vitals" id="vitals-key-preview"></span>
+          </button>
         </div>
-        <p class="status-note" data-i18n="status.note">참고용 정리이며 의료 진단·치료가 아닙니다. 의사·약사 판단을 대신하지 않습니다. 약·병명 원문은 여기에 적지 않습니다.</p>
-      </div>
-    </section>
+      </section>
+
+      <section class="status-block" id="status-block" aria-labelledby="body-status-title">
+        <button type="button" class="status-toggle" id="status-toggle" aria-expanded="false" aria-controls="status-panel">
+          <span class="status-toggle-text">
+            <strong id="body-status-title" data-i18n="status.title">현재 내몸 상태</strong>
+            <span class="status-hint" id="status-hint" data-i18n="status.hint">입력하면 참고 요약이 나타납니다</span>
+          </span>
+          <span class="chev" aria-hidden="true">▾</span>
+        </button>
+        <div class="status-panel" id="status-panel" role="region" aria-labelledby="body-status-title" hidden>
+          <p class="status-mode" id="status-mode"></p>
+          <p class="status-empty" id="status-empty" data-i18n="status.empty">입력하면 참고 요약이 나타납니다</p>
+          <div class="status-body" id="status-body">
+            <p class="status-filled" id="status-filled" aria-live="polite"></p>
+          </div>
+          <p class="status-note" data-i18n="status.note">참고용 정리이며 의료 진단·치료가 아닙니다. 의사·약사 판단을 대신하지 않습니다. 약·병명 원문은 여기에 적지 않습니다.</p>
+        </div>
+      </section>
+    </div>
 
     <section class="symptom-ask" id="symptom-ask" aria-labelledby="symptom-ask-title">
       <button type="button" class="symptom-ask-toggle" id="symptom-ask-toggle" aria-expanded="false" aria-controls="symptom-ask-panel">
@@ -3771,7 +3828,7 @@
         <span data-i18n="records.title">내 기록 관리</span>
         <span class="ops-chevron" aria-hidden="true">▾</span>
       </button>
-      <p class="app-shell-version" id="app-shell-version" data-shell-version="20261009.2">이 화면 버전 20261009.2</p>
+      <p class="app-shell-version" id="app-shell-version" data-shell-version="20261009.3">이 화면 버전 20261009.3</p>
       <div class="ops-body" id="records-body" hidden>
 
         <div class="records-vitals" id="records-vitals">
