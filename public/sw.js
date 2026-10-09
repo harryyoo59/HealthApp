@@ -2,10 +2,10 @@
    Bump SHELL_VERSION together with index.html [data-shell-version].
    A new name drops the previous precache on activate. Diary data lives in
    localStorage and is never touched here. */
-var SHELL_VERSION = "20261010.1";
+var SHELL_VERSION = "20261010.2";
 var CACHE = "healthapp-shell-" + SHELL_VERSION;
 /* Vercel cleanUrls: no trailing slash / no /index.html — match final 200 paths. */
-var SHELL = ["/", "/privacy", "/manifest.webmanifest", "/icon-192.png", "/icon-512.png"];
+var SHELL = ["/", "/privacy", "/manifest.webmanifest", "/icon-192.png", "/icon-512.png", "/icon-180.png", "/icon-maskable-512.png"];
 
 function copyWithoutNoStore(response) {
   var headers = new Headers(response.headers);
