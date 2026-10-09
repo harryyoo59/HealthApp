@@ -1963,6 +1963,45 @@
       -webkit-box-orient: vertical;
       overflow: hidden;
     }
+    /* 현재 내몸 상태 열면 한 줄 전체로 크게 */
+    .vitals-status-row.is-status-open,
+    .vitals-status-row:has(.status-block.open) {
+      grid-template-columns: 1fr;
+    }
+    .vitals-status-row.is-status-open .vitals-box,
+    .vitals-status-row:has(.status-block.open) .vitals-box {
+      display: none;
+    }
+    .vitals-status-row .status-block.open {
+      grid-column: 1 / -1;
+      height: auto;
+    }
+    .vitals-status-row .status-block.open .status-toggle {
+      height: auto;
+      align-items: center;
+    }
+    .vitals-status-row .status-block.open .status-toggle-text strong {
+      font-size: 16px;
+    }
+    .vitals-status-row .status-block.open .status-hint {
+      display: block;
+      -webkit-line-clamp: unset;
+      white-space: normal;
+      overflow: visible;
+      font-size: 13px;
+      line-height: 1.4;
+    }
+    .vitals-status-row .status-block.open .status-panel {
+      padding: 12px 14px 16px;
+    }
+    .vitals-status-row .status-block.open .status-filled {
+      font-size: 15px;
+      line-height: 1.55;
+    }
+    .vitals-status-row .status-block.open .status-empty {
+      font-size: 14px;
+      padding: 14px 12px;
+    }
     .vitals-box-lead {
       margin: 0 0 10px;
       padding: 0 2px;
@@ -3828,7 +3867,7 @@
         <span data-i18n="records.title">내 기록 관리</span>
         <span class="ops-chevron" aria-hidden="true">▾</span>
       </button>
-      <p class="app-shell-version" id="app-shell-version" data-shell-version="20261009.3">이 화면 버전 20261009.3</p>
+      <p class="app-shell-version" id="app-shell-version" data-shell-version="20261009.4">이 화면 버전 20261009.4</p>
       <div class="ops-body" id="records-body" hidden>
 
         <div class="records-vitals" id="records-vitals">
@@ -9895,14 +9934,20 @@
 
       function setStatusOpen(open) {
         if (!statusBlock || !statusToggle || !statusPanel) return;
+        var row = document.getElementById("vitals-status-row");
         if (open) {
           statusBlock.classList.add("open");
           statusToggle.setAttribute("aria-expanded", "true");
           statusPanel.hidden = false;
+          if (row) row.classList.add("is-status-open");
+          try {
+            statusBlock.scrollIntoView({ block: "nearest", behavior: "smooth" });
+          } catch (eScroll) { /* ignore */ }
         } else {
           statusBlock.classList.remove("open");
           statusToggle.setAttribute("aria-expanded", "false");
           statusPanel.hidden = true;
+          if (row) row.classList.remove("is-status-open");
         }
       }
 
