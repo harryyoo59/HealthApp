@@ -3530,7 +3530,7 @@
         <span data-i18n="records.title">내 기록 관리</span>
         <span class="ops-chevron" aria-hidden="true">▾</span>
       </button>
-      <p class="app-shell-version" id="app-shell-version" data-shell-version="20261008.2">이 화면 버전 20261008.2</p>
+      <p class="app-shell-version" id="app-shell-version" data-shell-version="20261009.1">이 화면 버전 20261009.1</p>
       <div class="ops-body" id="records-body" hidden>
         <div class="records-transfer" id="records-transfer" data-i18n-attr="aria-label:records.transferAria" aria-label="기록 저장·옮기기">
           <h3 class="ops-section-title" data-i18n="records.transferTitle">기록 저장·옮기기</h3>
@@ -3902,7 +3902,7 @@
           </div>
           <label class="meals-note-label" for="meal-drink" data-i18n="meal.writeOwn">* 메뉴에 없으면 아래칸에 적어 주세요</label>
           <div class="meals-note-row">
-            <input type="text" class="meals-note-input" id="meal-drink" maxlength="80" placeholder="예: 아메리카노. 제로콜라" data-i18n-placeholder="meal.ph.drink" autocomplete="off" />
+            <input type="text" class="meals-note-input" id="meal-drink" maxlength="80" placeholder="예: 아메리카노(노슈가). 커피(일반)" data-i18n-placeholder="meal.ph.drink" autocomplete="off" />
           </div>
         </div>
         <div class="meals-field" data-meal-slot="alcohol">
@@ -4373,7 +4373,7 @@
         },
         drink: {
           title: "음료",
-          help: "어제 마신 음료를 적어 주세요. 예: 커피, 제로콜라"
+          help: "어제 마신 음료를 적어 주세요. 예: 아메리카노(노슈가), 커피(일반)"
         },
         alcohol: {
           title: "주류",
@@ -4469,7 +4469,8 @@
       ];
       /** 음료 기본 메뉴 (기존 + 추천). */
       var DRINK_FOOD_CHIPS = [
-        { id: "coffee", label: "커피", kcal: 50 },
+        { id: "americano-nosugar", label: "아메리카노(노슈가)", kcal: 10 },
+        { id: "coffee", label: "커피(일반)", kcal: 50 },
         { id: "cola", label: "콜라", kcal: 140 },
         { id: "soda", label: "탄산음료", kcal: 140 },
         { id: "iced-americano", label: "아이스아메리카노", kcal: 15 },
@@ -5411,6 +5412,13 @@
         return !/[가-힣]\s*후라이/.test(withoutEgg);
       }
 
+      // 아메리카노·노슈가·블랙커피는 무설탕. 라떼·믹스·설탕이 있으면 일반 커피 규칙으로 넘긴다.
+      function matchNoSugarCoffee(item) {
+        var s = String(item || "");
+        if (/라떼|믹스|설탕|시럽|우유|연유/.test(s)) return false;
+        return /아메리카노|노슈가|노슈거|블랙\s*커피/.test(s);
+      }
+
       var FOOD_KCAL_RULES = [
         { test: /비빔밥/, kcal: 550, label: "비빔밥" },
         { test: /볶음밥|덮밥/, kcal: 600, label: "볶음·덮밥" },
@@ -5443,7 +5451,8 @@
         { test: /샐러드|쌈채소|상추|채소/, kcal: 40, label: "채소" },
         { test: /과일|사과|바나나|귤|포도/, kcal: 80, label: "과일" },
         { test: /과자|칩|초콜릿|아이스크림|케이크|디저트/, kcal: 220, label: "간식·디저트" },
-        { test: /커피|아메리카노|라떼/, kcal: 50, label: "커피" },
+        { test: { test: function (item) { return matchNoSugarCoffee(item); } }, kcal: 10, label: "아메리카노(노슈가)" },
+        { test: /커피|라떼|아메리카노/, kcal: 50, label: "커피(일반)" },
         { test: /우유한잔|우유\s*한\s*잔|우유/, kcal: 120, label: "우유" },
         { test: /콜라/, kcal: 140, label: "콜라" },
         { test: /탄산음료|사이다|스프라이트|환타/, kcal: 140, label: "탄산음료" },
