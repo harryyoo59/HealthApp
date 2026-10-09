@@ -3867,7 +3867,7 @@
         <span data-i18n="records.title">내 기록 관리</span>
         <span class="ops-chevron" aria-hidden="true">▾</span>
       </button>
-      <p class="app-shell-version" id="app-shell-version" data-shell-version="20261009.4">이 화면 버전 20261009.4</p>
+      <p class="app-shell-version" id="app-shell-version" data-shell-version="20261010.1">이 화면 버전 20261010.1</p>
       <div class="ops-body" id="records-body" hidden>
 
         <div class="records-vitals" id="records-vitals">
@@ -4483,15 +4483,10 @@
             </div>
           </div>
         </div>
-        <div class="act-block" data-act="drive" data-input-mode="none">
+        <div class="act-block" data-act="drive" data-input-mode="adjust">
           <div class="act-block-head">
             <strong>운전</strong>
             <span class="act-block-kcal" data-act-kcal="drive"></span>
-          </div>
-          <p class="act-mode-hint">주어진 시간 또는 +/- 조절 — <strong>하나만</strong></p>
-          <div class="act-path act-path-preset" data-act-path="preset">
-            <span class="act-path-label">주어진 시간</span>
-            <div class="act-chips" id="act-drive-chips" role="group" aria-label="운전 시간 선택"></div>
           </div>
           <div class="act-path act-path-adjust" data-act-path="adjust">
             <span class="act-path-label">+/- 조절</span>
@@ -4668,11 +4663,11 @@
         },
         "activity-yesterday": {
           title: "어제 하루 행동",
-          help: "수면·걷기·앉아있기·운전·운동을 눌러 고르세요. 주어진 시간·+/-·걸음(+/-)은 하나만 씁니다. 아래 총 소모 칼로리가 대략 합산됩니다."
+          help: "수면·걷기·앉아있기·운전·운동을 눌러 고르세요. 수면·걷기·앉아있기·운동은 주어진 시간·+/-·걸음(+/-) 중 하나만, 운전은 +/-만 씁니다. 아래 총 소모 칼로리가 대략 합산됩니다."
         },
         "activity-today": {
           title: "오늘 하루 행동",
-          help: "오늘 한 행동을 틈틈이 눌러 기록하세요. 주어진 시간·+/-·걸음(+/-)은 하나만. 수면·걷기·앉아있기·운전·운동과 총 소모가 합산됩니다."
+          help: "오늘 한 행동을 틈틈이 눌러 기록하세요. 수면·걷기·앉아있기·운동은 주어진 시간·+/-·걸음(+/-) 중 하나만, 운전은 +/-만. 총 소모가 합산됩니다."
         }
       };
       var PROFILE_KEYS = ["sex", "age", "height", "weight", "bp"];
@@ -6441,7 +6436,6 @@
       var SLEEP_PRESETS = [5, 6, 7, 8, 9];
       var WALK_MIN_PRESETS = [15, 30, 45, 60, 90];
       var SIT_PRESETS = [2, 4, 6, 8, 10];
-      var DRIVE_PRESETS = [0.5, 1, 1.5, 2];
       var EXERCISE_MIN_PRESETS = [20, 30, 40, 60];
       var EXTRA_MIN_PRESETS = [15, 30, 40, 60];
       var ACT_STEPPER_CFG = {
@@ -10937,7 +10931,7 @@
           actModes.sit = valueInPresets(d.sitHours, SIT_PRESETS) ? "preset" : "adjust";
         }
         if (d.driveHours != null && d.driveHours > 0) {
-          actModes.drive = valueInPresets(d.driveHours, DRIVE_PRESETS) ? "preset" : "adjust";
+          actModes.drive = "adjust";
         }
         if (d.exerciseMinutes != null && d.exerciseMinutes > 0) {
           actModes.exercise = valueInPresets(d.exerciseMinutes, EXERCISE_MIN_PRESETS) ? "preset" : "adjust";
@@ -11005,7 +10999,7 @@
         paintActStep(actWalkMinVal, "walkMinutes", actModes.walk === "adjust" ? d.walkMinutes : null);
         paintActStep(actWalkStepVal, "walkSteps", actModes.walk === "steps" ? d.walkSteps : null);
         paintActStep(actSitVal, "sitHours", actModes.sit === "adjust" ? d.sitHours : null);
-        paintActStep(actDriveVal, "driveHours", actModes.drive === "adjust" ? d.driveHours : null);
+        paintActStep(actDriveVal, "driveHours", d.driveHours);
         paintActStep(actExerciseMinVal, "exerciseMinutes", actModes.exercise === "adjust" ? d.exerciseMinutes : null);
 
         fillChipGroup("act-sleep-chips", SLEEP_PRESETS, function (v) {
@@ -11022,11 +11016,6 @@
           return formatActHours(v) + "시간";
         }, actModes.sit === "preset" ? d.sitHours : null, function (v) {
           pickActPreset("sit", "sitHours", v, SIT_PRESETS);
-        });
-        fillChipGroup("act-drive-chips", DRIVE_PRESETS, function (v) {
-          return formatActHours(v) + "시간";
-        }, actModes.drive === "preset" ? d.driveHours : null, function (v) {
-          pickActPreset("drive", "driveHours", v, DRIVE_PRESETS);
         });
         fillKindChips("act-exercise-kind-chips", EXERCISE_KINDS, d.exerciseKind, function (kind) {
           activityDraft.exerciseKind = (activityDraft.exerciseKind === kind) ? "" : kind;
