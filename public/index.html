@@ -3557,9 +3557,9 @@
   </div>
   <div id="consent-withdraw-dialog" class="consent-withdraw" role="dialog" aria-modal="true" aria-labelledby="consent-withdraw-text" hidden>
     <div class="consent-withdraw-card">
-      <p class="consent-withdraw-text" id="consent-withdraw-text">동의를 철회하면 이 폰에 저장된 모든 기록이 지워져요. 되돌릴 수 없어요.</p>
+      <p class="consent-withdraw-text" id="consent-withdraw-text">동의를 철회하면 이 폰에 입력한 건강 기록이 모두 지워져요. 되돌릴 수 없어요. 지우기 전에 「먼저 기록 저장 하기」로 파일을 받아 두는 걸 권장합니다.</p>
       <div class="consent-withdraw-actions">
-        <button type="button" class="consent-withdraw-backup" id="consent-withdraw-backup">먼저 백업 받기</button>
+        <button type="button" class="consent-withdraw-backup" id="consent-withdraw-backup">먼저 기록 저장 하기</button>
         <button type="button" class="consent-withdraw-cancel" id="consent-withdraw-cancel">취소</button>
         <button type="button" class="consent-withdraw-confirm" id="consent-withdraw-confirm">기록 지우고 철회</button>
       </div>
@@ -3933,8 +3933,7 @@
         <span data-i18n="records.title">내 기록 관리</span>
         <span class="ops-chevron" aria-hidden="true">▾</span>
       </button>
-      <p class="app-shell-version" id="app-shell-version" data-shell-version="20261010.3">이 화면 버전 20261010.3</p>
-      <div class="ops-body" id="records-body" hidden>
+      <p class="app-shell-version" id="app-shell-version" data-shell-version="20261011.1">이 화면 버전 20261011.1</p>      <div class="ops-body" id="records-body" hidden>
 
         <div class="records-vitals" id="records-vitals">
           <h3 class="ops-section-title">몸 수치 (혈압·혈당)</h3>
@@ -13256,6 +13255,40 @@
         dialog.hidden = true;
       }
 
+      function wipeKeepOnConsentClear(name) {
+        if (!name) return false;
+        if (name === "healthapp.ops.pinHash.v1") return true;
+        if (name === "healthapp.novelist.draft.v1") return true;
+        if (name === BREAKFAST_DEFAULTS_VERSION_KEY) return true;
+        if (name === LUNCH_DEFAULTS_VERSION_KEY) return true;
+        if (name === DINNER_DEFAULTS_VERSION_KEY) return true;
+        if (name === SNACK_SPLIT_VERSION_KEY) return true;
+        if (name === LATE_NIGHT_DEFAULTS_VERSION_KEY) return true;
+        if (name === DRINK_DEFAULTS_VERSION_KEY) return true;
+        if (name === ALCOHOL_DEFAULTS_VERSION_KEY) return true;
+        if (name === DESSERT_DEFAULTS_VERSION_KEY) return true;
+        return false;
+      }
+
+      function clearIndexedBackupBestEffort() {
+        try {
+          if (!window.indexedDB) return;
+          openBackupDb().then(function (db) {
+            return new Promise(function (resolve) {
+              try {
+                var tx = db.transaction(BACKUP_STORE, "readwrite");
+                tx.objectStore(BACKUP_STORE).delete(BACKUP_ID);
+                tx.oncomplete = function () { db.close(); resolve(); };
+                tx.onerror = function () { db.close(); resolve(); };
+              } catch (eTx) {
+                try { db.close(); } catch (eClose) { /* ignore */ }
+                resolve();
+              }
+            });
+          }).catch(function () { /* ignore */ });
+        } catch (e) { /* ignore */ }
+      }
+
       function clearOwnedDiaryStorage() {
         if (backupTimer) {
           clearTimeout(backupTimer);
@@ -13269,12 +13302,19 @@
           }
         } catch (eList) { /* ignore */ }
         names.forEach(function (name) {
+          if (wipeKeepOnConsentClear(name)) return;
           try { localStorage.removeItem(name); } catch (eRemove) { /* ignore */ }
         });
         try { localStorage.removeItem(CONSENT_KEY); } catch (eConsent) { /* ignore */ }
+        clearIndexedBackupBestEffort();
       }
 
       function confirmConsentWithdraw() {
+        var ok = confirmDangerTwice(
+          "정말 이 기기의 건강 기록을 모두 지울까요? 식단·약·문진·몸 수치 등이 삭제됩니다.",
+          "한 번 더 확인: 기록을 지우고 동의도 철회할까요? 되돌릴 수 없습니다."
+        );
+        if (!ok) return;
         clearOwnedDiaryStorage();
         window.location.reload();
       }
