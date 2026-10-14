@@ -2616,7 +2616,9 @@
       align-items: center;
     }
     .sheet-profile-row-bp {
-      align-items: start;
+      grid-template-columns: 1fr;
+      gap: 6px;
+      align-items: stretch;
     }
     .sheet-profile-row label,
     .sheet-profile-row .sheet-profile-label {
@@ -2717,26 +2719,40 @@
       flex-direction: column;
       gap: 8px;
       min-width: 0;
+      width: 100%;
     }
     .bp-pair {
-      display: grid;
-      grid-template-columns: 1fr auto 1fr;
-      gap: 6px;
-      align-items: center;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      min-width: 0;
     }
-    .bp-slash {
+    .bp-leg {
+      display: grid;
+      grid-template-columns: 40px minmax(0, 1fr);
+      gap: 8px;
+      align-items: center;
+      min-width: 0;
+    }
+    .bp-leg-label {
+      margin: 0;
       color: var(--muted);
-      font-size: 18px;
+      font-size: 13px;
       font-weight: 700;
-      padding-top: 2px;
+      text-align: center;
+    }
+    .bp-mini {
+      grid-template-columns: 44px minmax(0, 1fr) 44px;
+      min-width: 0;
     }
     .bp-mini .step-val {
-      font-size: 15px;
+      font-size: 16px;
+      min-width: 0;
     }
     .bp-mini .step-btn {
-      width: 40px;
-      height: 40px;
-      font-size: 20px;
+      width: 44px;
+      height: 44px;
+      font-size: 22px;
     }
     .bp-chips {
       display: flex;
@@ -3933,7 +3949,7 @@
         <span data-i18n="records.title">내 기록 관리</span>
         <span class="ops-chevron" aria-hidden="true">▾</span>
       </button>
-      <p class="app-shell-version" id="app-shell-version" data-shell-version="20261014.1">이 화면 버전 20261014.1</p>      <div class="ops-body" id="records-body" hidden>
+      <p class="app-shell-version" id="app-shell-version" data-shell-version="20261014.2">이 화면 버전 20261014.2</p>      <div class="ops-body" id="records-body" hidden>
 
         <div class="records-vitals" id="records-vitals">
           <h3 class="ops-section-title">몸 수치 (혈압·혈당)</h3>
@@ -4189,16 +4205,21 @@
           <span class="sheet-profile-label" id="profile-bp-label">혈압</span>
           <div class="bp-pick" role="group" aria-labelledby="profile-bp-label">
             <div class="bp-pair">
-              <div class="stepper bp-mini" data-stepper="sys" aria-label="수축기 혈압">
-                <button type="button" class="step-btn" data-dir="-1" aria-label="수축기 줄이기">−</button>
-                <span class="step-val is-empty" id="profile-sys-val" aria-live="polite">—</span>
-                <button type="button" class="step-btn" data-dir="1" aria-label="수축기 늘리기">+</button>
+              <div class="bp-leg">
+                <span class="bp-leg-label" id="profile-sys-label">위</span>
+                <div class="stepper bp-mini" data-stepper="sys" role="group" aria-labelledby="profile-sys-label">
+                  <button type="button" class="step-btn" data-dir="-1" aria-label="수축기 줄이기">−</button>
+                  <span class="step-val is-empty" id="profile-sys-val" aria-live="polite">—</span>
+                  <button type="button" class="step-btn" data-dir="1" aria-label="수축기 늘리기">+</button>
+                </div>
               </div>
-              <span class="bp-slash" aria-hidden="true">/</span>
-              <div class="stepper bp-mini" data-stepper="dia" aria-label="이완기 혈압">
-                <button type="button" class="step-btn" data-dir="-1" aria-label="이완기 줄이기">−</button>
-                <span class="step-val is-empty" id="profile-dia-val" aria-live="polite">—</span>
-                <button type="button" class="step-btn" data-dir="1" aria-label="이완기 늘리기">+</button>
+              <div class="bp-leg">
+                <span class="bp-leg-label" id="profile-dia-label">아래</span>
+                <div class="stepper bp-mini" data-stepper="dia" role="group" aria-labelledby="profile-dia-label">
+                  <button type="button" class="step-btn" data-dir="-1" aria-label="이완기 줄이기">−</button>
+                  <span class="step-val is-empty" id="profile-dia-val" aria-live="polite">—</span>
+                  <button type="button" class="step-btn" data-dir="1" aria-label="이완기 늘리기">+</button>
+                </div>
               </div>
             </div>
             <div class="bp-chips" id="bp-chips">
