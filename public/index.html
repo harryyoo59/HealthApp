@@ -3989,7 +3989,7 @@
         <span data-i18n="records.title">내 기록 관리</span>
         <span class="ops-chevron" aria-hidden="true">▾</span>
       </button>
-      <p class="app-shell-version" id="app-shell-version" data-shell-version="20261014.3">이 화면 버전 20261014.3</p>      <div class="ops-body" id="records-body" hidden>
+      <p class="app-shell-version" id="app-shell-version" data-shell-version="20261014.4">이 화면 버전 20261014.4</p>      <div class="ops-body" id="records-body" hidden>
 
         <div class="records-vitals" id="records-vitals">
           <h3 class="ops-section-title">몸 수치 (혈압·혈당)</h3>
@@ -14704,11 +14704,19 @@
           sessionStorage.setItem(noticeKey, "1");
         } catch (e) { /* ignore */ }
         if (!banner) return;
-        banner.textContent = "앱이 업데이트됐어요. 완전히 닫았다가 다시 열어 주세요.";
+        banner.textContent = "업데이트를 누르세요";
         banner.hidden = false;
       }
       if (banner) {
-        banner.addEventListener("click", function () { banner.hidden = true; });
+        banner.addEventListener("click", function () {
+          var updateBtn = document.getElementById("app-shell-update-top")
+            || document.getElementById("app-shell-refresh");
+          if (updateBtn) {
+            updateBtn.click();
+            return;
+          }
+          banner.hidden = true;
+        });
       }
       window.addEventListener("healthapp-shell-update", showUpdateNotice);
 
