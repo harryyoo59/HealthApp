@@ -442,6 +442,25 @@
       outline: 2px solid #f2fff8;
       outline-offset: 2px;
     }
+    .title-update-btn.is-update-ready,
+    #app-shell-refresh.is-update-ready {
+      animation: update-btn-blink 1.1s ease-in-out infinite;
+      border-color: #9ee6bf;
+      background: rgba(61, 155, 110, 0.42);
+      color: #ffffff;
+      box-shadow: 0 0 0 2px rgba(125, 206, 160, 0.35);
+    }
+    @keyframes update-btn-blink {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.42; transform: scale(1.04); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .title-update-btn.is-update-ready,
+      #app-shell-refresh.is-update-ready {
+        animation: none;
+        opacity: 1;
+      }
+    }
     .ops-secret-entry {
       position: absolute;
       left: 0;
@@ -3989,7 +4008,7 @@
         <span data-i18n="records.title">내 기록 관리</span>
         <span class="ops-chevron" aria-hidden="true">▾</span>
       </button>
-      <p class="app-shell-version" id="app-shell-version" data-shell-version="20261014.4">이 화면 버전 20261014.4</p>      <div class="ops-body" id="records-body" hidden>
+      <p class="app-shell-version" id="app-shell-version" data-shell-version="20261014.5">이 화면 버전 20261014.5</p>      <div class="ops-body" id="records-body" hidden>
 
         <div class="records-vitals" id="records-vitals">
           <h3 class="ops-section-title">몸 수치 (혈압·혈당)</h3>
@@ -14698,15 +14717,32 @@
     (function () {
       var banner = document.getElementById("app-update-banner");
       var noticeKey = "healthapp.shellUpdateNotice.v1";
+      function markUpdateButtonsReady() {
+        [
+          document.getElementById("app-shell-update-top"),
+          document.getElementById("app-shell-refresh")
+        ].forEach(function (btn) {
+          if (!btn) return;
+          btn.classList.add("is-update-ready");
+          btn.setAttribute("aria-label", "업데이트 · 새 화면이 있습니다");
+        });
+      }
       function showUpdateNotice() {
         try {
-          if (sessionStorage.getItem(noticeKey) === "1") return;
+          if (sessionStorage.getItem(noticeKey) === "1") {
+            markUpdateButtonsReady();
+            return;
+          }
           sessionStorage.setItem(noticeKey, "1");
         } catch (e) { /* ignore */ }
+        markUpdateButtonsReady();
         if (!banner) return;
         banner.textContent = "업데이트를 누르세요";
         banner.hidden = false;
       }
+      try {
+        if (sessionStorage.getItem(noticeKey) === "1") markUpdateButtonsReady();
+      } catch (eReady) { /* ignore */ }
       if (banner) {
         banner.addEventListener("click", function () {
           var updateBtn = document.getElementById("app-shell-update-top")
