@@ -4,8 +4,8 @@
 
 ## 공개 주소
 
-- **HTTPS:** https://healthapp-theta.vercel.app/
-- 나중에 도메인을 등록하면 Vercel에 연결하면 됩니다. 초대 문구의 주소도 함께 바꾸면 됩니다.
+- **사이트:** dailybodydiary.com
+- **HTTPS:** https://dailybodydiary.com/
 
 ## 로컬 개발
 
@@ -13,4 +13,4 @@
 
 ## 배포
 
-GitHub `main` 푸시 → Vercel `healthapp` 자동 배포 (출력 폴더 `public`).
+GitHub `main` 푸시 → Vercel `healthapp` 자동 배포 (출력 폴더 `public`). 공개 도메인은 dailybodydiary.com 입니다.
