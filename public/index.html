@@ -392,9 +392,16 @@
     @media (max-width: 340px) {
       .title-tools { align-items: flex-start; width: 100%; }
     }
+    .title-date-row {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
     .today-date {
       flex: 0 0 auto;
-      margin: 2px 0 0;
+      margin: 0;
       color: #c5d9cd;
       font-size: 13px;
       font-weight: 600;
@@ -404,6 +411,36 @@
       white-space: nowrap;
       cursor: default;
       user-select: none;
+    }
+    .title-update-btn {
+      appearance: none;
+      flex: 0 0 auto;
+      margin: 0;
+      padding: 5px 10px;
+      min-height: 30px;
+      border-radius: 999px;
+      border: 1px solid rgba(125, 206, 160, 0.45);
+      background: rgba(61, 155, 110, 0.18);
+      color: #dff5e8;
+      font: inherit;
+      font-size: 12px;
+      font-weight: 700;
+      line-height: 1.2;
+      letter-spacing: -0.01em;
+      cursor: pointer;
+      white-space: nowrap;
+      -webkit-tap-highlight-color: rgba(61, 155, 110, 0.25);
+    }
+    .title-update-btn:active {
+      background: rgba(61, 155, 110, 0.32);
+    }
+    .title-update-btn:disabled {
+      opacity: 0.55;
+      cursor: default;
+    }
+    .title-update-btn:focus-visible {
+      outline: 2px solid #f2fff8;
+      outline-offset: 2px;
     }
     .ops-secret-entry {
       position: absolute;
@@ -3618,7 +3655,10 @@
         <p class="title-en" data-i18n="brand.en">Personal Health Management</p>
       </div>
       <div class="title-tools">
-        <time class="today-date" id="today-date" datetime=""></time>
+        <div class="title-date-row">
+          <time class="today-date" id="today-date" datetime=""></time>
+          <button type="button" class="title-update-btn" id="app-shell-update-top" aria-label="업데이트 · 최신 화면 받기">업데이트</button>
+        </div>
       </div>
       <button type="button" class="ops-secret-entry" id="ops-secret-entry" aria-label="운영" title="">운영</button>
     </div>
@@ -3949,7 +3989,7 @@
         <span data-i18n="records.title">내 기록 관리</span>
         <span class="ops-chevron" aria-hidden="true">▾</span>
       </button>
-      <p class="app-shell-version" id="app-shell-version" data-shell-version="20261014.2">이 화면 버전 20261014.2</p>      <div class="ops-body" id="records-body" hidden>
+      <p class="app-shell-version" id="app-shell-version" data-shell-version="20261014.3">이 화면 버전 20261014.3</p>      <div class="ops-body" id="records-body" hidden>
 
         <div class="records-vitals" id="records-vitals">
           <h3 class="ops-section-title">몸 수치 (혈압·혈당)</h3>
@@ -3982,7 +4022,7 @@
           <p class="records-transfer-status" id="records-transfer-status" aria-live="polite"></p>
         </div>
         <div class="app-shell-actions">
-          <button type="button" class="records-transfer-btn is-secondary" id="app-shell-refresh">최신으로 새로고침</button>
+          <button type="button" class="records-transfer-btn is-secondary" id="app-shell-refresh">업데이트</button>
           <p class="records-transfer-lead">화면이 예전 그대로면 최신 화면만 다시 받습니다. 건강 기록은 지우지 않습니다.</p>
           <p class="records-transfer-status" id="app-shell-status" aria-live="polite"></p>
         </div>
@@ -13566,9 +13606,40 @@
         refreshPreImportRestoreButton();
       }
 
+      function runAppShellUpdate(triggerBtn) {
+        var statusEl = document.getElementById("app-shell-status");
+        var buttons = [
+          document.getElementById("app-shell-refresh"),
+          document.getElementById("app-shell-update-top")
+        ].filter(Boolean);
+        buttons.forEach(function (btn) { btn.disabled = true; });
+        if (triggerBtn) triggerBtn.disabled = true;
+        if (statusEl) statusEl.textContent = "최신 화면을 받는 중… 건강 기록은 지우지 않습니다.";
+        try { sessionStorage.setItem("healthapp.shellRefreshHint.v1", "1"); } catch (eFlag) { /* ignore */ }
+        // 앱 껍데기 캐시와 서비스 워커만 지운다. localStorage 건강 기록은 건드리지 않는다.
+        var clearShell = function () {
+          if (!window.caches || !caches.keys) return Promise.resolve();
+          return caches.keys().then(function (keys) {
+            return Promise.all(keys.map(function (key) {
+              if (String(key).indexOf("healthapp-shell") !== 0) return Promise.resolve();
+              return caches.delete(key);
+            }));
+          });
+        };
+        var unreg = (navigator.serviceWorker && navigator.serviceWorker.getRegistrations)
+          ? navigator.serviceWorker.getRegistrations().then(function (regs) {
+              return Promise.all(regs.map(function (reg) { return reg.unregister(); }));
+            })
+          : Promise.resolve();
+        Promise.resolve(unreg).then(clearShell).catch(function () { return null; }).then(function () {
+          window.location.reload();
+        });
+      }
+
       function setupAppShellControls() {
         var versionEl = document.getElementById("app-shell-version");
         var refreshBtn = document.getElementById("app-shell-refresh");
+        var topUpdateBtn = document.getElementById("app-shell-update-top");
         var statusEl = document.getElementById("app-shell-status");
         var version = versionEl ? (versionEl.getAttribute("data-shell-version") || "") : "";
         if (versionEl && version) versionEl.textContent = "이 화면 버전 " + version;
@@ -13579,30 +13650,11 @@
             if (statusEl) statusEl.textContent = "최신 화면으로 열었습니다. 건강 기록은 그대로입니다.";
           }
         } catch (eHint) { /* ignore */ }
-        if (!refreshBtn) return;
-        refreshBtn.addEventListener("click", function () {
-          refreshBtn.disabled = true;
-          if (statusEl) statusEl.textContent = "최신 화면을 받는 중… 건강 기록은 지우지 않습니다.";
-          try { sessionStorage.setItem("healthapp.shellRefreshHint.v1", "1"); } catch (eFlag) { /* ignore */ }
-          // 앱 껍데기 캐시와 서비스 워커만 지운다. localStorage 건강 기록은 건드리지 않는다.
-          var clearShell = function () {
-            if (!window.caches || !caches.keys) return Promise.resolve();
-            return caches.keys().then(function (keys) {
-              return Promise.all(keys.map(function (key) {
-                if (String(key).indexOf("healthapp-shell") !== 0) return Promise.resolve();
-                return caches.delete(key);
-              }));
-            });
-          };
-          var unreg = (navigator.serviceWorker && navigator.serviceWorker.getRegistrations)
-            ? navigator.serviceWorker.getRegistrations().then(function (regs) {
-                return Promise.all(regs.map(function (reg) { return reg.unregister(); }));
-              })
-            : Promise.resolve();
-          Promise.resolve(unreg).then(clearShell).catch(function () { return null; }).then(function () {
-            window.location.reload();
-          });
-        });
+        function onUpdateClick(ev) {
+          runAppShellUpdate(ev && ev.currentTarget);
+        }
+        if (refreshBtn) refreshBtn.addEventListener("click", onUpdateClick);
+        if (topUpdateBtn) topUpdateBtn.addEventListener("click", onUpdateClick);
       }
 
       function setupRecordsPanel() {
