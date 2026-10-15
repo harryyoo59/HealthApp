@@ -11661,6 +11661,19 @@
         return prev + (unit || "") + " → " + cur + (unit || "") + " (" + sign + d + (unit || "") + ")";
       }
 
+      /** 지난 기간이 '비교할 만큼' 쌓였는지. 월간은 말일 며칠만으로 비교하지 않음. */
+      function briefMinPrevDays(mode) {
+        return mode === "month" ? 7 : 3;
+      }
+
+      function briefPrevEnough(prev, mode, metricDays) {
+        var min = briefMinPrevDays(mode);
+        if (!prev || (prev.loggedDays || 0) < min) return false;
+        if (metricDays == null) return true;
+        var need = mode === "month" ? Math.min(5, min) : Math.min(2, min);
+        return (metricDays || 0) >= need;
+      }
+
       function briefPeriodLabels(mode) {
         if (mode === "month") {
           return {
@@ -11682,15 +11695,17 @@
         };
       }
 
-      function activityCompareLine(cur, prev, labels) {
+      function activityCompareLine(cur, prev, labels, mode) {
         var L = labels || briefPeriodLabels("week");
         var curScore = (cur.walkAvg || 0) + (cur.exerciseAvg || 0);
         var prevScore = (prev.walkAvg || 0) + (prev.exerciseAvg || 0);
-        if (!cur.walkDays && !cur.exerciseDays && !prev.walkDays && !prev.exerciseDays) return null;
-        if ((cur.walkDays || cur.exerciseDays) && !(prev.walkDays || prev.exerciseDays)) {
-          return L.thisLabel + " 걷기·운동 기록이 쌓이기 시작했습니다.";
+        var curActDays = (cur.walkDays || 0) + (cur.exerciseDays || 0);
+        var prevActDays = (prev.walkDays || 0) + (prev.exerciseDays || 0);
+        if (!curActDays && !prevActDays) return null;
+        if (curActDays && !briefPrevEnough(prev, mode, prevActDays)) {
+          return L.thisLabel + " 걷기·운동 기록이 쌓이는 중입니다. " + L.prevLabel + " 기록이 더 있으면 비교합니다.";
         }
-        if (!(cur.walkDays || cur.exerciseDays) && (prev.walkDays || prev.exerciseDays)) {
+        if (!curActDays && prevActDays) {
           return L.thisLabel + " 활동 기록이 아직 적어, " + L.prevWith + " 비교하기엔 이릅니다.";
         }
         var diff = curScore - prevScore;
@@ -11699,7 +11714,7 @@
         return "걷기·운동이 " + L.prevLabel + "보다 조금 줄어든 편입니다.";
       }
 
-      function weightCompareLine(cur, prev, labels) {
+      function weightCompareLine(cur, prev, labels, mode) {
         var L = labels || briefPeriodLabels("week");
         var a = cur.weightLast != null ? cur.weightLast : cur.weightFirst;
         var b = prev.weightLast != null ? prev.weightLast : prev.weightFirst;
@@ -11709,14 +11724,17 @@
           }
           return null;
         }
-        if (a == null || b == null) return "몸무게 비교는 " + L.bothSides + " 값이 더 쌓이면 가능합니다.";
+        if (a == null) return "몸무게 비교는 " + L.bothSides + " 값이 더 쌓이면 가능합니다.";
+        if (b == null || !briefPrevEnough(prev, mode, prev.loggedDays)) {
+          return L.thisLabel + " 몸무게 " + a + " kg · " + L.prevLabel + " 기록이 더 있으면 비교합니다.";
+        }
         var d = Math.round((a - b) * 10) / 10;
         if (Math.abs(d) < 0.3) return "몸무게는 비슷한 흐름입니다.";
         if (d > 0) return "몸무게가 " + L.prevEnd + "보다 조금 오른 흐름입니다.";
         return "몸무게가 " + L.prevEnd + "보다 조금 내린 흐름입니다.";
       }
 
-      function bpCompareLine(cur, prev, labels) {
+      function bpCompareLine(cur, prev, labels, mode) {
         var L = labels || briefPeriodLabels("week");
         var a = cur.bpLast || cur.bpFirst;
         var b = prev.bpLast || prev.bpFirst;
@@ -11726,7 +11744,10 @@
           }
           return null;
         }
-        if (!a || !b) return "혈압 비교는 " + L.bothSides + " 값이 더 쌓이면 가능합니다.";
+        if (!a) return "혈압 비교는 " + L.bothSides + " 값이 더 쌓이면 가능합니다.";
+        if (!b || !briefPrevEnough(prev, mode, prev.loggedDays)) {
+          return L.thisLabel + " 혈압 " + a.sys + "/" + a.dia + " · " + L.prevLabel + " 기록이 더 있으면 비교합니다.";
+        }
         var ds = a.sys - b.sys;
         var dd = a.dia - b.dia;
         if (Math.abs(ds) < 5 && Math.abs(dd) < 5) return "혈압은 큰 변화 없이 비슷한 편입니다.";
@@ -11734,7 +11755,7 @@
         return "혈압 수치가 " + L.prevLabel + "보다 조금 낮은 쪽으로 보입니다. 흐름은 의사와 함께 보시면 좋습니다.";
       }
 
-      function questionnaireCompareLine(cur, prev, labels) {
+      function questionnaireCompareLine(cur, prev, labels, mode) {
         var L = labels || briefPeriodLabels("week");
         if (!cur.qDays && !prev.qDays) return null;
         if (cur.emergencyDays > 0) {
@@ -11743,8 +11764,8 @@
         if (!cur.qDays && prev.qDays) {
           return L.thisLabel + " 문진 기록이 적어, 증상 흐름 비교는 다음에 이어 갑니다.";
         }
-        if (cur.qDays && !prev.qDays) {
-          return "문진 기록이 " + L.thisLabel + "부터 쌓이기 시작했습니다. 판단만 짧게 이어 가겠습니다.";
+        if (cur.qDays && !briefPrevEnough(prev, mode, prev.qDays)) {
+          return "문진 기록이 " + L.thisLabel + "에 쌓이는 중입니다. " + L.prevLabel + " 기록이 더 있으면 비교합니다.";
         }
         var curRate = cur.discomfortDays / Math.max(1, cur.qDays);
         var prevRate = prev.discomfortDays / Math.max(1, prev.qDays);
@@ -11864,7 +11885,9 @@
         if (weekBriefRange) {
           weekBriefRange.textContent =
             L.thisLabel + " " + formatWeekSpan(thisKeys[0], thisKeys[thisKeys.length - 1]) +
+            " (기록 " + cur.loggedDays + "일)" +
             " · " + L.prevLabel + " " + formatWeekSpan(prevKeys[0], prevKeys[prevKeys.length - 1]) +
+            " (기록 " + prev.loggedDays + "일)" +
             " (" + range.rangeNote + ")";
         }
 
@@ -11884,7 +11907,8 @@
         }
 
         if (cur.intakeAvg != null || prev.intakeAvg != null) {
-          var intakeText = deltaPhrase(cur.intakeAvg, prev.intakeAvg, " kcal");
+          var intakeCanCompare = briefPrevEnough(prev, mode, prev.intakeDays);
+          var intakeText = intakeCanCompare ? deltaPhrase(cur.intakeAvg, prev.intakeAvg, " kcal") : null;
           if (intakeText) {
             lines.push({ label: "칼로리 섭취(기록한 날)", text: intakeText });
           } else if (cur.intakeAvg != null) {
@@ -11895,7 +11919,8 @@
           }
         }
         if (cur.burnAvg != null || prev.burnAvg != null) {
-          var burnText = deltaPhrase(cur.burnAvg, prev.burnAvg, " kcal");
+          var burnCanCompare = briefPrevEnough(prev, mode, prev.burnDays);
+          var burnText = burnCanCompare ? deltaPhrase(cur.burnAvg, prev.burnAvg, " kcal") : null;
           if (burnText) {
             lines.push({ label: "칼로리 소비(기록한 날)", text: burnText });
           } else if (cur.burnAvg != null) {
@@ -11906,16 +11931,16 @@
           }
         }
 
-        var actLine = activityCompareLine(cur, prev, L);
+        var actLine = activityCompareLine(cur, prev, L, mode);
         if (actLine) lines.push({ label: "활동", text: actLine });
 
-        var wLine = weightCompareLine(cur, prev, L);
+        var wLine = weightCompareLine(cur, prev, L, mode);
         if (wLine) lines.push({ label: "몸무게", text: wLine });
 
-        var bpLine = bpCompareLine(cur, prev, L);
+        var bpLine = bpCompareLine(cur, prev, L, mode);
         if (bpLine) lines.push({ label: "혈압", text: bpLine });
 
-        var qLine = questionnaireCompareLine(cur, prev, L);
+        var qLine = questionnaireCompareLine(cur, prev, L, mode);
         if (qLine) lines.push({ label: "문진·증상", text: qLine });
 
         if (!lines.length) {
