@@ -218,65 +218,30 @@
       color: #dff5e8;
       letter-spacing: -0.01em;
     }
-    .ops-members {
+    .ops-visit {
       display: flex;
       flex-direction: column;
       gap: 8px;
     }
-    .ops-period-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 8px;
-    }
-    .ops-period {
-      border: 1px solid var(--line);
+    .ops-visit-link {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      box-sizing: border-box;
+      padding: 10px 12px;
       border-radius: 10px;
-      background: rgba(26, 58, 48, 0.45);
-      padding: 8px 10px;
-      min-width: 0;
-    }
-    .ops-period-head {
-      display: flex;
-      align-items: baseline;
-      justify-content: space-between;
-      gap: 8px;
-      margin-bottom: 4px;
-    }
-    .ops-period-label {
-      font-size: 12px;
+      border: 1px solid rgba(159, 227, 191, 0.35);
+      background: rgba(26, 58, 48, 0.55);
+      color: #dff5e8;
+      font-size: 13px;
       font-weight: 700;
-      color: var(--ink);
+      text-decoration: none;
+      letter-spacing: -0.01em;
     }
-    .ops-period-count {
-      font-size: 12px;
-      font-weight: 700;
-      color: #9fe3bf;
-      white-space: nowrap;
-    }
-    .ops-period-list {
-      margin: 0;
-      padding: 0;
-      list-style: none;
-    }
-    .ops-period-list li {
-      font-size: 11px;
-      line-height: 1.4;
-      color: #c5d9cd;
-      padding: 2px 0;
-      word-break: break-word;
-    }
-    .ops-period-list li + li {
-      border-top: 1px solid rgba(232, 242, 236, 0.06);
-    }
-    .ops-period-empty,
-    .ops-members-empty {
-      margin: 0;
-      font-size: 11px;
-      line-height: 1.4;
-      color: rgba(155, 181, 168, 0.85);
-    }
-    .ops-members-empty {
-      padding: 8px 2px 2px;
+    .ops-visit-link:focus-visible {
+      outline: 2px solid #9fe3bf;
+      outline-offset: 2px;
     }
     .ops-note {
       margin: 8px 0 0;
@@ -3748,11 +3713,17 @@
         <span class="ops-chevron" aria-hidden="true">▾</span>
       </button>
       <div class="ops-body" id="ops-body" hidden>
-        <h3 class="ops-section-title">새로 다운로드 받은 인원</h3>
-        <div class="ops-members" id="ops-members" aria-live="polite">
-          <p class="ops-members-empty">다운로드 인원 현황을 불러오는 중…</p>
+        <h3 class="ops-section-title">앱 방문 횟수</h3>
+        <div class="ops-visit" id="ops-visit">
+          <a
+            class="ops-visit-link"
+            id="ops-visit-link"
+            href="https://vercel.com/harryyoo59/healthapp/analytics"
+            target="_blank"
+            rel="noopener noreferrer"
+          >Vercel에서 방문 보기</a>
         </div>
-        <p class="ops-note">이 기기에 앱을 처음 연 시점(설치·첫 사용)을 다운로드로 셉니다. 운영자·시험 계정·AI 봇은 제외합니다. 서버 없이 이 기기 기록만 보여 줍니다.</p>
+        <p class="ops-note">숫자를 앱 안에 넣지 않습니다. 링크를 눌러 Vercel에 로그인한 뒤 Analytics·Traffic에서 방문 횟수를 보세요. 사람 수가 아니라 사이트를 연 횟수입니다.</p>
         <div class="ops-store" id="ops-store" aria-label="스토어 등록 문구">
           <h3 class="ops-section-title">스토어 등록 문구</h3>
           <p class="ops-store-lead">스토어 등록 시 참고 · 진단·치료 표현 금지</p>
@@ -4073,7 +4044,7 @@
         <span data-i18n="records.title">내 기록 관리</span>
         <span class="ops-chevron" aria-hidden="true">▾</span>
       </button>
-      <p class="app-shell-version" id="app-shell-version" data-shell-version="20261015.9">이 화면 버전 20261015.9</p>      <div class="ops-body" id="records-body" hidden>
+      <p class="app-shell-version" id="app-shell-version" data-shell-version="20261016.1">이 화면 버전 20261016.1</p>      <div class="ops-body" id="records-body" hidden>
 
         <div class="records-vitals" id="records-vitals">
           <h3 class="ops-section-title">몸 수치 (혈압·혈당)</h3>
@@ -13389,29 +13360,7 @@
       }
 
       function refreshOpsMembers() {
-        var el = document.getElementById("ops-members");
-        if (!el) return;
-        ensureLocalDownloadRecord();
-        var members = loadLocalMembers().filter(isRealMemberForOps);
-        var nowMs = Date.now();
-        var periods = getRegistrationPeriods(new Date(nowMs));
-        var lastMonth = membersInPeriod(members, periods.lastMonth);
-        var lastWeek = membersInPeriod(members, periods.lastWeek);
-        var thisWeek = membersInPeriod(members, periods.thisWeek);
-        var today = membersInPeriod(members, periods.today);
-        var any = lastMonth.length || lastWeek.length || thisWeek.length || today.length || members.length;
-        var html = "";
-        if (!any) {
-          html += '<p class="ops-members-empty">아직 새로 다운로드 받은 인원이 없습니다.</p>';
-        }
-        html +=
-          '<div class="ops-period-grid">' +
-            renderOpsPeriodBlock("전월", lastMonth) +
-            renderOpsPeriodBlock("전주", lastWeek) +
-            renderOpsPeriodBlock("금주", thisWeek) +
-            renderOpsPeriodBlock("오늘", today) +
-          "</div>";
-        el.innerHTML = html;
+        /* 방문 횟수는 Vercel Analytics 링크로만 안내. 패널 안 숫자 집계 없음. */
       }
 
       function hasLegalConsent() {
