@@ -4060,7 +4060,7 @@
         <span data-i18n="records.title">내 기록 관리</span>
         <span class="ops-chevron" aria-hidden="true">▾</span>
       </button>
-      <p class="app-shell-version" id="app-shell-version" data-shell-version="20261015.7">이 화면 버전 20261015.7</p>      <div class="ops-body" id="records-body" hidden>
+      <p class="app-shell-version" id="app-shell-version" data-shell-version="20261015.8">이 화면 버전 20261015.8</p>      <div class="ops-body" id="records-body" hidden>
 
         <div class="records-vitals" id="records-vitals">
           <h3 class="ops-section-title">몸 수치 (혈압·혈당)</h3>
@@ -4729,6 +4729,7 @@
             <span class="act-block-kcal" data-act-kcal="extras"></span>
           </div>
           <div class="act-chips" id="act-extra-kind-chips" role="group" aria-label="추가 활동 종류"></div>
+          <p class="act-mode-hint">한 번 탭=선택 · 두 번 탭=목록에서 빼기(직접 올린 항목)</p>
           <label class="meals-note-label" for="act-extra-note">* 목록에 없으면 아래칸에 적어 주세요</label>
           <input type="text" class="meals-note-input" id="act-extra-note" maxlength="40" placeholder="예: 정원 가꾸기. 볼링" autocomplete="off" />
           <p class="act-mode-hint">종류를 고르거나 직접 적은 뒤 시간을 <strong>눌러 고르기</strong></p>
@@ -4839,7 +4840,7 @@
       var BACKUP_ID = "latest";
       var PERSIST_KEYS = [
         STORAGE_KEY, MEALS_KEY, ACTIVITIES_KEY, WALK_KEY, DAILY_KEY, META_KEY, MEMBERS_KEY, SYMPTOM_ASK_KEY,
-        FIXED_MENU_KEY, CHIP_LABEL_CACHE_KEY, FOOD_WAREHOUSE_KEY, SUPPRESSED_DEFAULT_BY_MEAL_KEY,
+        FIXED_MENU_KEY, CUSTOM_EXTRA_KINDS_KEY, CHIP_LABEL_CACHE_KEY, FOOD_WAREHOUSE_KEY, SUPPRESSED_DEFAULT_BY_MEAL_KEY,
         VITALS_PREFS_KEY, VITALS_LOG_KEY
       ];
       var PROJECT_NL_URL = "https://project-nl-peach.vercel.app";
@@ -5904,6 +5905,10 @@
           refreshVitalsTrend();
           refreshVitalsClinic();
         }
+        if (action.kind === "extraKind" && Array.isArray(action.prevList)) {
+          saveCustomExtraKinds(action.prevList);
+          if (typeof paintActivityDraft === "function") paintActivityDraft();
+        }
       }
 
       function offerDataProtectUndo(action) {
@@ -6641,7 +6646,6 @@
 
       var EXERCISE_KINDS = ["헬스", "요가", "자전거", "수영", "등산", "스트레칭"];
       var EXTRA_KINDS = ["가사", "청소", "출퇴근", "계단", "가벼운 활동"];
-      var CUSTOM_EXTRA_KINDS_KEY = "healthapp.customExtraKinds.v1";
 
       function loadCustomExtraKinds() {
         try {
@@ -6685,6 +6689,113 @@
 
       function allExtraKinds() {
         return EXTRA_KINDS.concat(loadCustomExtraKinds());
+      }
+
+      var extraKindLastTap = { kind: "", at: 0 };
+      var extraKindTapPending = null;
+
+      function clearExtraKindTapPending() {
+        if (extraKindTapPending && extraKindTapPending.timer) {
+          clearTimeout(extraKindTapPending.timer);
+        }
+        extraKindTapPending = null;
+      }
+
+      function removeCustomExtraKind(kind, opts) {
+        opts = opts || {};
+        kind = String(kind || "").trim();
+        if (!kind || EXTRA_KINDS.indexOf(kind) >= 0) return false;
+        var list = loadCustomExtraKinds();
+        if (list.indexOf(kind) < 0) return false;
+        if (!opts.skipConfirm) {
+          var ok = confirmDangerTwice(
+            "「" + kind + "」을(를) 활동 목록에서 빼면, 다시 직접 적기 전까지 안 보입니다. 빼할까요?",
+            "한 번 더 확인: 정말 「" + kind + "」을(를) 목록에서 뺄까요?"
+          );
+          if (!ok) return false;
+        }
+        var prevList = list.slice();
+        saveCustomExtraKinds(list.filter(function (k) { return k !== kind; }));
+        if (extraDraft.kind === kind) {
+          extraDraft.kind = "";
+          extraDraft.linked = false;
+          extraDraft.minutes = null;
+        }
+        paintActivityDraft();
+        offerDataProtectUndo({
+          kind: "extraKind",
+          label: kind,
+          prevList: prevList,
+          message: "「" + kind + "」을(를) 활동 목록에서 뺐습니다."
+        });
+        return true;
+      }
+
+      function pickExtraKind(kind) {
+        var prevKind = extraDraft.kind;
+        extraDraft.kind = (prevKind === kind) ? "" : kind;
+        if (!extraDraft.kind) {
+          extraDraft.linked = false;
+          extraDraft.minutes = null;
+        } else {
+          if (prevKind !== extraDraft.kind) {
+            extraDraft.linked = false;
+            extraDraft.minutes = null;
+          }
+          commitExtraDraftOrUpdate();
+        }
+        actModes.extra = "none";
+        paintActivityDraft();
+      }
+
+      function handleExtraKindChipTap(kind) {
+        var now = Date.now();
+        var isCustom = EXTRA_KINDS.indexOf(kind) < 0;
+        var isDouble =
+          extraKindLastTap.kind === kind &&
+          (now - extraKindLastTap.at) <= FIXED_DOUBLE_TAP_MS;
+        if (isDouble && isCustom) {
+          clearExtraKindTapPending();
+          extraKindLastTap = { kind: "", at: 0 };
+          removeCustomExtraKind(kind);
+          return;
+        }
+        extraKindLastTap = { kind: kind, at: now };
+        clearExtraKindTapPending();
+        extraKindTapPending = {
+          kind: kind,
+          timer: setTimeout(function () {
+            extraKindTapPending = null;
+            pickExtraKind(kind);
+          }, FIXED_DOUBLE_TAP_MS)
+        };
+      }
+
+      function fillExtraKindChips(selected) {
+        var wrap = document.getElementById("act-extra-kind-chips");
+        if (!wrap) return;
+        wrap.innerHTML = "";
+        allExtraKinds().forEach(function (kind) {
+          var isCustom = EXTRA_KINDS.indexOf(kind) < 0;
+          var btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = "act-chip" + (isCustom ? " fixed-menu-chip" : "");
+          btn.textContent = kind;
+          btn.setAttribute("aria-pressed", selected === kind ? "true" : "false");
+          btn.setAttribute(
+            "aria-label",
+            isCustom
+              ? kind + ". 한 번 탭하면 선택, 두 번 탭하면 목록에서 빼기"
+              : kind + ". 한 번 탭하면 선택"
+          );
+          btn.title = isCustom
+            ? "한 번 탭=선택 · 두 번 탭=목록에서 빼기"
+            : "한 번 탭=선택";
+          btn.addEventListener("click", function () {
+            handleExtraKindChipTap(kind);
+          });
+          wrap.appendChild(btn);
+        });
       }
       var SLEEP_PRESETS = [5, 6, 7, 8, 9];
       var WALK_MIN_PRESETS = [15, 30, 45, 60, 90];
@@ -11309,25 +11420,10 @@
         }, actModes.exercise === "preset" ? d.exerciseMinutes : null, function (v) {
           pickActPreset("exercise", "exerciseMinutes", v, EXERCISE_MIN_PRESETS);
         });
-        fillKindChips("act-extra-kind-chips", allExtraKinds(), extraDraft.kind, function (kind) {
-          var prevKind = extraDraft.kind;
-          extraDraft.kind = (prevKind === kind) ? "" : kind;
-          if (!extraDraft.kind) {
-            extraDraft.linked = false;
-            extraDraft.minutes = null;
-          } else {
-            if (prevKind !== extraDraft.kind) {
-              extraDraft.linked = false;
-              extraDraft.minutes = null;
-            }
-            commitExtraDraftOrUpdate();
-          }
-          actModes.extra = "none";
-          paintActivityDraft();
-        });
+        fillExtraKindChips(extraDraft.kind);
         if (actExtraNoteEl && document.activeElement !== actExtraNoteEl) {
-          var isBuiltinChip = allExtraKinds().indexOf(extraDraft.kind) >= 0;
-          actExtraNoteEl.value = (!extraDraft.kind || isBuiltinChip) ? "" : extraDraft.kind;
+          var isListedChip = allExtraKinds().indexOf(extraDraft.kind) >= 0;
+          actExtraNoteEl.value = (!extraDraft.kind || isListedChip) ? "" : extraDraft.kind;
         }
 
         if (actExtrasList) {
