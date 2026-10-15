@@ -1700,6 +1700,23 @@
       outline: 2px solid var(--accent);
       outline-offset: 1px;
     }
+    .act-block .meals-note-input {
+      width: 100%;
+      border-radius: 10px;
+      border: 1px solid var(--line);
+      background: var(--key);
+      color: var(--ink);
+      font: inherit;
+      font-size: 14px;
+      line-height: 1.4;
+      padding: 10px 12px;
+      min-height: 44px;
+      box-sizing: border-box;
+    }
+    .act-block .meals-note-input:focus {
+      outline: 2px solid var(--accent);
+      outline-offset: 1px;
+    }
     .meals-sheet-total {
       margin-top: 2px;
       padding: 10px 12px;
@@ -4043,7 +4060,7 @@
         <span data-i18n="records.title">내 기록 관리</span>
         <span class="ops-chevron" aria-hidden="true">▾</span>
       </button>
-      <p class="app-shell-version" id="app-shell-version" data-shell-version="20261015.6">이 화면 버전 20261015.6</p>      <div class="ops-body" id="records-body" hidden>
+      <p class="app-shell-version" id="app-shell-version" data-shell-version="20261015.7">이 화면 버전 20261015.7</p>      <div class="ops-body" id="records-body" hidden>
 
         <div class="records-vitals" id="records-vitals">
           <h3 class="ops-section-title">몸 수치 (혈압·혈당)</h3>
@@ -4712,7 +4729,9 @@
             <span class="act-block-kcal" data-act-kcal="extras"></span>
           </div>
           <div class="act-chips" id="act-extra-kind-chips" role="group" aria-label="추가 활동 종류"></div>
-          <p class="act-mode-hint">종류를 고른 뒤 시간을 <strong>눌러 고르기</strong></p>
+          <label class="meals-note-label" for="act-extra-note">* 목록에 없으면 아래칸에 적어 주세요</label>
+          <input type="text" class="meals-note-input" id="act-extra-note" maxlength="40" placeholder="예: 정원 가꾸기. 볼링" autocomplete="off" />
+          <p class="act-mode-hint">종류를 고르거나 직접 적은 뒤 시간을 <strong>눌러 고르기</strong></p>
           <div class="act-row">
             <span class="muted">분</span>
             <div class="stepper" data-act-stepper="extraMinutes" role="group" aria-label="추가 활동 분">
@@ -4797,6 +4816,7 @@
       var MEMBERS_KEY = "healthapp.members.v1";
       var SYMPTOM_ASK_KEY = "healthapp.symptomAsk.v1";
       var FIXED_MENU_KEY = "healthapp.fixedMenu.v1";
+      var CUSTOM_EXTRA_KINDS_KEY = "healthapp.customExtraKinds.v1";
       var CHIP_LABEL_CACHE_KEY = "healthapp.chipLabelCache.v1";
       var FOOD_WAREHOUSE_KEY = "healthapp.foodWarehouse.v1";
       var SUPPRESSED_DEFAULT_BY_MEAL_KEY = "healthapp.suppressedDefaultFoodChipsByMeal.v1";
@@ -6285,6 +6305,7 @@
       var actDriveVal = document.getElementById("act-drive-val");
       var actExerciseMinVal = document.getElementById("act-exercise-min-val");
       var actExtraMinVal = document.getElementById("act-extra-min-val");
+      var actExtraNoteEl = document.getElementById("act-extra-note");
       var actExtrasList = document.getElementById("act-extras-list");
       var lastTodayActivityKcal = 0;
       var kcalChart = document.getElementById("kcal-chart");
@@ -6620,6 +6641,51 @@
 
       var EXERCISE_KINDS = ["헬스", "요가", "자전거", "수영", "등산", "스트레칭"];
       var EXTRA_KINDS = ["가사", "청소", "출퇴근", "계단", "가벼운 활동"];
+      var CUSTOM_EXTRA_KINDS_KEY = "healthapp.customExtraKinds.v1";
+
+      function loadCustomExtraKinds() {
+        try {
+          var raw = localStorage.getItem(CUSTOM_EXTRA_KINDS_KEY);
+          var arr = raw ? JSON.parse(raw) : [];
+          if (!Array.isArray(arr)) return [];
+          return arr.map(function (k) { return String(k || "").trim(); }).filter(function (k) {
+            return k && EXTRA_KINDS.indexOf(k) < 0;
+          }).slice(0, 20);
+        } catch (err) {
+          return [];
+        }
+      }
+
+      function saveCustomExtraKinds(list) {
+        var next = (list || []).map(function (k) { return String(k || "").trim(); }).filter(function (k) {
+          return k && EXTRA_KINDS.indexOf(k) < 0;
+        });
+        var seen = {};
+        var uniq = [];
+        next.forEach(function (k) {
+          if (seen[k]) return;
+          seen[k] = true;
+          uniq.push(k);
+        });
+        uniq = uniq.slice(0, 20);
+        try {
+          localStorage.setItem(CUSTOM_EXTRA_KINDS_KEY, JSON.stringify(uniq));
+        } catch (err) { /* ignore */ }
+        return uniq;
+      }
+
+      function promoteCustomExtraKind(kind) {
+        kind = String(kind || "").trim();
+        if (!kind || EXTRA_KINDS.indexOf(kind) >= 0) return;
+        var list = loadCustomExtraKinds();
+        if (list.indexOf(kind) >= 0) return;
+        list.unshift(kind);
+        saveCustomExtraKinds(list);
+      }
+
+      function allExtraKinds() {
+        return EXTRA_KINDS.concat(loadCustomExtraKinds());
+      }
       var SLEEP_PRESETS = [5, 6, 7, 8, 9];
       var WALK_MIN_PRESETS = [15, 30, 45, 60, 90];
       var SIT_PRESETS = [2, 4, 6, 8, 10];
@@ -11104,19 +11170,23 @@
       /** 활동 추가: 종류·시간이 있으면 위 항목처럼 바로 반영. 고른 직후엔 시간만 고쳐지고, 종류를 다시 고르면 새로 추가. */
       function commitExtraDraftOrUpdate() {
         if (!activityDraft) return false;
-        if (!extraDraft.kind || extraDraft.minutes == null || !(Number(extraDraft.minutes) > 0)) return false;
+        var kind = String(extraDraft.kind || "").trim();
+        if (!kind || extraDraft.minutes == null || !(Number(extraDraft.minutes) > 0)) return false;
+        extraDraft.kind = kind;
         if (!Array.isArray(activityDraft.extras)) activityDraft.extras = [];
         var mins = Number(extraDraft.minutes);
         var list = activityDraft.extras;
         if (extraDraft.linked && list.length) {
           var last = list[list.length - 1];
-          if (last && last.kind === extraDraft.kind) {
+          if (last && last.kind === kind) {
             last.minutes = mins;
+            promoteCustomExtraKind(kind);
             return true;
           }
         }
-        list.push({ kind: extraDraft.kind, minutes: mins });
+        list.push({ kind: kind, minutes: mins });
         extraDraft.linked = true;
+        promoteCustomExtraKind(kind);
         return true;
       }
 
@@ -11239,7 +11309,7 @@
         }, actModes.exercise === "preset" ? d.exerciseMinutes : null, function (v) {
           pickActPreset("exercise", "exerciseMinutes", v, EXERCISE_MIN_PRESETS);
         });
-        fillKindChips("act-extra-kind-chips", EXTRA_KINDS, extraDraft.kind, function (kind) {
+        fillKindChips("act-extra-kind-chips", allExtraKinds(), extraDraft.kind, function (kind) {
           var prevKind = extraDraft.kind;
           extraDraft.kind = (prevKind === kind) ? "" : kind;
           if (!extraDraft.kind) {
@@ -11255,6 +11325,10 @@
           actModes.extra = "none";
           paintActivityDraft();
         });
+        if (actExtraNoteEl && document.activeElement !== actExtraNoteEl) {
+          var isBuiltinChip = allExtraKinds().indexOf(extraDraft.kind) >= 0;
+          actExtraNoteEl.value = (!extraDraft.kind || isBuiltinChip) ? "" : extraDraft.kind;
+        }
 
         if (actExtrasList) {
           actExtrasList.innerHTML = "";
@@ -14488,6 +14562,25 @@
         }
       });
 
+
+      if (actExtraNoteEl) {
+        actExtraNoteEl.addEventListener("input", function () {
+          var t = String(actExtraNoteEl.value || "").trim();
+          if (t !== String(extraDraft.kind || "").trim()) {
+            extraDraft.linked = false;
+            extraDraft.minutes = null;
+          }
+          extraDraft.kind = t;
+          actModes.extra = "none";
+          paintActivityDraft();
+        });
+        actExtraNoteEl.addEventListener("keydown", function (e) {
+          if (e.key === "Enter") {
+            e.preventDefault();
+            actExtraNoteEl.blur();
+          }
+        });
+      }
 
       document.getElementById("sheet-close").addEventListener("click", closeSheet);
       backdrop.addEventListener("click", function (e) {
