@@ -4043,7 +4043,7 @@
         <span data-i18n="records.title">내 기록 관리</span>
         <span class="ops-chevron" aria-hidden="true">▾</span>
       </button>
-      <p class="app-shell-version" id="app-shell-version" data-shell-version="20261015.4">이 화면 버전 20261015.4</p>      <div class="ops-body" id="records-body" hidden>
+      <p class="app-shell-version" id="app-shell-version" data-shell-version="20261015.5">이 화면 버전 20261015.5</p>      <div class="ops-body" id="records-body" hidden>
 
         <div class="records-vitals" id="records-vitals">
           <h3 class="ops-section-title">몸 수치 (혈압·혈당)</h3>
@@ -4706,16 +4706,23 @@
             </div>
           </div>
         </div>
-        <div class="act-block" data-act="extra" data-input-mode="none">
+        <div class="act-block" data-act="extra" data-input-mode="adjust">
           <div class="act-block-head">
             <strong>활동 추가</strong>
             <span class="act-block-kcal" data-act-kcal="extras"></span>
           </div>
           <div class="act-chips" id="act-extra-kind-chips" role="group" aria-label="추가 활동 종류"></div>
-          <p class="act-mode-hint">종류·시간을 고르면 바로 반영 — 위 항목과 같음</p>
-          <div class="act-path act-path-preset" data-act-path="preset">
-            <span class="act-path-label">주어진 시간</span>
-            <div class="act-chips" id="act-extra-min-chips" role="group" aria-label="추가 활동 시간"></div>
+          <p class="act-mode-hint">종류를 고른 뒤 시간을 <strong>눌러 고르기</strong></p>
+          <div class="act-path act-path-adjust" data-act-path="adjust">
+            <span class="act-path-label">+/- 조절</span>
+            <div class="act-row">
+              <span class="muted">분</span>
+              <div class="stepper" data-act-stepper="extraMinutes" role="group" aria-label="추가 활동 분">
+                <button type="button" class="step-btn" data-dir="-1" aria-label="추가 활동 줄이기">−</button>
+                <span class="step-val is-empty" id="act-extra-min-val" aria-live="polite">눌러 고르기</span>
+                <button type="button" class="step-btn" data-dir="1" aria-label="추가 활동 늘리기">+</button>
+              </div>
+            </div>
           </div>
           <div class="act-extras" id="act-extras-list" aria-live="polite"></div>
         </div>
@@ -6166,7 +6173,7 @@
       var activeMeal = null;
       var activeActivityIndex = null;
       var activityDraft = null;
-      var extraDraft = { kind: "", minutes: null };
+      var extraDraft = { kind: "", minutes: null, linked: false };
       var actModes = {
         sleep: "none",
         walk: "none",
@@ -6280,6 +6287,7 @@
       var actSitVal = document.getElementById("act-sit-val");
       var actDriveVal = document.getElementById("act-drive-val");
       var actExerciseMinVal = document.getElementById("act-exercise-min-val");
+      var actExtraMinVal = document.getElementById("act-extra-min-val");
       var actExtrasList = document.getElementById("act-extras-list");
       var lastTodayActivityKcal = 0;
       var kcalChart = document.getElementById("kcal-chart");
@@ -6619,14 +6627,14 @@
       var WALK_MIN_PRESETS = [15, 30, 45, 60, 90];
       var SIT_PRESETS = [2, 4, 6, 8, 10];
       var EXERCISE_MIN_PRESETS = [20, 30, 40, 60];
-      var EXTRA_MIN_PRESETS = [15, 30, 40, 60];
       var ACT_STEPPER_CFG = {
         sleepHours: { min: 0, max: 14, step: 0.5, fallback: 7, unit: "시간", decimals: 1 },
         walkMinutes: { min: 0, max: 300, step: 5, fallback: 30, unit: "분", decimals: 0 },
         walkSteps: { min: 0, max: 50000, step: 500, fallback: 5000, unit: "보", decimals: 0 },
         sitHours: { min: 0, max: 16, step: 0.5, fallback: 6, unit: "시간", decimals: 1 },
         driveHours: { min: 0, max: 12, step: 0.5, fallback: 1, unit: "시간", decimals: 1 },
-        exerciseMinutes: { min: 0, max: 180, step: 5, fallback: 40, unit: "분", decimals: 0 }
+        exerciseMinutes: { min: 0, max: 180, step: 5, fallback: 40, unit: "분", decimals: 0 },
+        extraMinutes: { min: 0, max: 300, step: 5, fallback: 30, unit: "분", decimals: 0 }
       };
 
       function normalizeDriveHours(src) {
@@ -11079,6 +11087,7 @@
         if (key === "sitHours") return "sit";
         if (key === "driveHours") return "drive";
         if (key === "exerciseMinutes") return "exercise";
+        if (key === "extraMinutes") return "extra";
         return "";
       }
 
@@ -11137,11 +11146,7 @@
         if (d.exerciseMinutes != null && d.exerciseMinutes > 0) {
           actModes.exercise = valueInPresets(d.exerciseMinutes, EXERCISE_MIN_PRESETS) ? "preset" : "adjust";
         }
-        if (extraDraft.minutes != null && extraDraft.minutes > 0) {
-          actModes.extra = "preset";
-        } else if (extraDraft.kind) {
-          actModes.extra = "preset";
-        }
+        actModes.extra = "adjust";
         syncActBlockModes();
       }
 
@@ -11204,6 +11209,7 @@
         paintActStep(actSitVal, "sitHours", actModes.sit === "adjust" ? d.sitHours : null);
         paintActStep(actDriveVal, "driveHours", d.driveHours);
         paintActStep(actExerciseMinVal, "exerciseMinutes", actModes.exercise === "adjust" ? d.exerciseMinutes : null);
+        paintActStep(actExtraMinVal, "extraMinutes", extraDraft.minutes);
 
         fillChipGroup("act-sleep-chips", SLEEP_PRESETS, function (v) {
           return formatActHours(v) + "시간";
@@ -11241,27 +11247,15 @@
           extraDraft.kind = (prevKind === kind) ? "" : kind;
           if (!extraDraft.kind) {
             extraDraft.linked = false;
-            if (extraDraft.minutes == null || !(extraDraft.minutes > 0)) actModes.extra = "none";
-          } else {
-            if (prevKind !== extraDraft.kind) extraDraft.linked = false;
-            if (extraDraft.minutes == null) extraDraft.minutes = 30;
-            actModes.extra = "preset";
-            commitExtraDraftOrUpdate();
-          }
-          paintActivityDraft();
-        });
-        fillChipGroup("act-extra-min-chips", EXTRA_MIN_PRESETS, function (v) {
-          return v + "분";
-        }, actModes.extra === "preset" ? extraDraft.minutes : null, function (v) {
-          var same = extraDraft.minutes != null && Number(extraDraft.minutes) === Number(v) && actModes.extra === "preset";
-          if (same) {
             extraDraft.minutes = null;
-            if (!extraDraft.kind) actModes.extra = "none";
           } else {
-            extraDraft.minutes = v;
-            actModes.extra = "preset";
+            if (prevKind !== extraDraft.kind) {
+              extraDraft.linked = false;
+              extraDraft.minutes = null;
+            }
             commitExtraDraftOrUpdate();
           }
+          actModes.extra = "adjust";
           paintActivityDraft();
         });
 
@@ -11299,7 +11293,26 @@
 
       function nudgeActStepper(key, dir) {
         var cfg = ACT_STEPPER_CFG[key];
-        if (!cfg || !activityDraft) return;
+        if (!cfg) return;
+        if (key === "extraMinutes") {
+          var curEx = extraDraft.minutes;
+          if (curEx == null || !(curEx > 0)) {
+            extraDraft.minutes = cfg.fallback;
+          } else {
+            var nextEx = curEx + dir * cfg.step;
+            if (nextEx <= 0) {
+              extraDraft.minutes = null;
+              extraDraft.linked = false;
+            } else {
+              extraDraft.minutes = Math.min(cfg.max, Math.max(cfg.min, Math.round(nextEx / cfg.step) * cfg.step));
+            }
+          }
+          actModes.extra = "adjust";
+          commitExtraDraftOrUpdate();
+          paintActivityDraft();
+          return;
+        }
+        if (!activityDraft) return;
         var act = stepperKeyToAct(key);
         if (act) {
           if (key === "walkSteps") {
@@ -11327,7 +11340,7 @@
 
       function fillActivityInputs() {
         activityDraft = cloneDayActivity(activeActivityState());
-        extraDraft = { kind: "", minutes: null };
+        extraDraft = { kind: "", minutes: null, linked: false };
         inferActModesFromDraft(activityDraft);
         paintActivityDraft();
       }
@@ -11352,7 +11365,7 @@
 
       function clearActivityInputs() {
         activityDraft = emptyDayActivity();
-        extraDraft = { kind: "", minutes: null };
+        extraDraft = { kind: "", minutes: null, linked: false };
         actModes = emptyActModes();
         activityClearArmed = true;
         syncActBlockModes();
@@ -14448,10 +14461,21 @@
         var valEl = wrap.querySelector(".step-val");
         if (valEl) {
           valEl.addEventListener("click", function () {
+            var cfg = ACT_STEPPER_CFG[key];
+            if (!cfg) return;
+            if (key === "extraMinutes") {
+              if (extraDraft.minutes == null || !(extraDraft.minutes > 0)) {
+                extraDraft.minutes = cfg.fallback;
+              }
+              actModes.extra = "adjust";
+              commitExtraDraftOrUpdate();
+              paintActivityDraft();
+              return;
+            }
             if (!activityDraft) return;
             var act = stepperKeyToAct(key);
             if (activityDraft[key] == null || !(activityDraft[key] > 0)) {
-              activityDraft[key] = ACT_STEPPER_CFG[key].fallback;
+              activityDraft[key] = cfg.fallback;
             }
             if (act) {
               if (key === "walkSteps") {
