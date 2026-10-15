@@ -1792,6 +1792,19 @@
       font-size: 14px;
       font-weight: 700;
     }
+    .act-block-title {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      gap: 4px 6px;
+      min-width: 0;
+    }
+    .act-block-guide {
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 600;
+      line-height: 1.3;
+    }
     .act-block-kcal {
       color: var(--accent);
       font-size: 12px;
@@ -4060,7 +4073,7 @@
         <span data-i18n="records.title">내 기록 관리</span>
         <span class="ops-chevron" aria-hidden="true">▾</span>
       </button>
-      <p class="app-shell-version" id="app-shell-version" data-shell-version="20261015.8">이 화면 버전 20261015.8</p>      <div class="ops-body" id="records-body" hidden>
+      <p class="app-shell-version" id="app-shell-version" data-shell-version="20261015.9">이 화면 버전 20261015.9</p>      <div class="ops-body" id="records-body" hidden>
 
         <div class="records-vitals" id="records-vitals">
           <h3 class="ops-section-title">몸 수치 (혈압·혈당)</h3>
@@ -4725,11 +4738,13 @@
         </div>
         <div class="act-block" data-act="extra" data-input-mode="none">
           <div class="act-block-head">
-            <strong>활동 추가</strong>
+            <span class="act-block-title">
+              <strong>활동 추가</strong>
+              <span class="act-block-guide">(한 번 탭=선택 · 두 번 탭=목록에서 빼기)</span>
+            </span>
             <span class="act-block-kcal" data-act-kcal="extras"></span>
           </div>
           <div class="act-chips" id="act-extra-kind-chips" role="group" aria-label="추가 활동 종류"></div>
-          <p class="act-mode-hint">한 번 탭=선택 · 두 번 탭=목록에서 빼기(직접 올린 항목)</p>
           <label class="meals-note-label" for="act-extra-note">* 목록에 없으면 아래칸에 적어 주세요</label>
           <input type="text" class="meals-note-input" id="act-extra-note" maxlength="40" placeholder="예: 정원 가꾸기. 볼링" autocomplete="off" />
           <p class="act-mode-hint">종류를 고르거나 직접 적은 뒤 시간을 <strong>눌러 고르기</strong></p>
