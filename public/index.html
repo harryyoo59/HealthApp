@@ -4043,7 +4043,7 @@
         <span data-i18n="records.title">내 기록 관리</span>
         <span class="ops-chevron" aria-hidden="true">▾</span>
       </button>
-      <p class="app-shell-version" id="app-shell-version" data-shell-version="20261015.2">이 화면 버전 20261015.2</p>      <div class="ops-body" id="records-body" hidden>
+      <p class="app-shell-version" id="app-shell-version" data-shell-version="20261015.3">이 화면 버전 20261015.3</p>      <div class="ops-body" id="records-body" hidden>
 
         <div class="records-vitals" id="records-vitals">
           <h3 class="ops-section-title">몸 수치 (혈압·혈당)</h3>
@@ -11910,10 +11910,10 @@
           var intakeCanCompare = briefPrevEnough(prev, mode, prev.intakeDays);
           var intakeText = intakeCanCompare ? deltaPhrase(cur.intakeAvg, prev.intakeAvg, " kcal") : null;
           if (intakeText) {
-            lines.push({ label: "칼로리 섭취(기록한 날)", text: intakeText });
+            lines.push({ label: "칼로리 섭취(기록한날 하루 평균치)", text: intakeText });
           } else if (cur.intakeAvg != null) {
             lines.push({
-              label: "칼로리 섭취(기록한 날)",
+              label: "칼로리 섭취(기록한날 하루 평균치)",
               text: L.thisLabel + " 약 " + cur.intakeAvg + " kcal · " + L.prevLabel + " 기록이 더 있으면 비교합니다. 빈 날은 채우지 않습니다."
             });
           }
@@ -11922,10 +11922,10 @@
           var burnCanCompare = briefPrevEnough(prev, mode, prev.burnDays);
           var burnText = burnCanCompare ? deltaPhrase(cur.burnAvg, prev.burnAvg, " kcal") : null;
           if (burnText) {
-            lines.push({ label: "칼로리 소비(기록한 날)", text: burnText });
+            lines.push({ label: "칼로리 소비(기록한날 하루 평균치)", text: burnText });
           } else if (cur.burnAvg != null) {
             lines.push({
-              label: "칼로리 소비(기록한 날)",
+              label: "칼로리 소비(기록한날 하루 평균치)",
               text: L.thisLabel + " 약 " + cur.burnAvg + " kcal · " + L.prevLabel + " 기록이 더 있으면 비교합니다. 빈 날은 채우지 않습니다."
             });
           }
