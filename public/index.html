@@ -4043,7 +4043,7 @@
         <span data-i18n="records.title">내 기록 관리</span>
         <span class="ops-chevron" aria-hidden="true">▾</span>
       </button>
-      <p class="app-shell-version" id="app-shell-version" data-shell-version="20261015.3">이 화면 버전 20261015.3</p>      <div class="ops-body" id="records-body" hidden>
+      <p class="app-shell-version" id="app-shell-version" data-shell-version="20261015.4">이 화면 버전 20261015.4</p>      <div class="ops-body" id="records-body" hidden>
 
         <div class="records-vitals" id="records-vitals">
           <h3 class="ops-section-title">몸 수치 (혈압·혈당)</h3>
@@ -4712,12 +4712,11 @@
             <span class="act-block-kcal" data-act-kcal="extras"></span>
           </div>
           <div class="act-chips" id="act-extra-kind-chips" role="group" aria-label="추가 활동 종류"></div>
-          <p class="act-mode-hint">시간은 아래 칩으로만 — 종류와 시간을 고른 뒤 넣기</p>
+          <p class="act-mode-hint">종류·시간을 고르면 바로 반영 — 위 항목과 같음</p>
           <div class="act-path act-path-preset" data-act-path="preset">
             <span class="act-path-label">주어진 시간</span>
             <div class="act-chips" id="act-extra-min-chips" role="group" aria-label="추가 활동 시간"></div>
           </div>
-          <button type="button" class="act-add-btn" id="act-extra-add">+ 이 활동 넣기</button>
           <div class="act-extras" id="act-extras-list" aria-live="polite"></div>
         </div>
         <div class="act-sheet-total" aria-live="polite">
@@ -11096,6 +11095,25 @@
         }
       }
 
+      /** 활동 추가: 종류·시간이 있으면 위 항목처럼 바로 반영. 고른 직후엔 시간만 고쳐지고, 종류를 다시 고르면 새로 추가. */
+      function commitExtraDraftOrUpdate() {
+        if (!activityDraft) return false;
+        if (!extraDraft.kind || extraDraft.minutes == null || !(Number(extraDraft.minutes) > 0)) return false;
+        if (!Array.isArray(activityDraft.extras)) activityDraft.extras = [];
+        var mins = Number(extraDraft.minutes);
+        var list = activityDraft.extras;
+        if (extraDraft.linked && list.length) {
+          var last = list[list.length - 1];
+          if (last && last.kind === extraDraft.kind) {
+            last.minutes = mins;
+            return true;
+          }
+        }
+        list.push({ kind: extraDraft.kind, minutes: mins });
+        extraDraft.linked = true;
+        return true;
+      }
+
       function inferActModesFromDraft(d) {
         d = d || emptyDayActivity();
         actModes = emptyActModes();
@@ -11120,6 +11138,8 @@
           actModes.exercise = valueInPresets(d.exerciseMinutes, EXERCISE_MIN_PRESETS) ? "preset" : "adjust";
         }
         if (extraDraft.minutes != null && extraDraft.minutes > 0) {
+          actModes.extra = "preset";
+        } else if (extraDraft.kind) {
           actModes.extra = "preset";
         }
         syncActBlockModes();
@@ -11217,13 +11237,16 @@
           pickActPreset("exercise", "exerciseMinutes", v, EXERCISE_MIN_PRESETS);
         });
         fillKindChips("act-extra-kind-chips", EXTRA_KINDS, extraDraft.kind, function (kind) {
-          extraDraft.kind = (extraDraft.kind === kind) ? "" : kind;
-          if (extraDraft.kind && extraDraft.minutes == null) {
-            extraDraft.minutes = 30;
+          var prevKind = extraDraft.kind;
+          extraDraft.kind = (prevKind === kind) ? "" : kind;
+          if (!extraDraft.kind) {
+            extraDraft.linked = false;
+            if (extraDraft.minutes == null || !(extraDraft.minutes > 0)) actModes.extra = "none";
+          } else {
+            if (prevKind !== extraDraft.kind) extraDraft.linked = false;
+            if (extraDraft.minutes == null) extraDraft.minutes = 30;
             actModes.extra = "preset";
-          }
-          if (!extraDraft.kind && (extraDraft.minutes == null || !(extraDraft.minutes > 0))) {
-            actModes.extra = "none";
+            commitExtraDraftOrUpdate();
           }
           paintActivityDraft();
         });
@@ -11233,10 +11256,11 @@
           var same = extraDraft.minutes != null && Number(extraDraft.minutes) === Number(v) && actModes.extra === "preset";
           if (same) {
             extraDraft.minutes = null;
-            actModes.extra = "none";
+            if (!extraDraft.kind) actModes.extra = "none";
           } else {
             extraDraft.minutes = v;
             actModes.extra = "preset";
+            commitExtraDraftOrUpdate();
           }
           paintActivityDraft();
         });
@@ -14443,19 +14467,6 @@
         }
       });
 
-      var actExtraAdd = document.getElementById("act-extra-add");
-      if (actExtraAdd) {
-        actExtraAdd.addEventListener("click", function () {
-          if (!activityDraft) return;
-          if (!extraDraft.kind || extraDraft.minutes == null || !(extraDraft.minutes > 0)) return;
-          activityDraft.extras.push({
-            kind: extraDraft.kind,
-            minutes: Number(extraDraft.minutes)
-          });
-          extraDraft = { kind: "", minutes: null };
-          paintActivityDraft();
-        });
-      }
 
       document.getElementById("sheet-close").addEventListener("click", closeSheet);
       backdrop.addEventListener("click", function (e) {
