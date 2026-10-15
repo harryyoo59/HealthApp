@@ -2500,6 +2500,37 @@
       border-top: 1px solid var(--line);
     }
     .week-brief.open .week-brief-panel { display: block; }
+    .week-brief-modes {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin: 10px 0 0;
+    }
+    .week-brief-mode {
+      appearance: none;
+      border-radius: 10px;
+      border: 2px solid rgba(232,242,236,0.28);
+      background: #142820;
+      color: var(--muted);
+      font: inherit;
+      font-size: 14px;
+      font-weight: 650;
+      line-height: 1.3;
+      padding: 9px 10px;
+      cursor: pointer;
+      min-height: 42px;
+    }
+    .week-brief-mode[aria-pressed="true"] {
+      border-color: #ffffff;
+      background: #0b7a4a;
+      color: #ffffff;
+      font-weight: 800;
+      box-shadow: 0 2px 0 #064028;
+    }
+    .week-brief-mode:focus-visible {
+      outline: 3px solid #f2fff8;
+      outline-offset: 2px;
+    }
     .week-brief-range {
       margin: 10px 0 10px;
       padding: 0 2px;
@@ -3847,18 +3878,22 @@
     <section class="week-brief" id="week-brief" aria-labelledby="week-brief-title">
       <button type="button" class="week-brief-toggle" id="week-brief-toggle" aria-expanded="false" aria-controls="week-brief-panel">
         <span class="week-brief-toggle-text">
-          <strong id="week-brief-title" data-i18n="week.title">주간 변화 브리핑</strong>
-          <span class="week-brief-hint" id="week-brief-hint" data-i18n="week.hint">이번 주와 지난 주 비교</span>
+          <strong id="week-brief-title">주간(월간) 변화 브리핑</strong>
+          <span class="week-brief-hint" id="week-brief-hint">주간·월간 비교 · 눌러 보기</span>
         </span>
         <span class="chev" aria-hidden="true">▾</span>
       </button>
       <div class="week-brief-panel" id="week-brief-panel" role="region" aria-labelledby="week-brief-title" hidden>
-        <p class="week-brief-range" id="week-brief-range" data-i18n="week.range">이번 주(월~오늘)와 지난 주를 비교합니다.</p>
-        <p class="week-brief-empty" id="week-brief-empty" data-i18n="week.empty">이번 주 기록이 더 쌓이면 비교합니다.</p>
+        <div class="week-brief-modes" role="group" aria-label="비교 기간">
+          <button type="button" class="week-brief-mode" id="week-brief-mode-week" data-brief-mode="week" aria-pressed="true">주간</button>
+          <button type="button" class="week-brief-mode" id="week-brief-mode-month" data-brief-mode="month" aria-pressed="false">월간</button>
+        </div>
+        <p class="week-brief-range" id="week-brief-range">이번 주(월~오늘)와 지난 주를 비교합니다.</p>
+        <p class="week-brief-empty" id="week-brief-empty">이번 주 기록이 더 쌓이면 비교합니다.</p>
         <div class="week-brief-body" id="week-brief-body">
           <ul class="week-brief-lines" id="week-brief-lines"></ul>
         </div>
-        <p class="week-brief-note" data-i18n="week.note">추정·참고용입니다. 진단·치료가 아닙니다. 약·병명 원문은 여기에 적지 않습니다.</p>
+        <p class="week-brief-note">추정·참고용입니다. 진단·치료가 아닙니다. 약·병명 원문은 여기에 적지 않습니다.</p>
       </div>
     </section>
 
@@ -4008,7 +4043,7 @@
         <span data-i18n="records.title">내 기록 관리</span>
         <span class="ops-chevron" aria-hidden="true">▾</span>
       </button>
-      <p class="app-shell-version" id="app-shell-version" data-shell-version="20261014.5">이 화면 버전 20261014.5</p>      <div class="ops-body" id="records-body" hidden>
+      <p class="app-shell-version" id="app-shell-version" data-shell-version="20261015.1">이 화면 버전 20261015.1</p>      <div class="ops-body" id="records-body" hidden>
 
         <div class="records-vitals" id="records-vitals">
           <h3 class="ops-section-title">몸 수치 (혈압·혈당)</h3>
@@ -11626,78 +11661,103 @@
         return prev + (unit || "") + " → " + cur + (unit || "") + " (" + sign + d + (unit || "") + ")";
       }
 
-      function activityCompareLine(cur, prev) {
+      function briefPeriodLabels(mode) {
+        if (mode === "month") {
+          return {
+            thisLabel: "이번 달",
+            prevLabel: "지난달",
+            prevWith: "지난달과",
+            bothSides: "양쪽 달에",
+            compareKind: "월간",
+            prevEnd: "지난달 말"
+          };
+        }
+        return {
+          thisLabel: "이번 주",
+          prevLabel: "지난주",
+          prevWith: "지난주와",
+          bothSides: "양쪽 주에",
+          compareKind: "주간",
+          prevEnd: "지난주 말"
+        };
+      }
+
+      function activityCompareLine(cur, prev, labels) {
+        var L = labels || briefPeriodLabels("week");
         var curScore = (cur.walkAvg || 0) + (cur.exerciseAvg || 0);
         var prevScore = (prev.walkAvg || 0) + (prev.exerciseAvg || 0);
         if (!cur.walkDays && !cur.exerciseDays && !prev.walkDays && !prev.exerciseDays) return null;
         if ((cur.walkDays || cur.exerciseDays) && !(prev.walkDays || prev.exerciseDays)) {
-          return "이번 주 걷기·운동 기록이 쌓이기 시작했습니다.";
+          return L.thisLabel + " 걷기·운동 기록이 쌓이기 시작했습니다.";
         }
         if (!(cur.walkDays || cur.exerciseDays) && (prev.walkDays || prev.exerciseDays)) {
-          return "이번 주 활동 기록이 아직 적어, 지난주와 비교하기엔 이릅니다.";
+          return L.thisLabel + " 활동 기록이 아직 적어, " + L.prevWith + " 비교하기엔 이릅니다.";
         }
         var diff = curScore - prevScore;
-        if (Math.abs(diff) < 8) return "걷기·운동은 지난주와 비슷한 흐름입니다.";
-        if (diff > 0) return "걷기·운동이 지난주보다 조금 늘어난 편입니다.";
-        return "걷기·운동이 지난주보다 조금 줄어든 편입니다.";
+        if (Math.abs(diff) < 8) return "걷기·운동은 " + L.prevWith + " 비슷한 흐름입니다.";
+        if (diff > 0) return "걷기·운동이 " + L.prevLabel + "보다 조금 늘어난 편입니다.";
+        return "걷기·운동이 " + L.prevLabel + "보다 조금 줄어든 편입니다.";
       }
 
-      function weightCompareLine(cur, prev) {
+      function weightCompareLine(cur, prev, labels) {
+        var L = labels || briefPeriodLabels("week");
         var a = cur.weightLast != null ? cur.weightLast : cur.weightFirst;
         var b = prev.weightLast != null ? prev.weightLast : prev.weightFirst;
         if (a == null && b == null) {
           if (parseWeightNum(state.weight) != null) {
-            return "몸무게는 기본 정보에 있으나, 주간 비교용 기록이 더 쌓이면 보여 줍니다.";
+            return "몸무게는 기본 정보에 있으나, " + L.compareKind + " 비교용 기록이 더 쌓이면 보여 줍니다.";
           }
           return null;
         }
-        if (a == null || b == null) return "몸무게 비교는 양쪽 주에 값이 더 쌓이면 가능합니다.";
+        if (a == null || b == null) return "몸무게 비교는 " + L.bothSides + " 값이 더 쌓이면 가능합니다.";
         var d = Math.round((a - b) * 10) / 10;
         if (Math.abs(d) < 0.3) return "몸무게는 비슷한 흐름입니다.";
-        if (d > 0) return "몸무게가 지난주 말보다 조금 오른 흐름입니다.";
-        return "몸무게가 지난주 말보다 조금 내린 흐름입니다.";
+        if (d > 0) return "몸무게가 " + L.prevEnd + "보다 조금 오른 흐름입니다.";
+        return "몸무게가 " + L.prevEnd + "보다 조금 내린 흐름입니다.";
       }
 
-      function bpCompareLine(cur, prev) {
+      function bpCompareLine(cur, prev, labels) {
+        var L = labels || briefPeriodLabels("week");
         var a = cur.bpLast || cur.bpFirst;
         var b = prev.bpLast || prev.bpFirst;
         if (!a && !b) {
           if (parseBpPair(state.bp)) {
-            return "혈압은 기본 정보에 있으나, 주간 비교용 기록이 더 쌓이면 보여 줍니다.";
+            return "혈압은 기본 정보에 있으나, " + L.compareKind + " 비교용 기록이 더 쌓이면 보여 줍니다.";
           }
           return null;
         }
-        if (!a || !b) return "혈압 비교는 양쪽 주에 값이 더 쌓이면 가능합니다.";
+        if (!a || !b) return "혈압 비교는 " + L.bothSides + " 값이 더 쌓이면 가능합니다.";
         var ds = a.sys - b.sys;
         var dd = a.dia - b.dia;
         if (Math.abs(ds) < 5 && Math.abs(dd) < 5) return "혈압은 큰 변화 없이 비슷한 편입니다.";
-        if (ds > 0 || dd > 0) return "혈압 수치가 지난주보다 조금 높은 쪽으로 보입니다. 흐름은 의사와 함께 보시면 좋습니다.";
-        return "혈압 수치가 지난주보다 조금 낮은 쪽으로 보입니다. 흐름은 의사와 함께 보시면 좋습니다.";
+        if (ds > 0 || dd > 0) return "혈압 수치가 " + L.prevLabel + "보다 조금 높은 쪽으로 보입니다. 흐름은 의사와 함께 보시면 좋습니다.";
+        return "혈압 수치가 " + L.prevLabel + "보다 조금 낮은 쪽으로 보입니다. 흐름은 의사와 함께 보시면 좋습니다.";
       }
 
-      function questionnaireCompareLine(cur, prev) {
+      function questionnaireCompareLine(cur, prev, labels) {
+        var L = labels || briefPeriodLabels("week");
         if (!cur.qDays && !prev.qDays) return null;
         if (cur.emergencyDays > 0) {
           return "급증상 신호가 있어 보입니다. 앱 안내보다 병원·응급실·119를 우선하세요.";
         }
         if (!cur.qDays && prev.qDays) {
-          return "이번 주 문진 기록이 적어, 증상 흐름 비교는 다음에 이어 갑니다.";
+          return L.thisLabel + " 문진 기록이 적어, 증상 흐름 비교는 다음에 이어 갑니다.";
         }
         if (cur.qDays && !prev.qDays) {
-          return "문진 기록이 이번 주부터 쌓이기 시작했습니다. 판단만 짧게 이어 가겠습니다.";
+          return "문진 기록이 " + L.thisLabel + "부터 쌓이기 시작했습니다. 판단만 짧게 이어 가겠습니다.";
         }
         var curRate = cur.discomfortDays / Math.max(1, cur.qDays);
         var prevRate = prev.discomfortDays / Math.max(1, prev.qDays);
         if (cur.stressHighDays > prev.stressHighDays + 1) {
-          return "문진상 긴장·스트레스 표시가 지난주보다 잦은 편입니다.";
+          return "문진상 긴장·스트레스 표시가 " + L.prevLabel + "보다 잦은 편입니다.";
         }
         if (curRate + 0.2 < prevRate) {
-          return "문진상 불편 표시가 지난주보다 줄어든 편입니다.";
+          return "문진상 불편 표시가 " + L.prevLabel + "보다 줄어든 편입니다.";
         }
         if (curRate > prevRate + 0.2) {
-          return "문진상 불편 표시가 지난주보다 잦은 편입니다.";
+          return "문진상 불편 표시가 " + L.prevLabel + "보다 잦은 편입니다.";
         }
-        return "문진상 불편 표시는 지난주와 비슷한 편입니다.";
+        return "문진상 불편 표시는 " + L.prevWith + " 비슷한 편입니다.";
       }
 
       function setWeekBriefOpen(open) {
@@ -11713,10 +11773,57 @@
         }
       }
 
+      var weekBriefMode = "week";
+
+      function startOfMonthDate(d) {
+        return new Date(d.getFullYear(), d.getMonth(), 1);
+      }
+
+      function briefRangeForMode(mode) {
+        var today = new Date();
+        if (mode === "month") {
+          var thisStartM = startOfMonthDate(today);
+          var prevEndM = addDaysDate(thisStartM, -1);
+          var prevStartM = startOfMonthDate(prevEndM);
+          return {
+            thisStart: thisStartM,
+            thisEnd: today,
+            prevStart: prevStartM,
+            prevEnd: prevEndM,
+            rangeNote: "달력 월, 현지"
+          };
+        }
+        var thisStart = startOfWeekMonday(today);
+        var prevEnd = addDaysDate(thisStart, -1);
+        var prevStart = startOfWeekMonday(prevEnd);
+        return {
+          thisStart: thisStart,
+          thisEnd: today,
+          prevStart: prevStart,
+          prevEnd: prevEnd,
+          rangeNote: "월~일, 현지"
+        };
+      }
+
+      function setWeekBriefMode(mode) {
+        weekBriefMode = mode === "month" ? "month" : "week";
+        document.querySelectorAll(".week-brief-mode").forEach(function (btn) {
+          var on = btn.getAttribute("data-brief-mode") === weekBriefMode;
+          btn.setAttribute("aria-pressed", on ? "true" : "false");
+        });
+        renderWeekBrief();
+      }
+
       function setupWeekBriefToggle() {
-        if (!weekBriefToggle) return;
-        weekBriefToggle.addEventListener("click", function () {
-          setWeekBriefOpen(!weekBrief.classList.contains("open"));
+        if (weekBriefToggle) {
+          weekBriefToggle.addEventListener("click", function () {
+            setWeekBriefOpen(!weekBrief.classList.contains("open"));
+          });
+        }
+        document.querySelectorAll(".week-brief-mode").forEach(function (btn) {
+          btn.addEventListener("click", function () {
+            setWeekBriefMode(btn.getAttribute("data-brief-mode") || "week");
+          });
         });
       }
 
@@ -11746,21 +11853,19 @@
       function renderWeekBrief() {
         if (!weekBrief || !weekBriefLines) return;
 
-        var today = new Date();
-        var thisStart = startOfWeekMonday(today);
-        var thisEnd = today;
-        var prevEnd = addDaysDate(thisStart, -1);
-        var prevStart = startOfWeekMonday(prevEnd);
-        var thisKeys = keysInRange(thisStart, thisEnd);
-        var prevKeys = keysInRange(prevStart, prevEnd);
+        var mode = weekBriefMode === "month" ? "month" : "week";
+        var L = briefPeriodLabels(mode);
+        var range = briefRangeForMode(mode);
+        var thisKeys = keysInRange(range.thisStart, range.thisEnd);
+        var prevKeys = keysInRange(range.prevStart, range.prevEnd);
         var cur = aggregateWeek(thisKeys);
         var prev = aggregateWeek(prevKeys);
 
         if (weekBriefRange) {
           weekBriefRange.textContent =
-            "이번 주 " + formatWeekSpan(thisKeys[0], thisKeys[thisKeys.length - 1]) +
-            " · 지난 주 " + formatWeekSpan(prevKeys[0], prevKeys[prevKeys.length - 1]) +
-            " (월~일, 현지)";
+            L.thisLabel + " " + formatWeekSpan(thisKeys[0], thisKeys[thisKeys.length - 1]) +
+            " · " + L.prevLabel + " " + formatWeekSpan(prevKeys[0], prevKeys[prevKeys.length - 1]) +
+            " (" + range.rangeNote + ")";
         }
 
         var lines = [];
@@ -11769,10 +11874,10 @@
         if (!hasEnough) {
           weekBrief.classList.remove("has-data");
           if (weekBriefEmpty) {
-            weekBriefEmpty.textContent = "이번 주 기록이 더 쌓이면 비교합니다.";
+            weekBriefEmpty.textContent = L.thisLabel + " 기록이 더 쌓이면 비교합니다.";
           }
           if (weekBriefHint) {
-            weekBriefHint.textContent = "기록이 더 쌓이면 비교합니다";
+            weekBriefHint.textContent = "주간·월간 비교 · 기록이 더 쌓이면 보여 줍니다";
           }
           weekBriefLines.innerHTML = "";
           return;
@@ -11785,7 +11890,7 @@
           } else if (cur.intakeAvg != null) {
             lines.push({
               label: "칼로리 섭취(기록한 날)",
-              text: "이번 주 약 " + cur.intakeAvg + " kcal · 지난주 기록이 더 있으면 비교합니다. 빈 날은 채우지 않습니다."
+              text: L.thisLabel + " 약 " + cur.intakeAvg + " kcal · " + L.prevLabel + " 기록이 더 있으면 비교합니다. 빈 날은 채우지 않습니다."
             });
           }
         }
@@ -11796,30 +11901,30 @@
           } else if (cur.burnAvg != null) {
             lines.push({
               label: "칼로리 소비(기록한 날)",
-              text: "이번 주 약 " + cur.burnAvg + " kcal · 지난주 기록이 더 있으면 비교합니다. 빈 날은 채우지 않습니다."
+              text: L.thisLabel + " 약 " + cur.burnAvg + " kcal · " + L.prevLabel + " 기록이 더 있으면 비교합니다. 빈 날은 채우지 않습니다."
             });
           }
         }
 
-        var actLine = activityCompareLine(cur, prev);
+        var actLine = activityCompareLine(cur, prev, L);
         if (actLine) lines.push({ label: "활동", text: actLine });
 
-        var wLine = weightCompareLine(cur, prev);
+        var wLine = weightCompareLine(cur, prev, L);
         if (wLine) lines.push({ label: "몸무게", text: wLine });
 
-        var bpLine = bpCompareLine(cur, prev);
+        var bpLine = bpCompareLine(cur, prev, L);
         if (bpLine) lines.push({ label: "혈압", text: bpLine });
 
-        var qLine = questionnaireCompareLine(cur, prev);
+        var qLine = questionnaireCompareLine(cur, prev, L);
         if (qLine) lines.push({ label: "문진·증상", text: qLine });
 
         if (!lines.length) {
           weekBrief.classList.remove("has-data");
           if (weekBriefEmpty) {
-            weekBriefEmpty.textContent = "이번 주 기록이 더 쌓이면 비교합니다.";
+            weekBriefEmpty.textContent = L.thisLabel + " 기록이 더 쌓이면 비교합니다.";
           }
           if (weekBriefHint) {
-            weekBriefHint.textContent = "기록이 더 쌓이면 비교합니다";
+            weekBriefHint.textContent = "주간·월간 비교 · 기록이 더 쌓이면 보여 줍니다";
           }
           weekBriefLines.innerHTML = "";
           return;
@@ -11827,7 +11932,7 @@
 
         weekBrief.classList.add("has-data");
         if (weekBriefHint) {
-          weekBriefHint.textContent = "이번 주와 지난 주 비교 · 빈 날은 그대로 · 눌러 보기";
+          weekBriefHint.textContent = "주간·월간 비교 · 빈 날은 그대로 · 눌러 보기";
         }
         if (weekBriefRange && weekHasUnloggedPastDay(thisKeys.concat(prevKeys))) {
           weekBriefRange.textContent += " 기록 없는 날은 비워 두었습니다. 평균으로 채우지 않습니다.";
@@ -13627,14 +13732,22 @@
 
       function runAppShellUpdate(triggerBtn) {
         var statusEl = document.getElementById("app-shell-status");
+        var banner = document.getElementById("app-update-banner");
         var buttons = [
           document.getElementById("app-shell-refresh"),
           document.getElementById("app-shell-update-top")
         ].filter(Boolean);
-        buttons.forEach(function (btn) { btn.disabled = true; });
+        buttons.forEach(function (btn) {
+          btn.disabled = true;
+          btn.classList.remove("is-update-ready");
+        });
         if (triggerBtn) triggerBtn.disabled = true;
+        if (banner) banner.hidden = true;
         if (statusEl) statusEl.textContent = "최신 화면을 받는 중… 건강 기록은 지우지 않습니다.";
-        try { sessionStorage.setItem("healthapp.shellRefreshHint.v1", "1"); } catch (eFlag) { /* ignore */ }
+        try {
+          sessionStorage.setItem("healthapp.shellRefreshHint.v1", "1");
+          sessionStorage.removeItem("healthapp.shellUpdateNotice.v1");
+        } catch (eFlag) { /* ignore */ }
         // 앱 껍데기 캐시와 서비스 워커만 지운다. localStorage 건강 기록은 건드리지 않는다.
         var clearShell = function () {
           if (!window.caches || !caches.keys) return Promise.resolve();
