@@ -4043,7 +4043,7 @@
         <span data-i18n="records.title">내 기록 관리</span>
         <span class="ops-chevron" aria-hidden="true">▾</span>
       </button>
-      <p class="app-shell-version" id="app-shell-version" data-shell-version="20261015.5">이 화면 버전 20261015.5</p>      <div class="ops-body" id="records-body" hidden>
+      <p class="app-shell-version" id="app-shell-version" data-shell-version="20261015.6">이 화면 버전 20261015.6</p>      <div class="ops-body" id="records-body" hidden>
 
         <div class="records-vitals" id="records-vitals">
           <h3 class="ops-section-title">몸 수치 (혈압·혈당)</h3>
@@ -4706,22 +4706,19 @@
             </div>
           </div>
         </div>
-        <div class="act-block" data-act="extra" data-input-mode="adjust">
+        <div class="act-block" data-act="extra" data-input-mode="none">
           <div class="act-block-head">
             <strong>활동 추가</strong>
             <span class="act-block-kcal" data-act-kcal="extras"></span>
           </div>
           <div class="act-chips" id="act-extra-kind-chips" role="group" aria-label="추가 활동 종류"></div>
           <p class="act-mode-hint">종류를 고른 뒤 시간을 <strong>눌러 고르기</strong></p>
-          <div class="act-path act-path-adjust" data-act-path="adjust">
-            <span class="act-path-label">+/- 조절</span>
-            <div class="act-row">
-              <span class="muted">분</span>
-              <div class="stepper" data-act-stepper="extraMinutes" role="group" aria-label="추가 활동 분">
-                <button type="button" class="step-btn" data-dir="-1" aria-label="추가 활동 줄이기">−</button>
-                <span class="step-val is-empty" id="act-extra-min-val" aria-live="polite">눌러 고르기</span>
-                <button type="button" class="step-btn" data-dir="1" aria-label="추가 활동 늘리기">+</button>
-              </div>
+          <div class="act-row">
+            <span class="muted">분</span>
+            <div class="stepper" data-act-stepper="extraMinutes" role="group" aria-label="추가 활동 분">
+              <button type="button" class="step-btn" data-dir="-1" aria-label="추가 활동 줄이기">−</button>
+              <span class="step-val is-empty" id="act-extra-min-val" aria-live="polite">눌러 고르기</span>
+              <button type="button" class="step-btn" data-dir="1" aria-label="추가 활동 늘리기">+</button>
             </div>
           </div>
           <div class="act-extras" id="act-extras-list" aria-live="polite"></div>
@@ -11146,7 +11143,7 @@
         if (d.exerciseMinutes != null && d.exerciseMinutes > 0) {
           actModes.exercise = valueInPresets(d.exerciseMinutes, EXERCISE_MIN_PRESETS) ? "preset" : "adjust";
         }
-        actModes.extra = "adjust";
+        actModes.extra = "none";
         syncActBlockModes();
       }
 
@@ -11255,7 +11252,7 @@
             }
             commitExtraDraftOrUpdate();
           }
-          actModes.extra = "adjust";
+          actModes.extra = "none";
           paintActivityDraft();
         });
 
@@ -11307,7 +11304,7 @@
               extraDraft.minutes = Math.min(cfg.max, Math.max(cfg.min, Math.round(nextEx / cfg.step) * cfg.step));
             }
           }
-          actModes.extra = "adjust";
+          actModes.extra = "none";
           commitExtraDraftOrUpdate();
           paintActivityDraft();
           return;
@@ -14467,7 +14464,7 @@
               if (extraDraft.minutes == null || !(extraDraft.minutes > 0)) {
                 extraDraft.minutes = cfg.fallback;
               }
-              actModes.extra = "adjust";
+              actModes.extra = "none";
               commitExtraDraftOrUpdate();
               paintActivityDraft();
               return;
