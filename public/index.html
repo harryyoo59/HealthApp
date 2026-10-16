@@ -748,7 +748,7 @@
       white-space: nowrap;
       text-shadow: 0 1px 2px rgba(0, 0, 0, 0.55);
       transform: translate(42px, -70%);
-      animation: cheer-click-burst 560ms cubic-bezier(0.2, 1.2, 0.35, 1) forwards;
+      animation: cheer-click-burst 1200ms cubic-bezier(0.2, 1.2, 0.35, 1) forwards;
       will-change: transform, opacity;
     }
     @keyframes cheer-click-burst {
@@ -756,11 +756,11 @@
         transform: translate(42px, -70%) scale(0.4);
         opacity: 0;
       }
-      28% {
+      12% {
         transform: translate(50px, -78%) scale(1.2);
         opacity: 1;
       }
-      70% {
+      72% {
         transform: translate(56px, -86%) scale(1);
         opacity: 1;
       }
@@ -4299,7 +4299,7 @@
         <span data-i18n="records.title">내 기록 관리</span>
         <span class="ops-chevron" aria-hidden="true">▾</span>
       </button>
-      <p class="app-shell-version" id="app-shell-version" data-shell-version="20261017.3">이 화면 버전 20261017.3</p>      <div class="ops-body" id="records-body" hidden>
+      <p class="app-shell-version" id="app-shell-version" data-shell-version="20261017.4">이 화면 버전 20261017.4</p>      <div class="ops-body" id="records-body" hidden>
 
         <div class="records-vitals" id="records-vitals">
           <h3 class="ops-section-title">몸 수치 (혈압·혈당)</h3>
@@ -4361,7 +4361,7 @@
       <div class="cheer-row">
         <p class="cheer-text">Harry 에게 응원의 하트 눌러주시면<br>제가 더욱 힘이 납니다.</p>
         <button type="button" class="cheer-media" id="cheer-media" aria-label="Harry에게 응원 하트 보내기">
-          <img src="/cheer-heart.webp?v=20261017.3" alt="" width="48" height="48" decoding="async">
+          <img src="/cheer-heart.webp?v=20261017.4" alt="" width="48" height="48" decoding="async">
           <span class="cheer-burst-layer" id="cheer-burst-layer" aria-hidden="true"></span>
         </button>
       </div>
@@ -15427,13 +15427,13 @@
 
           window.setTimeout(function () {
             if (layer) layer.textContent = "";
-          }, 980);
+          }, 1700);
         }
 
         btn.addEventListener("click", function () {
           var now = Date.now();
           if (now < busyUntil) return;
-          busyUntil = now + 900;
+          busyUntil = now + 1600;
           btn.classList.remove("is-cheers");
           void btn.offsetWidth;
           btn.classList.add("is-cheers");
