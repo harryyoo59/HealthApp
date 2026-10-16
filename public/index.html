@@ -661,7 +661,7 @@
       width: 48px;
       height: 48px;
       margin-left: 4px;
-      margin-right: 20px;
+      margin-right: 56px;
       background: transparent;
       cursor: pointer;
       -webkit-tap-highlight-color: transparent;
@@ -680,7 +680,7 @@
     }
     @keyframes cheer-pop {
       0% { transform: scale(1); }
-      40% { transform: scale(1.28); }
+      40% { transform: scale(1.22); }
       100% { transform: scale(1); }
     }
     .cheer-media img {
@@ -690,6 +690,108 @@
       object-fit: contain;
       background: transparent;
       pointer-events: none;
+    }
+    .cheer-burst-layer {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 0;
+      height: 0;
+      pointer-events: none;
+      z-index: 6;
+      overflow: visible;
+    }
+    .cheer-fly-heart {
+      position: absolute;
+      left: 0;
+      top: 0;
+      color: #ff2d55;
+      font-size: 18px;
+      line-height: 1;
+      font-weight: 900;
+      text-shadow: 0 1px 0 rgba(80, 0, 20, 0.35);
+      transform: translate(-50%, -50%);
+      animation: cheer-fly-right 720ms cubic-bezier(0.22, 0.9, 0.3, 1) forwards;
+      will-change: transform, opacity;
+    }
+    @keyframes cheer-fly-right {
+      0% {
+        transform: translate(-50%, -50%) scale(0.55);
+        opacity: 0;
+      }
+      12% {
+        transform: translate(-50%, -55%) scale(1);
+        opacity: 1;
+      }
+      58% {
+        transform: translate(46px, -62%) scale(1.12);
+        opacity: 1;
+      }
+      72% {
+        transform: translate(54px, -70%) scale(1.55);
+        opacity: 0.95;
+      }
+      100% {
+        transform: translate(58px, -76%) scale(0.15);
+        opacity: 0;
+      }
+    }
+    .cheer-fly-click {
+      position: absolute;
+      left: 0;
+      top: 0;
+      color: #ffffff;
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      line-height: 1;
+      white-space: nowrap;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.55);
+      transform: translate(42px, -70%);
+      animation: cheer-click-burst 560ms cubic-bezier(0.2, 1.2, 0.35, 1) forwards;
+      will-change: transform, opacity;
+    }
+    @keyframes cheer-click-burst {
+      0% {
+        transform: translate(42px, -70%) scale(0.4);
+        opacity: 0;
+      }
+      28% {
+        transform: translate(50px, -78%) scale(1.2);
+        opacity: 1;
+      }
+      70% {
+        transform: translate(56px, -86%) scale(1);
+        opacity: 1;
+      }
+      100% {
+        transform: translate(60px, -94%) scale(0.85);
+        opacity: 0;
+      }
+    }
+    .cheer-fly-shard {
+      position: absolute;
+      left: 0;
+      top: 0;
+      color: #ff4d6d;
+      font-size: 11px;
+      line-height: 1;
+      font-weight: 900;
+      --dx: 0px;
+      --dy: 0px;
+      transform: translate(50px, -70%);
+      animation: cheer-shard-pop 520ms ease-out forwards;
+      will-change: transform, opacity;
+    }
+    @keyframes cheer-shard-pop {
+      0% {
+        transform: translate(50px, -70%) scale(0.5);
+        opacity: 1;
+      }
+      100% {
+        transform: translate(calc(50px + var(--dx)), calc(-70% + var(--dy))) scale(0.2);
+        opacity: 0;
+      }
     }
     .cheer-toast {
       display: none;
@@ -4197,7 +4299,7 @@
         <span data-i18n="records.title">내 기록 관리</span>
         <span class="ops-chevron" aria-hidden="true">▾</span>
       </button>
-      <p class="app-shell-version" id="app-shell-version" data-shell-version="20261016.17">이 화면 버전 20261016.17</p>      <div class="ops-body" id="records-body" hidden>
+      <p class="app-shell-version" id="app-shell-version" data-shell-version="20261016.18">이 화면 버전 20261016.18</p>      <div class="ops-body" id="records-body" hidden>
 
         <div class="records-vitals" id="records-vitals">
           <h3 class="ops-section-title">몸 수치 (혈압·혈당)</h3>
@@ -4258,7 +4360,10 @@
     <section class="cheer-entry" id="cheer-entry" aria-label="Harry에게 응원하기">
       <div class="cheer-row">
         <p class="cheer-text">Harry 에게 응원의 하트 눌러주시면<br>제가 더욱 힘이 납니다.</p>
-        <button type="button" class="cheer-media" id="cheer-media" aria-label="Harry에게 응원 하트 보내기"><img src="/cheer-heart.webp?v=20261016.17" alt="" width="48" height="48" decoding="async"></button>
+        <button type="button" class="cheer-media" id="cheer-media" aria-label="Harry에게 응원 하트 보내기">
+          <img src="/cheer-heart.webp?v=20261016.18" alt="" width="48" height="48" decoding="async">
+          <span class="cheer-burst-layer" id="cheer-burst-layer" aria-hidden="true"></span>
+        </button>
       </div>
       <p class="cheer-toast" id="cheer-toast" role="status" aria-live="polite"></p>
     </section>
@@ -15288,13 +15393,51 @@
           } catch (e) { /* ignore */ }
         }
 
+        function playCheerBurst() {
+          var layer = document.getElementById("cheer-burst-layer");
+          if (!layer) return;
+          layer.textContent = "";
+          var heart = document.createElement("span");
+          heart.className = "cheer-fly-heart";
+          heart.textContent = "♥";
+          layer.appendChild(heart);
+
+          window.setTimeout(function () {
+            var clickWord = document.createElement("span");
+            clickWord.className = "cheer-fly-click";
+            clickWord.textContent = "클릭";
+            layer.appendChild(clickWord);
+
+            var dirs = [
+              [18, -14],
+              [22, 4],
+              [8, 16],
+              [-6, 12],
+              [28, -6]
+            ];
+            for (var i = 0; i < dirs.length; i++) {
+              var shard = document.createElement("span");
+              shard.className = "cheer-fly-shard";
+              shard.textContent = "♥";
+              shard.style.setProperty("--dx", dirs[i][0] + "px");
+              shard.style.setProperty("--dy", dirs[i][1] + "px");
+              layer.appendChild(shard);
+            }
+          }, 380);
+
+          window.setTimeout(function () {
+            if (layer) layer.textContent = "";
+          }, 980);
+        }
+
         btn.addEventListener("click", function () {
           var now = Date.now();
           if (now < busyUntil) return;
-          busyUntil = now + 700;
+          busyUntil = now + 900;
           btn.classList.remove("is-cheers");
           void btn.offsetWidth;
           btn.classList.add("is-cheers");
+          playCheerBurst();
           var count = bumpLocalCount();
           trackCheer(count);
           showCheerToast(
