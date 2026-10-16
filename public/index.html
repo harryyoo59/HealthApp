@@ -3113,6 +3113,65 @@
       font-weight: 700;
       white-space: nowrap;
     }
+    .birth-date-row {
+      display: flex;
+      align-items: center;
+      flex-wrap: nowrap;
+      gap: 4px;
+      width: 100%;
+    }
+    .birth-date-row input {
+      width: 100%;
+      min-width: 0;
+      text-align: center;
+      border-radius: 10px;
+      border: 1px solid var(--line);
+      background: var(--key);
+      color: var(--ink);
+      font: inherit;
+      font-size: 15px;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      line-height: 1.4;
+      padding: 10px 6px;
+    }
+    .birth-date-row input#birth-date-y { flex: 1.35 1 0; max-width: 5.2em; }
+    .birth-date-row input#birth-date-m,
+    .birth-date-row input#birth-date-d { flex: 0.85 1 0; max-width: 3.2em; }
+    .birth-date-row input:focus {
+      outline: 2px solid var(--accent);
+      outline-offset: 1px;
+    }
+    .birth-date-unit {
+      flex: 0 0 auto;
+      color: var(--ink);
+      font-size: 14px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+    .profile-age-auto {
+      min-height: 44px;
+      display: flex;
+      align-items: center;
+      padding: 8px 12px;
+      border-radius: 10px;
+      border: 1px solid rgba(232,242,236,0.18);
+      background: rgba(20, 40, 32, 0.65);
+      color: var(--ink);
+      font-size: 15px;
+      font-weight: 700;
+    }
+    .profile-age-auto.is-empty {
+      color: var(--muted);
+      font-weight: 600;
+    }
+    .profile-age-hint {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.35;
+      font-weight: 500;
+    }
     .labs-group {
       margin: 8px 0 0;
       color: var(--ink);
@@ -3859,7 +3918,7 @@
       <div class="keys">
         <button class="key" type="button" data-field="profile" data-i18n-attr="aria-label:home.profileAria" aria-label="기본 정보 입력">
           <strong data-i18n="home.profile">기본 정보</strong>
-          <span class="hint" data-i18n="home.profileHint">성별·나이·키·몸무게·혈압·문진표</span>
+          <span class="hint" data-i18n="home.profileHint">성별·생년월일·키·몸무게·혈압·문진표</span>
           <span class="preview" data-preview="profile"></span>
         </button>
         <button class="key" type="button" data-field="meds" data-i18n-attr="aria-label:home.medsAria" aria-label="처방및 병명 입력">
@@ -4098,7 +4157,7 @@
         <span data-i18n="records.title">내 기록 관리</span>
         <span class="ops-chevron" aria-hidden="true">▾</span>
       </button>
-      <p class="app-shell-version" id="app-shell-version" data-shell-version="20261016.13">이 화면 버전 20261016.13</p>      <div class="ops-body" id="records-body" hidden>
+      <p class="app-shell-version" id="app-shell-version" data-shell-version="20261016.14">이 화면 버전 20261016.14</p>      <div class="ops-body" id="records-body" hidden>
 
         <div class="records-vitals" id="records-vitals">
           <h3 class="ops-section-title">몸 수치 (혈압·혈당)</h3>
@@ -4158,7 +4217,7 @@
 
     <section class="cheer-entry" id="cheer-entry" aria-label="Harry에게 응원하기">
       <p class="cheer-text">Harry 에게 응원의 하트 눌러주시면<br>제가 더욱 힘이 납니다.</p>
-      <button type="button" class="cheer-media" id="cheer-media" aria-label="Harry에게 응원 하트 보내기"><img src="/cheer-heart.webp?v=20261016.13" alt="" width="48" height="48"></button>
+      <button type="button" class="cheer-media" id="cheer-media" aria-label="Harry에게 응원 하트 보내기"><img src="/cheer-heart.webp?v=20261016.14" alt="" width="48" height="48"></button>
     </section>
 
     <section class="share-entry" id="share-entry" data-i18n-attr="aria-label:share.sectionAria" aria-label="지인에게 이 사이트 알리기">
@@ -4332,11 +4391,21 @@
           </div>
         </div>
         <div class="sheet-profile-row">
+          <span class="sheet-profile-label" id="profile-birth-label">생년월일</span>
+          <div class="birth-date-row" role="group" aria-labelledby="profile-birth-label">
+            <input type="text" id="birth-date-y" inputmode="numeric" pattern="[0-9]*" maxlength="4" placeholder="0000" autocomplete="bday-year" aria-label="출생 년도" />
+            <span class="birth-date-unit">년</span>
+            <input type="text" id="birth-date-m" inputmode="numeric" pattern="[0-9]*" maxlength="2" placeholder="00" autocomplete="bday-month" aria-label="출생 월" />
+            <span class="birth-date-unit">월</span>
+            <input type="text" id="birth-date-d" inputmode="numeric" pattern="[0-9]*" maxlength="2" placeholder="00" autocomplete="bday-day" aria-label="출생 일" />
+            <span class="birth-date-unit">일</span>
+          </div>
+        </div>
+        <div class="sheet-profile-row">
           <span class="sheet-profile-label" id="profile-age-label">나이</span>
-          <div class="stepper" data-stepper="age" role="group" aria-labelledby="profile-age-label">
-            <button type="button" class="step-btn" data-dir="-1" aria-label="나이 줄이기">−</button>
-            <span class="step-val is-empty" id="profile-age-val" aria-live="polite">눌러 고르기</span>
-            <button type="button" class="step-btn" data-dir="1" aria-label="나이 늘리기">+</button>
+          <div>
+            <div class="profile-age-auto is-empty" id="profile-age-val" aria-live="polite" aria-labelledby="profile-age-label">생년월일을 넣으면 자동</div>
+            <p class="profile-age-hint" id="profile-age-hint">생일이 지나면 자동으로 한 살 올라갑니다.</p>
           </div>
         </div>
         <div class="sheet-profile-row">
@@ -4899,7 +4968,7 @@
       var FIELDS = {
         profile: {
           title: "기본 정보",
-          help: "성별·나이·키·몸무게·혈압을 고른 뒤, 아래 문진표도 칩으로 채워 주세요."
+          help: "성별·생년월일·키·몸무게·혈압을 고른 뒤, 아래 문진표도 칩으로 채워 주세요. 나이는 생년월일로 자동 계산됩니다."
         },
         meds: {
           title: "처방및 병명",
@@ -4922,9 +4991,10 @@
           help: "오늘 한 행동을 틈틈이 눌러 기록하세요. 수면·걷기·앉아있기·운동은 주어진 시간·+/-·걸음(+/-) 중 하나만, 운전은 +/-만. 총 소모가 합산됩니다."
         }
       };
-      var PROFILE_KEYS = ["sex", "age", "height", "weight", "bp"];
+      var PROFILE_KEYS = ["sex", "birthDate", "age", "height", "weight", "bp"];
       var PROFILE_LABELS = {
         sex: "성별",
+        birthDate: "생년월일",
         age: "나이",
         height: "키",
         weight: "몸무게",
@@ -6219,7 +6289,7 @@
       var DEFAULT_ACTIVITY_MIN = 30;
 
       var state = {
-        sex: "", age: "", height: "", weight: "", bp: "",
+        sex: "", birthDate: "", age: "", height: "", weight: "", bp: "",
         rx: "", dx: "", otc: "", supp: "", labs: "", labsMemo: "", labPanels: [],
         surgery: "", cured: "",
         questionnaire: null
@@ -6258,7 +6328,11 @@
       var helpEl = document.getElementById("sheet-help");
       var inputEl = document.getElementById("sheet-input");
       var profileEls = {
+        birthY: document.getElementById("birth-date-y"),
+        birthM: document.getElementById("birth-date-m"),
+        birthD: document.getElementById("birth-date-d"),
         ageVal: document.getElementById("profile-age-val"),
+        ageHint: document.getElementById("profile-age-hint"),
         heightVal: document.getElementById("profile-height-val"),
         weightVal: document.getElementById("profile-weight-val"),
         sysVal: document.getElementById("profile-sys-val"),
@@ -6289,7 +6363,11 @@
       var labFieldInputMap = {};
       var profileDraft = {
         sex: "",
+        birthY: null,
+        birthM: null,
+        birthD: null,
         age: null,
+        legacyAge: null,
         height: null,
         weight: null,
         sys: null,
@@ -6303,7 +6381,6 @@
       var qFamilyDetailEl = document.getElementById("q-family-detail");
       var qFamilyDetailWrap = document.getElementById("q-family-detail-wrap");
       var STEPPER_CFG = {
-        age: { min: 1, max: 120, step: 1, fallback: 60, unit: "세", decimals: 0 },
         height: { min: 100, max: 220, step: 1, fallback: 165, unit: "cm", decimals: 0 },
         weight: { min: 30, max: 200, step: 0.5, fallback: 65, unit: "kg", decimals: 1 },
         sys: { min: 70, max: 220, step: 1, fallback: 120, unit: "", decimals: 0 },
@@ -7090,7 +7167,7 @@
           burn: 0,
           vitals: { weight: "", bp: "", at: 0 },
           bodyBasics: {
-            sex: "", age: "", height: "", weight: "", bp: "",
+            sex: "", birthDate: "", age: "", height: "", weight: "", bp: "",
             rx: "", dx: "", otc: "", supp: "", labs: "", labsMemo: "", labPanels: [],
             surgery: "", cured: "",
             questionnaire: emptyQuestionnaire()
@@ -7560,9 +7637,93 @@
         });
       }
 
+      function daysInMonth(year, month) {
+        var y = Number(year);
+        var m = Number(month);
+        if (!Number.isFinite(y) || !Number.isFinite(m) || m < 1 || m > 12) return 31;
+        return new Date(y, m, 0).getDate();
+      }
+
+      function parseBirthDateParts(value) {
+        var s = String(value || "").trim();
+        var m = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
+        if (!m) return { y: null, m: null, d: null };
+        var y = Number(m[1]);
+        var mo = Number(m[2]);
+        var d = Number(m[3]);
+        if (!Number.isFinite(y) || !Number.isFinite(mo) || !Number.isFinite(d)) {
+          return { y: null, m: null, d: null };
+        }
+        return { y: y, m: mo, d: d };
+      }
+
+      function formatBirthDate(y, m, d) {
+        if (y == null || m == null || d == null) return "";
+        var yy = Math.round(Number(y));
+        var mm = Math.round(Number(m));
+        var dd = Math.round(Number(d));
+        if (!Number.isFinite(yy) || !Number.isFinite(mm) || !Number.isFinite(dd)) return "";
+        var nowY = new Date().getFullYear();
+        if (yy < 1900 || yy > nowY) return "";
+        if (mm < 1 || mm > 12) return "";
+        var maxD = daysInMonth(yy, mm);
+        if (dd < 1 || dd > maxD) return "";
+        var birth = new Date(yy, mm - 1, dd);
+        if (
+          birth.getFullYear() !== yy ||
+          birth.getMonth() !== mm - 1 ||
+          birth.getDate() !== dd
+        ) {
+          return "";
+        }
+        var today = new Date();
+        today.setHours(0, 0, 0, 0);
+        if (birth.getTime() > today.getTime()) return "";
+        return (
+          String(yy) +
+          "-" +
+          String(mm).padStart(2, "0") +
+          "-" +
+          String(dd).padStart(2, "0")
+        );
+      }
+
+      function ageFromBirthParts(y, m, d) {
+        var iso = formatBirthDate(y, m, d);
+        if (!iso) return null;
+        var parts = parseBirthDateParts(iso);
+        var now = new Date();
+        var age = now.getFullYear() - parts.y;
+        var hadBirthday =
+          now.getMonth() + 1 > parts.m ||
+          (now.getMonth() + 1 === parts.m && now.getDate() >= parts.d);
+        if (!hadBirthday) age -= 1;
+        if (age < 0 || age > 120) return null;
+        return age;
+      }
+
+      function normalizeBirthDate(raw) {
+        var parts = parseBirthDateParts(raw);
+        return formatBirthDate(parts.y, parts.m, parts.d);
+      }
+
+      function formatBirthDateDisplay(iso) {
+        var parts = parseBirthDateParts(iso);
+        if (parts.y == null) return "";
+        return parts.y + "년 " + parts.m + "월 " + parts.d + "일";
+      }
+
       function normalizeBodyBasics(raw) {
         raw = raw || {};
-        var ageNum = parseNumberLoose(raw.age);
+        var birthDate = normalizeBirthDate(raw.birthDate);
+        var ageFromBirth = birthDate
+          ? ageFromBirthParts(
+              parseBirthDateParts(birthDate).y,
+              parseBirthDateParts(birthDate).m,
+              parseBirthDateParts(birthDate).d
+            )
+          : null;
+        var ageNum = ageFromBirth != null ? ageFromBirth : parseNumberLoose(raw.age);
         var heightNum = parseNumberLoose(raw.height);
         var weightNum = parseNumberLoose(raw.weight);
         var bp = parseBpParts(raw.bp);
@@ -7575,6 +7736,7 @@
         }
         var out = {
           sex: normalizeSex(raw.sex),
+          birthDate: birthDate,
           age: ageNum == null ? String(raw.age || "").trim() : String(Math.round(ageNum)),
           height: heightNum == null ? String(raw.height || "").trim() : formatStepperValue("height", heightNum),
           weight: weightNum == null ? String(raw.weight || "").trim() : formatStepperValue("weight", weightNum),
@@ -8283,6 +8445,7 @@
         bb = bb || {};
         return !!(
           String(bb.sex || "").trim() ||
+          String(bb.birthDate || "").trim() ||
           String(bb.age || "").trim() ||
           String(bb.height || "").trim() ||
           String(bb.weight || "").trim() ||
@@ -8941,7 +9104,7 @@
       function hasProfileBits() {
         var n = 0;
         if (state.sex.trim()) n++;
-        if (state.age.trim()) n++;
+        if (String(state.birthDate || "").trim() || state.age.trim()) n++;
         if (state.height.trim()) n++;
         if (state.weight.trim()) n++;
         if (state.bp.trim()) n++;
@@ -12226,7 +12389,16 @@
         var parts = [];
         PROFILE_KEYS.forEach(function (key) {
           var value = String(state[key] || "").trim();
-          if (value) parts.push(PROFILE_LABELS[key] + " " + firstLine(value));
+          if (!value) return;
+          if (key === "birthDate") {
+            parts.push(PROFILE_LABELS[key] + " " + formatBirthDateDisplay(value));
+            return;
+          }
+          if (key === "age") {
+            parts.push(PROFILE_LABELS[key] + " " + value + "세");
+            return;
+          }
+          parts.push(PROFILE_LABELS[key] + " " + firstLine(value));
         });
         var qLines = questionnaireSummaryLines(state.questionnaire);
         if (qLines.length) parts.push("문진 " + firstLine(qLines.join(" · ")));
@@ -12317,12 +12489,92 @@
         });
       }
 
-      function paintProfileDraft() {
-        if (profileDraft.age == null) {
-          paintStepVal(profileEls.ageVal, "", true);
-        } else {
-          paintStepVal(profileEls.ageVal, formatStepperValue("age", profileDraft.age), false);
+      function syncAgeFromBirthDraft() {
+        var computed = ageFromBirthParts(
+          profileDraft.birthY,
+          profileDraft.birthM,
+          profileDraft.birthD
+        );
+        if (computed != null) {
+          profileDraft.age = computed;
+          profileDraft.legacyAge = null;
+          return;
         }
+        if (
+          profileDraft.birthY == null &&
+          profileDraft.birthM == null &&
+          profileDraft.birthD == null &&
+          profileDraft.legacyAge != null
+        ) {
+          profileDraft.age = profileDraft.legacyAge;
+          return;
+        }
+        profileDraft.age = null;
+      }
+
+      function paintBirthDateInputs() {
+        if (profileEls.birthY) {
+          profileEls.birthY.value =
+            profileDraft.birthY == null ? "" : String(profileDraft.birthY);
+        }
+        if (profileEls.birthM) {
+          profileEls.birthM.value =
+            profileDraft.birthM == null ? "" : String(profileDraft.birthM);
+        }
+        if (profileEls.birthD) {
+          profileEls.birthD.value =
+            profileDraft.birthD == null ? "" : String(profileDraft.birthD);
+        }
+      }
+
+      function paintAgeAuto() {
+        if (!profileEls.ageVal) return;
+        syncAgeFromBirthDraft();
+        if (profileDraft.age == null) {
+          profileEls.ageVal.textContent = "생년월일을 넣으면 자동";
+          profileEls.ageVal.classList.add("is-empty");
+          if (profileEls.ageHint) {
+            profileEls.ageHint.textContent = "생일이 지나면 자동으로 한 살 올라갑니다.";
+          }
+          return;
+        }
+        profileEls.ageVal.textContent = String(Math.round(profileDraft.age)) + "세";
+        profileEls.ageVal.classList.remove("is-empty");
+        if (profileEls.ageHint) {
+          var iso = formatBirthDate(
+            profileDraft.birthY,
+            profileDraft.birthM,
+            profileDraft.birthD
+          );
+          profileEls.ageHint.textContent = iso
+            ? "생일이 지나면 자동으로 한 살 올라갑니다."
+            : "예전에 넣은 나이입니다. 생년월일을 넣으면 자동으로 맞춰집니다.";
+        }
+      }
+
+      function readBirthDraftFromInputs() {
+        function readPart(el, min, max) {
+          if (!el) return null;
+          var n = parseNumberLoose(el.value);
+          if (n == null) return null;
+          n = Math.round(n);
+          if (n < min || n > max) return null;
+          return n;
+        }
+        var nowY = new Date().getFullYear();
+        profileDraft.birthY = readPart(profileEls.birthY, 1900, nowY);
+        profileDraft.birthM = readPart(profileEls.birthM, 1, 12);
+        var maxD =
+          profileDraft.birthY != null && profileDraft.birthM != null
+            ? daysInMonth(profileDraft.birthY, profileDraft.birthM)
+            : 31;
+        profileDraft.birthD = readPart(profileEls.birthD, 1, maxD);
+        syncAgeFromBirthDraft();
+      }
+
+      function paintProfileDraft() {
+        paintBirthDateInputs();
+        paintAgeAuto();
         if (profileDraft.height == null) {
           paintStepVal(profileEls.heightVal, "", true);
         } else {
@@ -12550,27 +12802,42 @@
 
       function fillProfileInputs() {
         var bp = parseBpParts(state.bp);
+        var birth = parseBirthDateParts(state.birthDate);
+        var legacyAge = parseNumberLoose(state.age);
         profileDraft = {
           sex: normalizeSex(state.sex),
-          age: parseNumberLoose(state.age),
+          birthY: birth.y,
+          birthM: birth.m,
+          birthD: birth.d,
+          age: null,
+          legacyAge: birth.y == null ? legacyAge : null,
           height: parseNumberLoose(state.height),
           weight: parseNumberLoose(state.weight),
           sys: bp.sys,
           dia: bp.dia,
           questionnaire: normalizeQuestionnaire(state.questionnaire)
         };
-        if (profileDraft.age != null) profileDraft.age = clampStepper("age", profileDraft.age);
+        if (profileDraft.legacyAge != null) {
+          profileDraft.legacyAge = Math.max(1, Math.min(120, Math.round(profileDraft.legacyAge)));
+        }
         if (profileDraft.height != null) profileDraft.height = clampStepper("height", profileDraft.height);
         if (profileDraft.weight != null) profileDraft.weight = clampStepper("weight", profileDraft.weight);
         if (profileDraft.sys != null) profileDraft.sys = clampStepper("sys", profileDraft.sys);
         if (profileDraft.dia != null) profileDraft.dia = clampStepper("dia", profileDraft.dia);
+        syncAgeFromBirthDraft();
         setSexSelection(profileDraft.sex);
         paintProfileDraft();
         paintQuestionnaireDraft();
       }
 
       function readProfileInputs() {
+        readBirthDraftFromInputs();
         state.sex = getSexSelection();
+        state.birthDate = formatBirthDate(
+          profileDraft.birthY,
+          profileDraft.birthM,
+          profileDraft.birthD
+        );
         state.age = profileDraft.age == null ? "" : String(Math.round(profileDraft.age));
         state.height = profileDraft.height == null ? "" : formatStepperValue("height", profileDraft.height);
         state.weight = profileDraft.weight == null ? "" : formatStepperValue("weight", profileDraft.weight);
@@ -12590,7 +12857,11 @@
       function clearProfileInputs() {
         profileDraft = {
           sex: "",
+          birthY: null,
+          birthM: null,
+          birthD: null,
           age: null,
+          legacyAge: null,
           height: null,
           weight: null,
           sys: null,
@@ -14483,9 +14754,21 @@
         }, wait);
       }
 
+      function refreshAgeFromBirthDate() {
+        if (!String(state.birthDate || "").trim()) return false;
+        var next = normalizeBodyBasics(state);
+        if (String(next.age || "") === String(state.age || "")) return false;
+        state.age = next.age;
+        try {
+          persistSetItem(STORAGE_KEY, JSON.stringify(state));
+        } catch (e) { /* ignore */ }
+        return true;
+      }
+
       function syncLocalCalendar() {
         var key = fillTodayDate();
         shownDateKey = key;
+        refreshAgeFromBirthDate();
         if (dayMeta.calendarDate && dayMeta.calendarDate !== key) {
           // 현지 자정 넘김: 「오늘」→「어제」이관, 새 오늘 비움, 기본정보 유지
           var ended = dayMeta.calendarDate;
@@ -14713,6 +14996,19 @@
         btn.addEventListener("click", function () {
           var next = btn.getAttribute("data-sex") || "";
           setSexSelection(getSexSelection() === next ? "" : next);
+        });
+      });
+
+      [profileEls.birthY, profileEls.birthM, profileEls.birthD].forEach(function (el) {
+        if (!el) return;
+        el.addEventListener("input", function () {
+          readBirthDraftFromInputs();
+          paintAgeAuto();
+        });
+        el.addEventListener("blur", function () {
+          readBirthDraftFromInputs();
+          paintBirthDateInputs();
+          paintAgeAuto();
         });
       });
 
