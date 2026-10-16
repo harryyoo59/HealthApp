@@ -625,19 +625,24 @@
     .share-entry,
     .cheer-entry {
       margin-top: 14px;
-      margin-bottom: 18px;
+      margin-bottom: 10px;
       scroll-margin-bottom: 96px;
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 8px;
+      padding: 4px 2px;
+      border: 0;
+      background: transparent;
+      overflow: visible;
     }
-    .cheer-entry { margin-bottom: 10px; }
     .share-entry { margin-bottom: 10px; }
-    .cheer-entry {
+    .cheer-row {
       display: flex;
       align-items: center;
       justify-content: flex-start;
       gap: 22px;
-      padding: 4px 2px;
-      border: 0;
-      background: transparent;
+      overflow: visible;
     }
     .cheer-text {
       flex: 0 1 auto;
@@ -660,6 +665,10 @@
       background: transparent;
       cursor: pointer;
       -webkit-tap-highlight-color: transparent;
+      overflow: visible;
+      transform-origin: center center;
+      position: relative;
+      z-index: 2;
     }
     .cheer-media:focus-visible {
       outline: 2px solid var(--accent, #c4e87a);
@@ -667,11 +676,11 @@
       border-radius: 8px;
     }
     .cheer-media.is-cheers {
-      animation: cheer-pop 420ms ease;
+      animation: cheer-pop 480ms cubic-bezier(0.34, 1.45, 0.64, 1);
     }
     @keyframes cheer-pop {
       0% { transform: scale(1); }
-      35% { transform: scale(1.18); }
+      40% { transform: scale(1.28); }
       100% { transform: scale(1); }
     }
     .cheer-media img {
@@ -682,6 +691,20 @@
       background: transparent;
       pointer-events: none;
     }
+    .cheer-toast {
+      display: none;
+      margin: 0;
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid rgba(125, 206, 160, 0.55);
+      background: rgba(61, 155, 110, 0.16);
+      color: #9fe3bf;
+      font-size: 13px;
+      font-weight: 700;
+      text-align: center;
+      line-height: 1.4;
+    }
+    .cheer-toast.open { display: block; }
     .novelist-bar,
     .share-bar {
       appearance: none;
@@ -4174,7 +4197,7 @@
         <span data-i18n="records.title">내 기록 관리</span>
         <span class="ops-chevron" aria-hidden="true">▾</span>
       </button>
-      <p class="app-shell-version" id="app-shell-version" data-shell-version="20261016.16">이 화면 버전 20261016.16</p>      <div class="ops-body" id="records-body" hidden>
+      <p class="app-shell-version" id="app-shell-version" data-shell-version="20261016.17">이 화면 버전 20261016.17</p>      <div class="ops-body" id="records-body" hidden>
 
         <div class="records-vitals" id="records-vitals">
           <h3 class="ops-section-title">몸 수치 (혈압·혈당)</h3>
@@ -4233,8 +4256,11 @@
     </section>
 
     <section class="cheer-entry" id="cheer-entry" aria-label="Harry에게 응원하기">
-      <p class="cheer-text">Harry 에게 응원의 하트 눌러주시면<br>제가 더욱 힘이 납니다.</p>
-      <button type="button" class="cheer-media" id="cheer-media" aria-label="Harry에게 응원 하트 보내기"><img src="/cheer-heart.webp?v=20261016.16" alt="" width="48" height="48" decoding="async"></button>
+      <div class="cheer-row">
+        <p class="cheer-text">Harry 에게 응원의 하트 눌러주시면<br>제가 더욱 힘이 납니다.</p>
+        <button type="button" class="cheer-media" id="cheer-media" aria-label="Harry에게 응원 하트 보내기"><img src="/cheer-heart.webp?v=20261016.17" alt="" width="48" height="48" decoding="async"></button>
+      </div>
+      <p class="cheer-toast" id="cheer-toast" role="status" aria-live="polite"></p>
     </section>
 
     <section class="share-entry" id="share-entry" data-i18n-attr="aria-label:share.sectionAria" aria-label="지인에게 이 사이트 알리기">
@@ -15187,7 +15213,7 @@
       function setupCheerHeart() {
         var CHEER_COUNT_KEY = "healthapp.cheerHeart.count.v1";
         var btn = document.getElementById("cheer-media");
-        var toastEl = document.getElementById("share-toast");
+        var toastEl = document.getElementById("cheer-toast");
         var toastTimer = 0;
         var busyUntil = 0;
         if (!btn) return;
