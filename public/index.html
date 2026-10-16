@@ -622,12 +622,60 @@
       font-style: italic;
     }
     .novelist-entry,
-    .share-entry {
+    .share-entry,
+    .cheer-entry {
       margin-top: 14px;
       margin-bottom: 18px;
       scroll-margin-bottom: 96px;
     }
+    .cheer-entry { margin-bottom: 10px; }
     .share-entry { margin-bottom: 10px; }
+    .cheer-entry {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 14px;
+      border-radius: 16px;
+      border: 1px solid rgba(232, 140, 160, 0.28);
+      background:
+        linear-gradient(135deg, rgba(232, 140, 160, 0.14) 0%, rgba(72, 36, 48, 0.55) 55%, rgba(28, 18, 24, 0.92) 100%),
+        #1c1218;
+    }
+    .cheer-text {
+      flex: 1;
+      margin: 0;
+      font-size: 13px;
+      line-height: 1.45;
+      font-weight: 600;
+      color: #f6e4ea;
+    }
+    .cheer-heart {
+      appearance: none;
+      flex-shrink: 0;
+      width: 48px;
+      height: 48px;
+      margin: 0;
+      padding: 0;
+      border: 1px solid rgba(255, 160, 180, 0.35);
+      border-radius: 50%;
+      background: rgba(255, 90, 120, 0.22);
+      color: #ff7a96;
+      font-size: 22px;
+      line-height: 1;
+      cursor: pointer;
+      box-shadow: inset 0 1px 0 rgba(255, 220, 230, 0.18);
+    }
+    .cheer-heart:active {
+      transform: scale(0.94);
+    }
+    .cheer-heart:focus-visible {
+      outline: 2px solid #ff7a96;
+      outline-offset: 2px;
+    }
+    .cheer-heart.is-thanks {
+      color: #ffb3c4;
+      background: rgba(255, 90, 120, 0.38);
+    }
     .novelist-bar,
     .share-bar {
       appearance: none;
@@ -4044,7 +4092,7 @@
         <span data-i18n="records.title">내 기록 관리</span>
         <span class="ops-chevron" aria-hidden="true">▾</span>
       </button>
-      <p class="app-shell-version" id="app-shell-version" data-shell-version="20261016.2">이 화면 버전 20261016.2</p>      <div class="ops-body" id="records-body" hidden>
+      <p class="app-shell-version" id="app-shell-version" data-shell-version="20261016.3">이 화면 버전 20261016.3</p>      <div class="ops-body" id="records-body" hidden>
 
         <div class="records-vitals" id="records-vitals">
           <h3 class="ops-section-title">몸 수치 (혈압·혈당)</h3>
@@ -4100,6 +4148,11 @@
           <button type="button" class="records-consent-link" id="records-consent-revoke">동의 철회</button>
         </div>
       </div>
+    </section>
+
+    <section class="cheer-entry" id="cheer-entry" aria-label="Harry에게 응원하기">
+      <p class="cheer-text">Harry 에게 응원의 하트 눌러주시면<br>제가 더욱 힘이 납니다.</p>
+      <button type="button" class="cheer-heart" id="cheer-heart" aria-label="응원 하트 누르기">♥</button>
     </section>
 
     <section class="share-entry" id="share-entry" data-i18n-attr="aria-label:share.sectionAria" aria-label="지인에게 이 사이트 알리기">
@@ -14954,6 +15007,17 @@
           safeCopyText(buildInviteMessage());
           flashLabel(copyLabel, "복사 완료!", "초대 링크 1초 복사");
           showToast("초대 링크가 클립보드에 복사되었습니다!");
+        }
+
+        var cheerHeart = document.getElementById("cheer-heart");
+        if (cheerHeart) {
+          cheerHeart.addEventListener("click", function () {
+            cheerHeart.classList.add("is-thanks");
+            showToast("응원 감사합니다. 힘이 납니다!");
+            window.setTimeout(function () {
+              cheerHeart.classList.remove("is-thanks");
+            }, 1200);
+          });
         }
 
         openBtn.addEventListener("click", openShareModal);
