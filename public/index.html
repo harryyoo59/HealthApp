@@ -1519,7 +1519,10 @@
       -webkit-overflow-scrolling: touch;
       overscroll-behavior: contain;
       touch-action: pan-y;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
     }
+    .sheet-meals::-webkit-scrollbar { width: 0; height: 0; }
     .sheet-backdrop.mode-meals .sheet-meals { display: flex; }
     .sheet-backdrop.mode-meals .sheet-single,
     .sheet-backdrop.mode-meals .sheet-profile,
@@ -1784,7 +1787,10 @@
       -webkit-overflow-scrolling: touch;
       overscroll-behavior: contain;
       touch-action: pan-y;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
     }
+    .sheet-activity::-webkit-scrollbar { width: 0; height: 0; }
     .sheet-backdrop.mode-activity .sheet-activity { display: flex; }
     .sheet-backdrop.mode-activity .sheet-single,
     .sheet-backdrop.mode-activity .sheet-profile,
@@ -2676,7 +2682,8 @@
     .sheet-backdrop.mode-profile,
     .sheet-backdrop.mode-meds {
       align-items: stretch;
-      padding-top: max(10px, env(safe-area-inset-top, 0px));
+      /* 컴퓨터(safe-area 0)에서 위 10px 틈+둥근 모서리가 박스 2중처럼 보임 → 안전영역만 */
+      padding-top: env(safe-area-inset-top, 0px);
     }
     .sheet-backdrop.mode-meals .sheet,
     .sheet-backdrop.mode-activity .sheet,
@@ -2685,7 +2692,10 @@
       height: auto;
       flex: 1 1 auto;
       max-height: none;
-      border-radius: 18px 18px 0 0;
+      border-radius: 0;
+      border-left: 0;
+      border-right: 0;
+      border-top: 0;
     }
     .sheet-head {
       display: flex;
@@ -2742,7 +2752,11 @@
       -webkit-overflow-scrolling: touch;
       overscroll-behavior: contain;
       touch-action: pan-y;
+      /* 컴퓨터: 고전 스크롤바 궤도가 「박스 안 박스」처럼 보임 → 폰처럼 숨김(스크롤은 유지) */
+      scrollbar-width: none;
+      -ms-overflow-style: none;
     }
+    .sheet-profile::-webkit-scrollbar { width: 0; height: 0; }
     .sheet-backdrop.mode-profile .sheet-profile { display: flex; }
     .sheet-backdrop.mode-profile .sheet-single { display: none; }
     .sheet-profile-row {
@@ -3028,7 +3042,10 @@
       -webkit-overflow-scrolling: touch;
       overscroll-behavior: contain;
       touch-action: pan-y;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
     }
+    .sheet-meds::-webkit-scrollbar { width: 0; height: 0; }
     .sheet-backdrop.mode-meds .sheet-meds { display: flex; }
     .sheet-backdrop.mode-meds .sheet-single,
     .sheet-backdrop.mode-meds .sheet-profile { display: none; }
@@ -4157,7 +4174,7 @@
         <span data-i18n="records.title">내 기록 관리</span>
         <span class="ops-chevron" aria-hidden="true">▾</span>
       </button>
-      <p class="app-shell-version" id="app-shell-version" data-shell-version="20261016.14">이 화면 버전 20261016.14</p>      <div class="ops-body" id="records-body" hidden>
+      <p class="app-shell-version" id="app-shell-version" data-shell-version="20261016.15">이 화면 버전 20261016.15</p>      <div class="ops-body" id="records-body" hidden>
 
         <div class="records-vitals" id="records-vitals">
           <h3 class="ops-section-title">몸 수치 (혈압·혈당)</h3>
