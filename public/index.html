@@ -649,11 +649,29 @@
       color: var(--ink);
     }
     .cheer-media {
+      appearance: none;
+      border: 0;
+      padding: 0;
       flex-shrink: 0;
       width: 48px;
       height: 48px;
       margin-right: 28px;
       background: transparent;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .cheer-media:focus-visible {
+      outline: 2px solid var(--accent, #c4e87a);
+      outline-offset: 3px;
+      border-radius: 8px;
+    }
+    .cheer-media.is-cheers {
+      animation: cheer-pop 420ms ease;
+    }
+    @keyframes cheer-pop {
+      0% { transform: scale(1); }
+      35% { transform: scale(1.18); }
+      100% { transform: scale(1); }
     }
     .cheer-media img {
       display: block;
@@ -661,6 +679,7 @@
       height: 100%;
       object-fit: contain;
       background: transparent;
+      pointer-events: none;
     }
     .novelist-bar,
     .share-bar {
@@ -3757,7 +3776,7 @@
             rel="noopener noreferrer"
           >Vercel에서 방문 보기</a>
         </div>
-        <p class="ops-note">숫자를 앱 안에 넣지 않습니다. 링크를 눌러 Vercel에 로그인한 뒤, 화면 위쪽 Visitors·Page Views 숫자를 보세요. 사람 수가 아니라 사이트를 연 횟수입니다.</p>
+        <p class="ops-note">숫자를 앱 안에 넣지 않습니다. 링크를 눌러 Vercel에 로그인한 뒤, 화면 위쪽 Visitors·Page Views 숫자를 보세요. 사람 수가 아니라 사이트를 연 횟수입니다. 응원 하트 클릭은 Custom Events의 cheer_heart 에서, 화면 버전·PWA 여부·시간대·기록 유무 등과 함께 볼 수 있습니다.</p>
         <div class="ops-store" id="ops-store" aria-label="스토어 등록 문구">
           <h3 class="ops-section-title">스토어 등록 문구</h3>
           <p class="ops-store-lead">스토어 등록 시 참고 · 진단·치료 표현 금지</p>
@@ -4078,7 +4097,7 @@
         <span data-i18n="records.title">내 기록 관리</span>
         <span class="ops-chevron" aria-hidden="true">▾</span>
       </button>
-      <p class="app-shell-version" id="app-shell-version" data-shell-version="20261016.11">이 화면 버전 20261016.11</p>      <div class="ops-body" id="records-body" hidden>
+      <p class="app-shell-version" id="app-shell-version" data-shell-version="20261016.12">이 화면 버전 20261016.12</p>      <div class="ops-body" id="records-body" hidden>
 
         <div class="records-vitals" id="records-vitals">
           <h3 class="ops-section-title">몸 수치 (혈압·혈당)</h3>
@@ -4138,7 +4157,7 @@
 
     <section class="cheer-entry" id="cheer-entry" aria-label="Harry에게 응원하기">
       <p class="cheer-text">Harry 에게 응원의 하트 눌러주시면<br>제가 더욱 힘이 납니다.</p>
-      <span class="cheer-media" id="cheer-media" aria-hidden="true"><img src="/cheer-heart.webp?v=20261016.11" alt="" width="48" height="48"></span>
+      <button type="button" class="cheer-media" id="cheer-media" aria-label="Harry에게 응원 하트 보내기"><img src="/cheer-heart.webp?v=20261016.12" alt="" width="48" height="48"></button>
     </section>
 
     <section class="share-entry" id="share-entry" data-i18n-attr="aria-label:share.sectionAria" aria-label="지인에게 이 사이트 알리기">
@@ -14843,12 +14862,108 @@
       setupWeekBriefToggle();
       setupStatusToggle();
       setupShareSite();
+      setupCheerHeart();
       setupNovelist();
       setupSymptomAsk();
       setupVitals();
       render();
       refreshQWeeklyRemind();
       warnIfStorageNearlyFull();
+
+      function setupCheerHeart() {
+        var CHEER_COUNT_KEY = "healthapp.cheerHeart.count.v1";
+        var btn = document.getElementById("cheer-media");
+        var toastEl = document.getElementById("share-toast");
+        var toastTimer = 0;
+        var busyUntil = 0;
+        if (!btn) return;
+
+        function showCheerToast(msg) {
+          if (!toastEl) return;
+          toastEl.textContent = msg;
+          toastEl.classList.add("open");
+          if (toastTimer) window.clearTimeout(toastTimer);
+          toastTimer = window.setTimeout(function () {
+            toastEl.classList.remove("open");
+          }, 3200);
+        }
+
+        function whenBucket(h) {
+          if (h >= 5 && h < 12) return "morning";
+          if (h >= 12 && h < 17) return "afternoon";
+          if (h >= 17 && h < 22) return "evening";
+          return "night";
+        }
+
+        function hasDailyRecords() {
+          try {
+            var raw = localStorage.getItem(DAILY_KEY);
+            if (!raw) return false;
+            var data = JSON.parse(raw);
+            if (!data || typeof data !== "object") return false;
+            return Object.keys(data).length > 0;
+          } catch (e) {
+            return false;
+          }
+        }
+
+        function isPwa() {
+          var media = window.matchMedia && window.matchMedia("(display-mode: standalone)").matches;
+          return !!media || window.navigator.standalone === true;
+        }
+
+        function shellVersion() {
+          var el = document.getElementById("app-shell-version");
+          return el ? String(el.getAttribute("data-shell-version") || "").trim() : "";
+        }
+
+        function bumpLocalCount() {
+          var n = 0;
+          try {
+            n = Math.max(0, parseInt(localStorage.getItem(CHEER_COUNT_KEY) || "0", 10) || 0);
+          } catch (e) {}
+          n += 1;
+          try {
+            localStorage.setItem(CHEER_COUNT_KEY, String(n));
+          } catch (e2) {}
+          return n;
+        }
+
+        function trackCheer(count) {
+          var payload = {
+            name: "cheer_heart",
+            data: {
+              shell: shellVersion() || "unknown",
+              mode: isPwa() ? "pwa" : "browser",
+              lang: String(navigator.language || "unknown").slice(0, 16),
+              when: whenBucket(new Date().getHours()),
+              has_records: hasDailyRecords() ? "yes" : "no",
+              local_n: Math.min(count, 9999)
+            }
+          };
+          try {
+            if (typeof window.va === "function") {
+              window.va("event", payload);
+            }
+          } catch (e) { /* ignore */ }
+        }
+
+        btn.addEventListener("click", function () {
+          var now = Date.now();
+          if (now < busyUntil) return;
+          busyUntil = now + 700;
+          btn.classList.remove("is-cheers");
+          void btn.offsetWidth;
+          btn.classList.add("is-cheers");
+          var count = bumpLocalCount();
+          trackCheer(count);
+          showCheerToast(
+            count === 1
+              ? "응원 감사합니다! 힘이 납니다."
+              : "응원 " + count + "번 감사합니다! 힘이 납니다."
+          );
+        });
+      }
 
       function setupShareSite() {
         // 공개 사이트. 안내 문구는 dailybodydiary.com, QR·공유 API는 https 전체 주소.
