@@ -623,7 +623,8 @@
     }
     .novelist-entry,
     .share-entry,
-    .cheer-entry {
+    .cheer-entry,
+    .chamzone-credit {
       margin-top: 14px;
       margin-bottom: 10px;
       scroll-margin-bottom: 96px;
@@ -635,6 +636,40 @@
       border: 0;
       background: transparent;
       overflow: visible;
+    }
+    .chamzone-credit {
+      align-items: center;
+      margin-top: 18px;
+      margin-bottom: 18px;
+      padding: 12px 10px 20px;
+    }
+    .chamzone-credit-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      max-width: 300px;
+      padding: 10px 12px;
+      border-radius: 12px;
+      background: #fff;
+      box-sizing: border-box;
+    }
+    .chamzone-credit-icon {
+      display: block;
+      width: 40px;
+      height: 40px;
+      flex-shrink: 0;
+      object-fit: contain;
+    }
+    .chamzone-credit-logo {
+      display: block;
+      flex: 1 1 auto;
+      width: auto;
+      max-width: calc(100% - 48px);
+      height: 36px;
+      object-fit: contain;
+      object-position: left center;
     }
     .share-entry { margin-bottom: 10px; }
     .cheer-row {
@@ -4309,7 +4344,7 @@
         <span data-i18n="records.title">내 기록 관리</span>
         <span class="ops-chevron" aria-hidden="true">▾</span>
       </button>
-      <p class="app-shell-version" id="app-shell-version" data-shell-version="20261018.5">이 화면 버전 20261018.5</p>      <div class="ops-body" id="records-body" hidden>
+      <p class="app-shell-version" id="app-shell-version" data-shell-version="20261018.6">이 화면 버전 20261018.6</p>      <div class="ops-body" id="records-body" hidden>
 
         <div class="records-vitals" id="records-vitals">
           <h3 class="ops-section-title">몸 수치 (혈압·혈당)</h3>
@@ -4371,7 +4406,7 @@
       <div class="cheer-row">
         <p class="cheer-text">Harry 에게 응원의<br>하트 눌러 주시면<br>제가 더욱 힘이 납니다.</p>
         <button type="button" class="cheer-media" id="cheer-media" aria-label="Harry에게 응원 하트 보내기">
-          <img src="/cheer-heart.webp?v=20261018.5" alt="" width="48" height="48" decoding="async">
+          <img src="/cheer-heart.webp?v=20261018.6" alt="" width="48" height="48" decoding="async">
           <span class="cheer-burst-layer" id="cheer-burst-layer" aria-hidden="true"></span>
         </button>
       </div>
@@ -4410,6 +4445,27 @@
           <span class="novelist-bar-go" data-i18n="novelist.go">바로가기</span>
         </span>
       </a>
+    </section>
+
+    <section class="chamzone-credit" id="chamzone-credit" aria-label="ChamZone Interactive">
+      <div class="chamzone-credit-row">
+        <img
+          class="chamzone-credit-icon"
+          src="/chamzone-icon.png?v=20261018.6"
+          alt=""
+          width="40"
+          height="40"
+          decoding="async"
+        >
+        <img
+          class="chamzone-credit-logo"
+          src="/chamzone-logo.png?v=20261018.6"
+          alt="ChamZone Interactive"
+          width="200"
+          height="36"
+          decoding="async"
+        >
+      </div>
     </section>
   </main>
   <nav class="nav" data-i18n-attr="aria-label:nav.aria" aria-label="하단 메뉴">
