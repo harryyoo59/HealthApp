@@ -4309,7 +4309,7 @@
         <span data-i18n="records.title">내 기록 관리</span>
         <span class="ops-chevron" aria-hidden="true">▾</span>
       </button>
-      <p class="app-shell-version" id="app-shell-version" data-shell-version="20261018.4">이 화면 버전 20261018.4</p>      <div class="ops-body" id="records-body" hidden>
+      <p class="app-shell-version" id="app-shell-version" data-shell-version="20261018.5">이 화면 버전 20261018.5</p>      <div class="ops-body" id="records-body" hidden>
 
         <div class="records-vitals" id="records-vitals">
           <h3 class="ops-section-title">몸 수치 (혈압·혈당)</h3>
@@ -4371,7 +4371,7 @@
       <div class="cheer-row">
         <p class="cheer-text">Harry 에게 응원의<br>하트 눌러 주시면<br>제가 더욱 힘이 납니다.</p>
         <button type="button" class="cheer-media" id="cheer-media" aria-label="Harry에게 응원 하트 보내기">
-          <img src="/cheer-heart.webp?v=20261018.4" alt="" width="48" height="48" decoding="async">
+          <img src="/cheer-heart.webp?v=20261018.5" alt="" width="48" height="48" decoding="async">
           <span class="cheer-burst-layer" id="cheer-burst-layer" aria-hidden="true"></span>
         </button>
       </div>
@@ -4667,8 +4667,9 @@
             <div class="act-chips q-chips" id="q-stress-chips" role="group" aria-label="스트레스"></div>
           </div>
           <div class="q-block">
-            <p class="q-block-label">배변 변화(변비·설사 등)</p>
-            <div class="act-chips q-chips" id="q-bowel-chips" role="group" aria-label="배변 변화"></div>
+            <p class="q-block-label">변비나 설사가 자주 있나요?</p>
+            <div class="act-chips q-chips" id="q-bowel-chips" role="group" aria-label="변비·설사"></div>
+            <p class="q-block-hint" id="q-bowel-alert" hidden>식이섬유와 물 섭취를 챙겨 보세요. 앱이 진단하지 않습니다.</p>
           </div>
           <div class="q-block">
             <p class="q-block-label">혈압·혈당 집 측정</p>
@@ -4722,6 +4723,36 @@
             <p class="q-block-label">한쪽 귀만 갑자기 안 들리거나 이명이 생긴 적이 있나요?</p>
             <div class="act-chips q-chips" id="q-tinnitus-sudden-chips" role="group" aria-label="한쪽 귀 갑작스런 난청·이명"></div>
             <p class="q-block-hint q-leg-vessel-alert" id="q-tinnitus-sudden-alert" hidden>바로 이비인후과에 가세요. 빨리 치료할수록 회복에 도움이 됩니다. 앱이 진단하지 않습니다.</p>
+          </div>
+          <div class="q-block">
+            <p class="q-block-label">계단을 오르거나 조금만 걸어도 가슴이 답답하거나 숨이 찬가요?</p>
+            <div class="act-chips q-chips" id="q-chest-exert-chips" role="group" aria-label="가벼운 활동 시 가슴 답답·숨참"></div>
+            <p class="q-block-hint q-leg-vessel-alert" id="q-chest-exert-alert" hidden>심장 쪽 신호일 수 있으니 병원에서 확인해 보세요. 앱이 진단하지 않습니다.</p>
+          </div>
+          <div class="q-block">
+            <p class="q-block-label">요즘 물을 많이 마시고 소변을 자주 보며, 이유 없이 살이 빠졌나요?</p>
+            <div class="act-chips q-chips" id="q-diabetes-triad-chips" role="group" aria-label="다음·다뇨·이유 없는 체중 감소"></div>
+            <p class="q-block-hint q-leg-vessel-alert" id="q-diabetes-triad-alert" hidden>당뇨 쪽일 수 있으니 병원에서 확인해 보세요. 앱이 진단하지 않습니다.</p>
+          </div>
+          <div class="q-block">
+            <p class="q-block-label">코를 심하게 골거나 자다가 숨이 멈춘다는 말을 들은 적 있나요?</p>
+            <div class="act-chips q-chips" id="q-sleep-apnea-chips" role="group" aria-label="심한 코골이·수면무호흡"></div>
+            <p class="q-block-hint q-leg-vessel-alert" id="q-sleep-apnea-alert" hidden>수면무호흡은 혈압과도 연관될 수 있으니 병원에서 확인해 보세요. 앱이 진단하지 않습니다.</p>
+          </div>
+          <div class="q-block">
+            <p class="q-block-label">아침에 발목이나 얼굴이 자주 붓나요?</p>
+            <div class="act-chips q-chips" id="q-morning-swell-chips" role="group" aria-label="아침 발목·얼굴 부기"></div>
+            <p class="q-block-hint q-leg-vessel-alert" id="q-morning-swell-alert" hidden>신장·심장 쪽을 병원에서 확인해 보세요. 앱이 진단하지 않습니다.</p>
+          </div>
+          <div class="q-block">
+            <p class="q-block-label">속쓰림이나 신물이 자주 올라오나요?</p>
+            <div class="act-chips q-chips" id="q-heartburn-chips" role="group" aria-label="속쓰림·신물"></div>
+            <p class="q-block-hint" id="q-heartburn-alert" hidden>식사 시간을 규칙적으로 하고 야식을 줄여 보세요. 앱이 진단하지 않습니다.</p>
+          </div>
+          <div class="q-block">
+            <p class="q-block-label">요즘 2주 넘게 기분이 가라앉거나 잠을 잘 못 자나요?</p>
+            <div class="act-chips q-chips" id="q-mood-low-chips" role="group" aria-label="기분 저하·불면 2주 이상"></div>
+            <p class="q-block-hint" id="q-mood-low-alert" hidden>마음 건강을 돌보고, 필요하면 상담·진료를 받아 보세요. 앱이 진단하지 않습니다.</p>
           </div>
           <div class="q-block">
             <p class="q-block-label">응급 신호 — 가슴 통증·한쪽 마비·심한 숨참 같은 급증상</p>
@@ -5347,6 +5378,38 @@
       var Q_TINNITUS_COMMON_GUIDE = "귀에서 삐·윙 소리가 자주 들리면 큰 소음을 줄이고, 잠과 카페인을 챙겨 보세요.";
       var Q_TINNITUS_PULSE_GUIDE = "심장 박자에 맞춰 들리는 이명은 혈관·혈압 쪽일 수 있으니 병원에서 확인해 보세요.";
       var Q_TINNITUS_SUDDEN_GUIDE = "한쪽 귀가 갑자기 안 들리거나 이명이 생기면 바로 이비인후과에 가세요.";
+      var Q_CHEST_EXERT_OPTS = [
+        { id: "none", label: "없음" },
+        { id: "has", label: "있음" }
+      ];
+      var Q_DIABETES_TRIAD_OPTS = [
+        { id: "none", label: "없음" },
+        { id: "has", label: "있음" }
+      ];
+      var Q_SLEEP_APNEA_OPTS = [
+        { id: "none", label: "없음" },
+        { id: "has", label: "있음" }
+      ];
+      var Q_MORNING_SWELL_OPTS = [
+        { id: "none", label: "없음" },
+        { id: "has", label: "있음" }
+      ];
+      var Q_HEARTBURN_OPTS = [
+        { id: "none", label: "없음" },
+        { id: "has", label: "있음" }
+      ];
+      var Q_MOOD_LOW_OPTS = [
+        { id: "none", label: "없음" },
+        { id: "has", label: "있음" }
+      ];
+      /** 기초 문진 「있음」 시 AI 변주 없이 고정 안내 */
+      var Q_CHEST_EXERT_GUIDE = "계단·짧은 걷기에 가슴 답답·숨참이 있으면 병원에서 확인해 보세요.";
+      var Q_DIABETES_TRIAD_GUIDE = "물을 많이 마시고 소변을 자주 보며 이유 없이 살이 빠지면 당뇨 쪽일 수 있으니 병원에서 확인해 보세요.";
+      var Q_SLEEP_APNEA_GUIDE = "심한 코골이·수면무호흡은 혈압과도 연관될 수 있으니 병원에서 확인해 보세요.";
+      var Q_MORNING_SWELL_GUIDE = "아침에 발목·얼굴이 자주 붓면 신장·심장 쪽을 병원에서 확인해 보세요.";
+      var Q_HEARTBURN_GUIDE = "속쓰림·신물이 잦으면 식사 시간을 규칙적으로 하고 야식을 줄여 보세요.";
+      var Q_BOWEL_GUIDE = "변비나 설사가 잦으면 식이섬유와 물 섭취를 챙겨 보세요.";
+      var Q_MOOD_LOW_GUIDE = "2주 넘게 기분이 가라앉거나 잠을 잘 못 자면 마음 건강을 돌보고, 필요하면 상담·진료를 받아 보세요.";
       var Q_AVOID_FOOD_OPTS = [
         { id: "peanut", label: "땅콩" },
         { id: "seafood", label: "해산물" },
@@ -7451,6 +7514,12 @@
           tinnitusCommon: "",
           tinnitusPulsatile: "",
           tinnitusSudden: "",
+          chestExertion: "",
+          diabetesTriad: "",
+          sleepApnea: "",
+          morningSwell: "",
+          heartburn: "",
+          moodLow: "",
           familyHistoryMode: "",
           familyHistories: [],
           familyHistoryDetail: "",
@@ -7504,6 +7573,12 @@
         base.tinnitusCommon = String(raw.tinnitusCommon || "").trim();
         base.tinnitusPulsatile = String(raw.tinnitusPulsatile || "").trim();
         base.tinnitusSudden = String(raw.tinnitusSudden || "").trim();
+        base.chestExertion = String(raw.chestExertion || "").trim();
+        base.diabetesTriad = String(raw.diabetesTriad || "").trim();
+        base.sleepApnea = String(raw.sleepApnea || "").trim();
+        base.morningSwell = String(raw.morningSwell || "").trim();
+        base.heartburn = String(raw.heartburn || "").trim();
+        base.moodLow = String(raw.moodLow || "").trim();
         base.familyHistoryMode = String(raw.familyHistoryMode || "").trim();
         base.familyHistories = normalizeStringList(raw.familyHistories);
         base.familyHistoryDetail = String(raw.familyHistoryDetail || "").trim();
@@ -7546,6 +7621,7 @@
         if (q.legWalkRelief || q.legNumbCold || q.nightLegCramp) return true;
         if (q.jointAcheSwell || q.jointMorningStiff || q.jointGoutFlare) return true;
         if (q.tinnitusCommon || q.tinnitusPulsatile || q.tinnitusSudden) return true;
+        if (q.chestExertion || q.diabetesTriad || q.sleepApnea || q.morningSwell || q.heartburn || q.moodLow) return true;
         if (q.familyHistoryMode === "has" || q.familyHistoryMode === "none") return true;
         if (q.allergyMode === "has" || q.allergyMode === "none") return true;
         if (q.avoidFoodMode === "has" || q.avoidFoodMode === "none") return true;
@@ -7593,6 +7669,34 @@
         return normalizeQuestionnaire(q).tinnitusSudden === "has";
       }
 
+      function questionnaireHasChestExertion(q) {
+        return normalizeQuestionnaire(q).chestExertion === "has";
+      }
+
+      function questionnaireHasDiabetesTriad(q) {
+        return normalizeQuestionnaire(q).diabetesTriad === "has";
+      }
+
+      function questionnaireHasSleepApnea(q) {
+        return normalizeQuestionnaire(q).sleepApnea === "has";
+      }
+
+      function questionnaireHasMorningSwell(q) {
+        return normalizeQuestionnaire(q).morningSwell === "has";
+      }
+
+      function questionnaireHasHeartburn(q) {
+        return normalizeQuestionnaire(q).heartburn === "has";
+      }
+
+      function questionnaireHasMoodLow(q) {
+        return normalizeQuestionnaire(q).moodLow === "has";
+      }
+
+      function questionnaireHasBowelFlag(q) {
+        return normalizeQuestionnaire(q).bowelChange === "has";
+      }
+
       function questionnaireSummaryLines(q) {
         q = normalizeQuestionnaire(q);
         var lines = [];
@@ -7622,7 +7726,7 @@
         if (q.drinking) lines.push("음주: " + qLabelById(Q_DRINKING_OPTS, q.drinking));
         if (q.waterIntake) lines.push("물: " + qLabelById(Q_WATER_OPTS, q.waterIntake));
         if (q.stress) lines.push("스트레스: " + qLabelById(Q_STRESS_OPTS, q.stress));
-        if (q.bowelChange) lines.push("배변 변화: " + qLabelById(Q_BOWEL_OPTS, q.bowelChange));
+        if (q.bowelChange) lines.push("변비·설사: " + qLabelById(Q_BOWEL_OPTS, q.bowelChange));
         if (q.homeMeasure) lines.push("집 측정: " + qLabelById(Q_HOME_MEASURE_OPTS, q.homeMeasure));
         if (q.weightChange) lines.push("몸무게 변화: " + qLabelById(Q_WEIGHT_CHANGE_OPTS, q.weightChange));
         if (q.legWalkRelief) {
@@ -7651,6 +7755,24 @@
         }
         if (q.tinnitusSudden) {
           lines.push("한쪽 귀 갑작스런 난청·이명: " + qLabelById(Q_TINNITUS_SUDDEN_OPTS, q.tinnitusSudden));
+        }
+        if (q.chestExertion) {
+          lines.push("가벼운 활동 시 가슴·숨: " + qLabelById(Q_CHEST_EXERT_OPTS, q.chestExertion));
+        }
+        if (q.diabetesTriad) {
+          lines.push("다음·다뇨·체중 감소: " + qLabelById(Q_DIABETES_TRIAD_OPTS, q.diabetesTriad));
+        }
+        if (q.sleepApnea) {
+          lines.push("코골이·수면무호흡: " + qLabelById(Q_SLEEP_APNEA_OPTS, q.sleepApnea));
+        }
+        if (q.morningSwell) {
+          lines.push("아침 발목·얼굴 부기: " + qLabelById(Q_MORNING_SWELL_OPTS, q.morningSwell));
+        }
+        if (q.heartburn) {
+          lines.push("속쓰림·신물: " + qLabelById(Q_HEARTBURN_OPTS, q.heartburn));
+        }
+        if (q.moodLow) {
+          lines.push("기분·수면(2주↑): " + qLabelById(Q_MOOD_LOW_OPTS, q.moodLow));
         }
         if (q.emergencyFlag) lines.push("응급 신호: " + qLabelById(Q_EMERGENCY_OPTS, q.emergencyFlag));
         if (q.familyHistoryMode === "none") lines.push("가족력: 없음");
@@ -10481,7 +10603,13 @@
               : ["오늘은 강도 낮은 활동만", "불편 변화를 짧게 메모하기"]);
         }
 
-        if (q.symptoms.indexOf("digest") >= 0 || q.bodyAreas.indexOf("belly") >= 0 || q.bowelChange === "has") {
+        if (questionnaireHasBowelFlag(q)) {
+          push("bowelFixed", 46, "배변·식이섬유",
+            [Q_BOWEL_GUIDE + " 앱·AI가 진단하지 않습니다."],
+            ["식이섬유·물 섭취 챙기기"]);
+        }
+
+        if (q.symptoms.indexOf("digest") >= 0 || q.bodyAreas.indexOf("belly") >= 0) {
           push("digest", 65, "소화 부담",
             [
               "소화·배 쪽 불편이 있어 자극적·기름진 끼니를 줄일 만합니다.",
@@ -10491,6 +10619,12 @@
               "자극·기름진 음식 한 끼 줄이기",
               "끼니를 소량·여러 번으로"
             ]);
+        }
+
+        if (questionnaireHasHeartburn(q)) {
+          push("heartburn", 50, "속쓰림·야식",
+            [Q_HEARTBURN_GUIDE + " 앱·AI가 진단하지 않습니다."],
+            ["야식 줄이기", "식사 시간 규칙적으로"]);
         }
 
         if (questionnaireHasLegVesselFlag(q)) {
@@ -10546,6 +10680,36 @@
           push("tinnitusCommon", 40, "이명·생활 챙기기",
             [Q_TINNITUS_COMMON_GUIDE + " 앱·AI가 진단하지 않습니다."],
             ["큰 소음 줄이기", "잠·카페인 챙기기"]);
+        }
+
+        if (questionnaireHasChestExertion(q)) {
+          push("chestExert", 91, "활동 시 가슴·숨",
+            [Q_CHEST_EXERT_GUIDE + " 앱·AI가 진단하지 않습니다."],
+            ["병원에서 심장·호흡 확인해 보기"]);
+        }
+
+        if (questionnaireHasDiabetesTriad(q)) {
+          push("diabetesTriad", 85, "당뇨 신호 확인",
+            [Q_DIABETES_TRIAD_GUIDE + " 앱·AI가 진단하지 않습니다."],
+            ["병원에서 혈당·당뇨 확인해 보기"]);
+        }
+
+        if (questionnaireHasMorningSwell(q)) {
+          push("morningSwell", 79, "아침 부기 확인",
+            [Q_MORNING_SWELL_GUIDE + " 앱·AI가 진단하지 않습니다."],
+            ["병원에서 신장·심장 확인해 보기"]);
+        }
+
+        if (questionnaireHasSleepApnea(q)) {
+          push("sleepApnea", 76, "수면무호흡 확인",
+            [Q_SLEEP_APNEA_GUIDE + " 앱·AI가 진단하지 않습니다."],
+            ["병원에서 수면·혈압 확인해 보기"]);
+        }
+
+        if (questionnaireHasMoodLow(q)) {
+          push("moodLow", 54, "마음 건강",
+            [Q_MOOD_LOW_GUIDE + " 앱·AI가 진단하지 않습니다."],
+            ["마음 건강 상담·진료 고려하기"]);
         }
 
         if (/고혈압|암로디핀|로사르탄|ARB|ACE|이뇨제|텔미사르탄|발사르탄/i.test(text) || bpLooksElevated() || (q.goals || []).indexOf("bp") >= 0) {
@@ -10642,6 +10806,27 @@
         return statusPick(pool, signal.id + "|" + kind);
       }
 
+      /** 문진 고정 안내 — AI 변주 금지 신호 */
+      function fixedSignalCopy(id) {
+        var map = {
+          legVessel: { guide: Q_LEG_VESSEL_GUIDE, action: "병원에서 다리·발 혈관 확인해 보기", one: "다리 혈관 — 병원 확인" },
+          jointRA: { guide: Q_JOINT_RA_GUIDE, action: "병원에서 관절 증상 확인해 보기", one: "아침 관절 — 병원 확인" },
+          jointGout: { guide: Q_JOINT_GOUT_GUIDE, action: "맥주·내장류·단 음료 줄이기", one: "통풍 식단 — 맥주·내장·단 음료" },
+          jointOA: { guide: Q_JOINT_OA_GUIDE, action: "체중을 무리 없이 관리하기", one: "관절 — 체중 관리" },
+          tinnitusSudden: { guide: Q_TINNITUS_SUDDEN_GUIDE, action: "바로 이비인후과 진료 받기", one: "갑작스런 난청 — 바로 이비인후과" },
+          tinnitusPulse: { guide: Q_TINNITUS_PULSE_GUIDE, action: "병원에서 이명·혈압 확인해 보기", one: "박동성 이명 — 병원 확인" },
+          tinnitusCommon: { guide: Q_TINNITUS_COMMON_GUIDE, action: "큰 소음 줄이기", one: "이명 — 소음·잠·카페인" },
+          chestExert: { guide: Q_CHEST_EXERT_GUIDE, action: "병원에서 심장·호흡 확인해 보기", one: "활동 시 가슴·숨 — 병원 확인" },
+          diabetesTriad: { guide: Q_DIABETES_TRIAD_GUIDE, action: "병원에서 혈당·당뇨 확인해 보기", one: "당뇨 신호 — 병원 확인" },
+          morningSwell: { guide: Q_MORNING_SWELL_GUIDE, action: "병원에서 신장·심장 확인해 보기", one: "아침 부기 — 병원 확인" },
+          sleepApnea: { guide: Q_SLEEP_APNEA_GUIDE, action: "병원에서 수면·혈압 확인해 보기", one: "수면무호흡 — 병원 확인" },
+          heartburn: { guide: Q_HEARTBURN_GUIDE, action: "야식 줄이기", one: "속쓰림 — 식사·야식" },
+          bowelFixed: { guide: Q_BOWEL_GUIDE, action: "식이섬유·물 섭취 챙기기", one: "변비·설사 — 식이섬유·물" },
+          moodLow: { guide: Q_MOOD_LOW_GUIDE, action: "마음 건강 상담·진료 고려하기", one: "마음 건강 — 상담·진료" }
+        };
+        return map[id] || null;
+      }
+
       /** 내부 참고로만 판단. 화면에 원문·수치·약명 나열 금지. */
       function buildLocalJudgment(facts) {
         var signals = gatherStatusSignals(facts);
@@ -10651,27 +10836,8 @@
         if (signals[0].id === "emergency") {
           return pickSignalText(signals[0], "opinion");
         }
-        if (signals[0].id === "legVessel") {
-          return Q_LEG_VESSEL_GUIDE;
-        }
-        if (signals[0].id === "jointRA") {
-          return Q_JOINT_RA_GUIDE;
-        }
-        if (signals[0].id === "jointGout") {
-          return Q_JOINT_GOUT_GUIDE;
-        }
-        if (signals[0].id === "jointOA") {
-          return Q_JOINT_OA_GUIDE;
-        }
-        if (signals[0].id === "tinnitusSudden") {
-          return Q_TINNITUS_SUDDEN_GUIDE;
-        }
-        if (signals[0].id === "tinnitusPulse") {
-          return Q_TINNITUS_PULSE_GUIDE;
-        }
-        if (signals[0].id === "tinnitusCommon") {
-          return Q_TINNITUS_COMMON_GUIDE;
-        }
+        var fixed = fixedSignalCopy(signals[0].id);
+        if (fixed) return fixed.guide;
         var top = signals.slice(0, 2);
         var parts = top.map(function (sig) {
           return pickSignalText(sig, "opinion");
@@ -10690,27 +10856,8 @@
         if (signals[0].id === "emergency") {
           return [pickSignalText(signals[0], "action") || "가까운 병원·응급실로 가시기"];
         }
-        if (signals[0].id === "tinnitusSudden") {
-          return ["바로 이비인후과 진료 받기"];
-        }
-        if (signals[0].id === "legVessel") {
-          return ["병원에서 다리·발 혈관 확인해 보기"];
-        }
-        if (signals[0].id === "jointRA") {
-          return ["병원에서 관절 증상 확인해 보기"];
-        }
-        if (signals[0].id === "tinnitusPulse") {
-          return ["병원에서 이명·혈압 확인해 보기"];
-        }
-        if (signals[0].id === "jointGout") {
-          return ["맥주·내장류·단 음료 줄이기"];
-        }
-        if (signals[0].id === "jointOA") {
-          return ["체중을 무리 없이 관리하기"];
-        }
-        if (signals[0].id === "tinnitusCommon") {
-          return ["큰 소음 줄이기", "잠·카페인 챙기기"].slice(0, 1);
-        }
+        var fixedAct = fixedSignalCopy(signals[0].id);
+        if (fixedAct) return [fixedAct.action];
         var actions = [];
         var seen = {};
         for (var i = 0; i < signals.length && actions.length < 2; i++) {
@@ -10740,13 +10887,8 @@
         var signals = gatherStatusSignals(facts);
         if (!signals.length) return "일상 챙기기 이어가기";
         if (signals[0].id === "emergency") return "급증상 신호 — 병원·응급 우선";
-        if (signals[0].id === "tinnitusSudden") return "갑작스런 난청 — 바로 이비인후과";
-        if (signals[0].id === "legVessel") return "다리 혈관 — 병원 확인";
-        if (signals[0].id === "jointRA") return "아침 관절 — 병원 확인";
-        if (signals[0].id === "tinnitusPulse") return "박동성 이명 — 병원 확인";
-        if (signals[0].id === "jointGout") return "통풍 식단 — 맥주·내장·단 음료";
-        if (signals[0].id === "jointOA") return "관절 — 체중 관리";
-        if (signals[0].id === "tinnitusCommon") return "이명 — 소음·잠·카페인";
+        var fixedOne = fixedSignalCopy(signals[0].id);
+        if (fixedOne) return fixedOne.one;
 
         var tags = [];
         signals.forEach(function (sig) {
@@ -10864,6 +11006,27 @@
         }
         if (questionnaireHasTinnitusCommon(state.questionnaire)) {
           jointNotes.push("중요: 흔한 이명 있음 → 고정 문구: 「" + Q_TINNITUS_COMMON_GUIDE + "」 진단 추정 금지.");
+        }
+        if (questionnaireHasChestExertion(state.questionnaire)) {
+          jointNotes.push("중요: 활동 시 가슴·숨참 있음 → 고정 문구: 「" + Q_CHEST_EXERT_GUIDE + "」 진단 추정 금지.");
+        }
+        if (questionnaireHasDiabetesTriad(state.questionnaire)) {
+          jointNotes.push("중요: 다음·다뇨·체중 감소 있음 → 고정 문구: 「" + Q_DIABETES_TRIAD_GUIDE + "」 진단 추정 금지.");
+        }
+        if (questionnaireHasSleepApnea(state.questionnaire)) {
+          jointNotes.push("중요: 코골이·수면무호흡 있음 → 고정 문구: 「" + Q_SLEEP_APNEA_GUIDE + "」 진단 추정 금지.");
+        }
+        if (questionnaireHasMorningSwell(state.questionnaire)) {
+          jointNotes.push("중요: 아침 발목·얼굴 부기 있음 → 고정 문구: 「" + Q_MORNING_SWELL_GUIDE + "」 진단 추정 금지.");
+        }
+        if (questionnaireHasHeartburn(state.questionnaire)) {
+          jointNotes.push("중요: 속쓰림·신물 있음 → 고정 문구: 「" + Q_HEARTBURN_GUIDE + "」 진단 추정 금지.");
+        }
+        if (questionnaireHasBowelFlag(state.questionnaire)) {
+          jointNotes.push("중요: 변비·설사 있음 → 고정 문구: 「" + Q_BOWEL_GUIDE + "」 진단 추정 금지.");
+        }
+        if (questionnaireHasMoodLow(state.questionnaire)) {
+          jointNotes.push("중요: 기분·수면 2주↑ 있음 → 고정 문구: 「" + Q_MOOD_LOW_GUIDE + "」 진단 추정 금지.");
         }
         var yPat = facts.yPat || {};
         var tPat = facts.tPat || {};
@@ -11244,6 +11407,28 @@
           }
         }
 
+        if (questionnaireHasChestExertion(qo) && /가슴|숨|계단|걷/i.test(q)) {
+          return Q_CHEST_EXERT_GUIDE + " 앱·AI가 진단하지 않습니다.";
+        }
+        if (questionnaireHasDiabetesTriad(qo) && /물|소변|살|당뇨|혈당|목마/i.test(q)) {
+          return Q_DIABETES_TRIAD_GUIDE + " 앱·AI가 진단하지 않습니다.";
+        }
+        if (questionnaireHasSleepApnea(qo) && /코골|수면|숨\s*멈|무호흡|잠/i.test(q)) {
+          return Q_SLEEP_APNEA_GUIDE + " 앱·AI가 진단하지 않습니다.";
+        }
+        if (questionnaireHasMorningSwell(qo) && /붓|부종|발목|얼굴/i.test(q)) {
+          return Q_MORNING_SWELL_GUIDE + " 앱·AI가 진단하지 않습니다.";
+        }
+        if (questionnaireHasHeartburn(qo) && /속쓰|신물|역류|위산|야식/i.test(q)) {
+          return Q_HEARTBURN_GUIDE + " 앱·AI가 진단하지 않습니다.";
+        }
+        if (questionnaireHasBowelFlag(qo) && /변비|설사|배변|변/i.test(q)) {
+          return Q_BOWEL_GUIDE + " 앱·AI가 진단하지 않습니다.";
+        }
+        if (questionnaireHasMoodLow(qo) && /기분|우울|잠|불면|가라앉/i.test(q)) {
+          return Q_MOOD_LOW_GUIDE + " 앱·AI가 진단하지 않습니다.";
+        }
+
         if (/어지|머리|두통|멍하|눈/i.test(q) || /head/.test(qLower) || qo.bodyAreas.indexOf("head") >= 0 && /머리|어지/.test(q)) {
           lines.push("머리가 무겁거나 어지러운 느낌은 수면·수분·식사 리듬과 함께 살펴보는 경우가 많습니다.");
           if (qo.sleepBand === "under5") {
@@ -11314,14 +11499,28 @@
           ? "중요: 문진에 다리 혈관 신호 있음 → 답변 맨 앞에 고정 문구만: 「" + Q_LEG_VESSEL_GUIDE + "」 혈관 진단을 추정하지 마세요."
           : "";
         var jointNote = "";
-        if (questionnaireHasTinnitusSudden(state.questionnaire)) {
+        if (questionnaireHasChestExertion(state.questionnaire)) {
+          jointNote = "중요: 활동 시 가슴·숨참 있음 → 고정 문구: 「" + Q_CHEST_EXERT_GUIDE + "」";
+        } else if (questionnaireHasTinnitusSudden(state.questionnaire)) {
           jointNote = "중요: 갑작스런 난청·이명 있음 → 고정 문구: 「" + Q_TINNITUS_SUDDEN_GUIDE + "」";
+        } else if (questionnaireHasDiabetesTriad(state.questionnaire)) {
+          jointNote = "중요: 다음·다뇨·체중 감소 있음 → 고정 문구: 「" + Q_DIABETES_TRIAD_GUIDE + "」";
         } else if (questionnaireHasJointMorningStiff(state.questionnaire)) {
           jointNote = "중요: 아침 관절 뻣뻣함 있음 → 고정 문구: 「" + Q_JOINT_RA_GUIDE + "」";
         } else if (questionnaireHasTinnitusPulsatile(state.questionnaire)) {
           jointNote = "중요: 박동성 이명 있음 → 고정 문구: 「" + Q_TINNITUS_PULSE_GUIDE + "」";
+        } else if (questionnaireHasMorningSwell(state.questionnaire)) {
+          jointNote = "중요: 아침 부기 있음 → 고정 문구: 「" + Q_MORNING_SWELL_GUIDE + "」";
+        } else if (questionnaireHasSleepApnea(state.questionnaire)) {
+          jointNote = "중요: 수면무호흡 있음 → 고정 문구: 「" + Q_SLEEP_APNEA_GUIDE + "」";
         } else if (questionnaireHasJointGoutFlare(state.questionnaire)) {
           jointNote = "중요: 급성 발적·통증 있음 → 고정 문구: 「" + Q_JOINT_GOUT_GUIDE + "」";
+        } else if (questionnaireHasMoodLow(state.questionnaire)) {
+          jointNote = "중요: 기분·수면 2주↑ 있음 → 고정 문구: 「" + Q_MOOD_LOW_GUIDE + "」";
+        } else if (questionnaireHasHeartburn(state.questionnaire)) {
+          jointNote = "중요: 속쓰림·신물 있음 → 고정 문구: 「" + Q_HEARTBURN_GUIDE + "」";
+        } else if (questionnaireHasBowelFlag(state.questionnaire)) {
+          jointNote = "중요: 변비·설사 있음 → 고정 문구: 「" + Q_BOWEL_GUIDE + "」";
         } else if (questionnaireHasJointAcheSwell(state.questionnaire)) {
           jointNote = "중요: 관절 통증·부기 있음 → 고정 문구: 「" + Q_JOINT_OA_GUIDE + "」";
         } else if (questionnaireHasTinnitusCommon(state.questionnaire)) {
@@ -12683,8 +12882,14 @@
         if (cur.emergencyDays > 0) {
           return "급증상 신호가 있어 보입니다. 앱 안내보다 병원·응급실·119를 우선하세요.";
         }
+        if (questionnaireHasChestExertion(state.questionnaire)) {
+          return Q_CHEST_EXERT_GUIDE;
+        }
         if (questionnaireHasTinnitusSudden(state.questionnaire)) {
           return Q_TINNITUS_SUDDEN_GUIDE;
+        }
+        if (questionnaireHasDiabetesTriad(state.questionnaire)) {
+          return Q_DIABETES_TRIAD_GUIDE;
         }
         if (questionnaireHasLegVesselFlag(state.questionnaire)) {
           return Q_LEG_VESSEL_GUIDE;
@@ -12692,11 +12897,26 @@
         if (questionnaireHasJointMorningStiff(state.questionnaire)) {
           return Q_JOINT_RA_GUIDE;
         }
+        if (questionnaireHasMorningSwell(state.questionnaire)) {
+          return Q_MORNING_SWELL_GUIDE;
+        }
+        if (questionnaireHasSleepApnea(state.questionnaire)) {
+          return Q_SLEEP_APNEA_GUIDE;
+        }
         if (questionnaireHasTinnitusPulsatile(state.questionnaire)) {
           return Q_TINNITUS_PULSE_GUIDE;
         }
         if (questionnaireHasJointGoutFlare(state.questionnaire)) {
           return Q_JOINT_GOUT_GUIDE;
+        }
+        if (questionnaireHasMoodLow(state.questionnaire)) {
+          return Q_MOOD_LOW_GUIDE;
+        }
+        if (questionnaireHasHeartburn(state.questionnaire)) {
+          return Q_HEARTBURN_GUIDE;
+        }
+        if (questionnaireHasBowelFlag(state.questionnaire)) {
+          return Q_BOWEL_GUIDE;
         }
         if (questionnaireHasJointAcheSwell(state.questionnaire)) {
           return Q_JOINT_OA_GUIDE;
@@ -13257,6 +13477,8 @@
           q.bowelChange = qPickSingle(q.bowelChange, id);
           paintQuestionnaireDraft();
         });
+        var bowelAlert = document.getElementById("q-bowel-alert");
+        if (bowelAlert) bowelAlert.hidden = q.bowelChange !== "has";
         fillQuestionnaireOptionChips("q-home-measure-chips", Q_HOME_MEASURE_OPTS, q.homeMeasure, false, "", function (id) {
           q.homeMeasure = qPickSingle(q.homeMeasure, id);
           paintQuestionnaireDraft();
@@ -13317,6 +13539,42 @@
         if (tinnitusAlert) tinnitusAlert.hidden = q.tinnitusCommon !== "has";
         if (tinnitusPulseAlert) tinnitusPulseAlert.hidden = q.tinnitusPulsatile !== "has";
         if (tinnitusSuddenAlert) tinnitusSuddenAlert.hidden = q.tinnitusSudden !== "has";
+        fillQuestionnaireOptionChips("q-chest-exert-chips", Q_CHEST_EXERT_OPTS, q.chestExertion, false, "", function (id) {
+          q.chestExertion = qPickSingle(q.chestExertion, id);
+          paintQuestionnaireDraft();
+        });
+        fillQuestionnaireOptionChips("q-diabetes-triad-chips", Q_DIABETES_TRIAD_OPTS, q.diabetesTriad, false, "", function (id) {
+          q.diabetesTriad = qPickSingle(q.diabetesTriad, id);
+          paintQuestionnaireDraft();
+        });
+        fillQuestionnaireOptionChips("q-sleep-apnea-chips", Q_SLEEP_APNEA_OPTS, q.sleepApnea, false, "", function (id) {
+          q.sleepApnea = qPickSingle(q.sleepApnea, id);
+          paintQuestionnaireDraft();
+        });
+        fillQuestionnaireOptionChips("q-morning-swell-chips", Q_MORNING_SWELL_OPTS, q.morningSwell, false, "", function (id) {
+          q.morningSwell = qPickSingle(q.morningSwell, id);
+          paintQuestionnaireDraft();
+        });
+        fillQuestionnaireOptionChips("q-heartburn-chips", Q_HEARTBURN_OPTS, q.heartburn, false, "", function (id) {
+          q.heartburn = qPickSingle(q.heartburn, id);
+          paintQuestionnaireDraft();
+        });
+        fillQuestionnaireOptionChips("q-mood-low-chips", Q_MOOD_LOW_OPTS, q.moodLow, false, "", function (id) {
+          q.moodLow = qPickSingle(q.moodLow, id);
+          paintQuestionnaireDraft();
+        });
+        var chestExertAlert = document.getElementById("q-chest-exert-alert");
+        var diabetesTriadAlert = document.getElementById("q-diabetes-triad-alert");
+        var sleepApneaAlert = document.getElementById("q-sleep-apnea-alert");
+        var morningSwellAlert = document.getElementById("q-morning-swell-alert");
+        var heartburnAlert = document.getElementById("q-heartburn-alert");
+        var moodLowAlert = document.getElementById("q-mood-low-alert");
+        if (chestExertAlert) chestExertAlert.hidden = q.chestExertion !== "has";
+        if (diabetesTriadAlert) diabetesTriadAlert.hidden = q.diabetesTriad !== "has";
+        if (sleepApneaAlert) sleepApneaAlert.hidden = q.sleepApnea !== "has";
+        if (morningSwellAlert) morningSwellAlert.hidden = q.morningSwell !== "has";
+        if (heartburnAlert) heartburnAlert.hidden = q.heartburn !== "has";
+        if (moodLowAlert) moodLowAlert.hidden = q.moodLow !== "has";
         fillQuestionnaireOptionChips("q-emergency-chips", Q_EMERGENCY_OPTS, q.emergencyFlag, false, "", function (id) {
           q.emergencyFlag = qPickSingle(q.emergencyFlag, id);
           paintQuestionnaireDraft();
