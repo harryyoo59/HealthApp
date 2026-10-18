@@ -3097,6 +3097,12 @@
       font-weight: 600;
       line-height: 1.35;
     }
+    .q-block-hint {
+      margin: 0;
+      color: rgba(155,181,168,0.75);
+      font-size: 11px;
+      line-height: 1.35;
+    }
     .q-mode-toggle {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -4299,7 +4305,7 @@
         <span data-i18n="records.title">내 기록 관리</span>
         <span class="ops-chevron" aria-hidden="true">▾</span>
       </button>
-      <p class="app-shell-version" id="app-shell-version" data-shell-version="20261017.6">이 화면 버전 20261017.6</p>      <div class="ops-body" id="records-body" hidden>
+      <p class="app-shell-version" id="app-shell-version" data-shell-version="20261018.1">이 화면 버전 20261018.1</p>      <div class="ops-body" id="records-body" hidden>
 
         <div class="records-vitals" id="records-vitals">
           <h3 class="ops-section-title">몸 수치 (혈압·혈당)</h3>
@@ -4361,7 +4367,7 @@
       <div class="cheer-row">
         <p class="cheer-text">Harry 에게 응원의<br>하트 눌러 주시면<br>제가 더욱 힘이 납니다.</p>
         <button type="button" class="cheer-media" id="cheer-media" aria-label="Harry에게 응원 하트 보내기">
-          <img src="/cheer-heart.webp?v=20261017.6" alt="" width="48" height="48" decoding="async">
+          <img src="/cheer-heart.webp?v=20261018.1" alt="" width="48" height="48" decoding="async">
           <span class="cheer-burst-layer" id="cheer-burst-layer" aria-hidden="true"></span>
         </button>
       </div>
@@ -4667,6 +4673,19 @@
           <div class="q-block">
             <p class="q-block-label">최근 몸무게 변화</p>
             <div class="act-chips q-chips" id="q-weight-change-chips" role="group" aria-label="최근 몸무게 변화"></div>
+          </div>
+          <div class="q-block">
+            <p class="q-block-label">걸을 때 다리가 아프거나 당기다가 쉬면 나아진 적이 있나요?</p>
+            <div class="act-chips q-chips" id="q-leg-walk-chips" role="group" aria-label="걸을 때 다리 통증·당김 후 쉬면 완화"></div>
+          </div>
+          <div class="q-block">
+            <p class="q-block-label">다리나 발이 자주 저리거나 차갑게 느껴지나요?</p>
+            <div class="act-chips q-chips" id="q-leg-numb-chips" role="group" aria-label="다리·발 저림·차가움"></div>
+          </div>
+          <div class="q-block">
+            <p class="q-block-label">자다가 다리에 쥐가 나나요?</p>
+            <p class="q-block-hint">탈수·미네랄·피로와 자주 겹칩니다. 물과 식사를 챙기는 참고이며, 혈관 질환 신호로 보지 않습니다.</p>
+            <div class="act-chips q-chips" id="q-night-cramp-chips" role="group" aria-label="자다가 다리 쥐"></div>
           </div>
           <div class="q-block">
             <p class="q-block-label">응급 신호 — 가슴 통증·한쪽 마비·심한 숨참 같은 급증상</p>
@@ -5243,6 +5262,18 @@
         { id: "down", label: "줄음" }
       ];
       var Q_EMERGENCY_OPTS = [
+        { id: "none", label: "없음" },
+        { id: "has", label: "있음" }
+      ];
+      var Q_LEG_WALK_OPTS = [
+        { id: "none", label: "없음" },
+        { id: "has", label: "있음" }
+      ];
+      var Q_LEG_NUMB_OPTS = [
+        { id: "none", label: "없음" },
+        { id: "has", label: "있음" }
+      ];
+      var Q_NIGHT_CRAMP_OPTS = [
         { id: "none", label: "없음" },
         { id: "has", label: "있음" }
       ];
@@ -7341,6 +7372,9 @@
           bowelChange: "",
           homeMeasure: "",
           weightChange: "",
+          legWalkRelief: "",
+          legNumbCold: "",
+          nightLegCramp: "",
           familyHistoryMode: "",
           familyHistories: [],
           familyHistoryDetail: "",
@@ -7385,6 +7419,9 @@
         base.bowelChange = String(raw.bowelChange || "").trim();
         base.homeMeasure = String(raw.homeMeasure || "").trim();
         base.weightChange = String(raw.weightChange || "").trim();
+        base.legWalkRelief = String(raw.legWalkRelief || "").trim();
+        base.legNumbCold = String(raw.legNumbCold || "").trim();
+        base.nightLegCramp = String(raw.nightLegCramp || "").trim();
         base.familyHistoryMode = String(raw.familyHistoryMode || "").trim();
         base.familyHistories = normalizeStringList(raw.familyHistories);
         base.familyHistoryDetail = String(raw.familyHistoryDetail || "").trim();
@@ -7424,6 +7461,7 @@
         if (q.sleepBand || q.bedtime || q.nightUrine || q.smoking || q.drinking) return true;
         if (q.waterIntake || q.stress || q.bowelChange) return true;
         if (q.homeMeasure || q.weightChange || q.emergencyFlag) return true;
+        if (q.legWalkRelief || q.legNumbCold || q.nightLegCramp) return true;
         if (q.familyHistoryMode === "has" || q.familyHistoryMode === "none") return true;
         if (q.allergyMode === "has" || q.allergyMode === "none") return true;
         if (q.avoidFoodMode === "has" || q.avoidFoodMode === "none") return true;
@@ -7474,6 +7512,15 @@
         if (q.bowelChange) lines.push("배변 변화: " + qLabelById(Q_BOWEL_OPTS, q.bowelChange));
         if (q.homeMeasure) lines.push("집 측정: " + qLabelById(Q_HOME_MEASURE_OPTS, q.homeMeasure));
         if (q.weightChange) lines.push("몸무게 변화: " + qLabelById(Q_WEIGHT_CHANGE_OPTS, q.weightChange));
+        if (q.legWalkRelief) {
+          lines.push("걸을 때 다리(쉬면 완화): " + qLabelById(Q_LEG_WALK_OPTS, q.legWalkRelief));
+        }
+        if (q.legNumbCold) {
+          lines.push("다리·발 저림·차가움: " + qLabelById(Q_LEG_NUMB_OPTS, q.legNumbCold));
+        }
+        if (q.nightLegCramp) {
+          lines.push("자다가 다리 쥐: " + qLabelById(Q_NIGHT_CRAMP_OPTS, q.nightLegCramp));
+        }
         if (q.emergencyFlag) lines.push("응급 신호: " + qLabelById(Q_EMERGENCY_OPTS, q.emergencyFlag));
         if (q.familyHistoryMode === "none") lines.push("가족력: 없음");
         else if (q.familyHistoryMode === "has" && q.familyHistories.length) {
@@ -10315,6 +10362,30 @@
             ]);
         }
 
+        if (q.legWalkRelief === "has" || q.legNumbCold === "has") {
+          push("legVessel", 61, "다리 순환 살펴보기",
+            [
+              "걸을 때 다리 불편(쉬면 완화)이나 발·다리 저림·차가움이 있어, 말초 혈관 쪽을 의사와 상의할 만합니다.",
+              "다리·발 쪽 흐름을 살필 신호가 있어 보입니다. 참고용이며 진단이 아닙니다."
+            ],
+            [
+              "진료 때 다리·발 증상 말하기",
+              "무리한 오래 걷기보다 편한 속도로"
+            ]);
+        }
+
+        if (q.nightLegCramp === "has") {
+          push("nightCramp", 38, "밤 다리 쥐",
+            [
+              "자다가 다리에 쥐가 나는 건 탈수·미네랄·피로와 자주 겹칩니다. 물과 식사를 챙기고, 반복되면 상담하세요.",
+              "밤 다리 쥐는 혈관 질환 신호로 보기보다 수분·미네랄 챙김을 먼저 생각해 볼 만합니다."
+            ],
+            [
+              "하루 물 조금 더 챙기기",
+              "무리한 활동 뒤엔 가볍게 스트레칭"
+            ]);
+        }
+
         if (/고혈압|암로디핀|로사르탄|ARB|ACE|이뇨제|텔미사르탄|발사르탄/i.test(text) || bpLooksElevated() || (q.goals || []).indexOf("bp") >= 0) {
           push("bpCare", saltyNow ? 50 : 48, "혈압 챙기기",
             [
@@ -12880,6 +12951,18 @@
         });
         fillQuestionnaireOptionChips("q-weight-change-chips", Q_WEIGHT_CHANGE_OPTS, q.weightChange, false, "", function (id) {
           q.weightChange = qPickSingle(q.weightChange, id);
+          paintQuestionnaireDraft();
+        });
+        fillQuestionnaireOptionChips("q-leg-walk-chips", Q_LEG_WALK_OPTS, q.legWalkRelief, false, "", function (id) {
+          q.legWalkRelief = qPickSingle(q.legWalkRelief, id);
+          paintQuestionnaireDraft();
+        });
+        fillQuestionnaireOptionChips("q-leg-numb-chips", Q_LEG_NUMB_OPTS, q.legNumbCold, false, "", function (id) {
+          q.legNumbCold = qPickSingle(q.legNumbCold, id);
+          paintQuestionnaireDraft();
+        });
+        fillQuestionnaireOptionChips("q-night-cramp-chips", Q_NIGHT_CRAMP_OPTS, q.nightLegCramp, false, "", function (id) {
+          q.nightLegCramp = qPickSingle(q.nightLegCramp, id);
           paintQuestionnaireDraft();
         });
         fillQuestionnaireOptionChips("q-emergency-chips", Q_EMERGENCY_OPTS, q.emergencyFlag, false, "", function (id) {
