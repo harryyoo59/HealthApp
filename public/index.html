@@ -4309,7 +4309,7 @@
         <span data-i18n="records.title">내 기록 관리</span>
         <span class="ops-chevron" aria-hidden="true">▾</span>
       </button>
-      <p class="app-shell-version" id="app-shell-version" data-shell-version="20261018.2">이 화면 버전 20261018.2</p>      <div class="ops-body" id="records-body" hidden>
+      <p class="app-shell-version" id="app-shell-version" data-shell-version="20261018.3">이 화면 버전 20261018.3</p>      <div class="ops-body" id="records-body" hidden>
 
         <div class="records-vitals" id="records-vitals">
           <h3 class="ops-section-title">몸 수치 (혈압·혈당)</h3>
@@ -4371,7 +4371,7 @@
       <div class="cheer-row">
         <p class="cheer-text">Harry 에게 응원의<br>하트 눌러 주시면<br>제가 더욱 힘이 납니다.</p>
         <button type="button" class="cheer-media" id="cheer-media" aria-label="Harry에게 응원 하트 보내기">
-          <img src="/cheer-heart.webp?v=20261018.2" alt="" width="48" height="48" decoding="async">
+          <img src="/cheer-heart.webp?v=20261018.3" alt="" width="48" height="48" decoding="async">
           <span class="cheer-burst-layer" id="cheer-burst-layer" aria-hidden="true"></span>
         </button>
       </div>
@@ -4692,6 +4692,21 @@
             <p class="q-block-label">자다가 다리에 쥐가 나나요?</p>
             <p class="q-block-hint">탈수·미네랄·피로와 자주 겹칩니다. 물과 식사를 챙기는 참고이며, 혈관 질환 신호로 보지 않습니다.</p>
             <div class="act-chips q-chips" id="q-night-cramp-chips" role="group" aria-label="자다가 다리 쥐"></div>
+          </div>
+          <div class="q-block">
+            <p class="q-block-label">무릎, 허리, 손가락 같은 관절이 자주 아프거나 붓나요?</p>
+            <div class="act-chips q-chips" id="q-joint-ache-chips" role="group" aria-label="관절 통증·부기"></div>
+            <p class="q-block-hint" id="q-joint-ache-alert" hidden>체중을 무리 없이 관리하면 관절 부담을 줄이는 데 도움이 될 수 있습니다. 앱이 진단하지 않습니다.</p>
+          </div>
+          <div class="q-block">
+            <p class="q-block-label">아침에 일어나면 관절이 뻣뻣하고, 그게 30분 넘게 가나요?</p>
+            <div class="act-chips q-chips" id="q-joint-stiff-chips" role="group" aria-label="아침 관절 뻣뻣함 30분 이상"></div>
+            <p class="q-block-hint q-leg-vessel-alert" id="q-joint-stiff-alert" hidden>병원에서 확인해 보세요. 앱이 진단하지 않습니다.</p>
+          </div>
+          <div class="q-block">
+            <p class="q-block-label">엄지발가락 같은 곳이 갑자기 빨갛게 붓고 심하게 아픈 적이 있나요?</p>
+            <div class="act-chips q-chips" id="q-joint-gout-chips" role="group" aria-label="엄지발가락 등 급성 발적·통증"></div>
+            <p class="q-block-hint" id="q-joint-gout-alert" hidden>맥주·내장류·단 음료를 조심해 보세요. 병원 확인도 권합니다. 앱이 진단하지 않습니다.</p>
           </div>
           <div class="q-block">
             <p class="q-block-label">응급 신호 — 가슴 통증·한쪽 마비·심한 숨참 같은 급증상</p>
@@ -5285,6 +5300,22 @@
       ];
       /** 다리 혈관 문진 「있음」 시 AI 변주 없이 고정 안내 */
       var Q_LEG_VESSEL_GUIDE = "혈관 문제일 수 있으니 병원에서 확인해 보세요.";
+      var Q_JOINT_ACHE_OPTS = [
+        { id: "none", label: "없음" },
+        { id: "has", label: "있음" }
+      ];
+      var Q_JOINT_STIFF_OPTS = [
+        { id: "none", label: "없음" },
+        { id: "has", label: "있음" }
+      ];
+      var Q_JOINT_GOUT_OPTS = [
+        { id: "none", label: "없음" },
+        { id: "has", label: "있음" }
+      ];
+      /** 관절 문진 「있음」 시 AI 변주 없이 고정 안내 */
+      var Q_JOINT_OA_GUIDE = "관절이 자주 아프거나 붓는다면 체중을 무리 없이 관리하는 편이 도움이 될 수 있습니다.";
+      var Q_JOINT_RA_GUIDE = "아침 관절 뻣뻣함이 30분 넘게 가면 병원에서 확인해 보세요.";
+      var Q_JOINT_GOUT_GUIDE = "갑자기 빨갛게 붓고 심하게 아픈 적이 있다면 맥주·내장류·단 음료를 조심해 보세요.";
       var Q_AVOID_FOOD_OPTS = [
         { id: "peanut", label: "땅콩" },
         { id: "seafood", label: "해산물" },
@@ -7383,6 +7414,9 @@
           legWalkRelief: "",
           legNumbCold: "",
           nightLegCramp: "",
+          jointAcheSwell: "",
+          jointMorningStiff: "",
+          jointGoutFlare: "",
           familyHistoryMode: "",
           familyHistories: [],
           familyHistoryDetail: "",
@@ -7430,6 +7464,9 @@
         base.legWalkRelief = String(raw.legWalkRelief || "").trim();
         base.legNumbCold = String(raw.legNumbCold || "").trim();
         base.nightLegCramp = String(raw.nightLegCramp || "").trim();
+        base.jointAcheSwell = String(raw.jointAcheSwell || "").trim();
+        base.jointMorningStiff = String(raw.jointMorningStiff || "").trim();
+        base.jointGoutFlare = String(raw.jointGoutFlare || "").trim();
         base.familyHistoryMode = String(raw.familyHistoryMode || "").trim();
         base.familyHistories = normalizeStringList(raw.familyHistories);
         base.familyHistoryDetail = String(raw.familyHistoryDetail || "").trim();
@@ -7470,6 +7507,7 @@
         if (q.waterIntake || q.stress || q.bowelChange) return true;
         if (q.homeMeasure || q.weightChange || q.emergencyFlag) return true;
         if (q.legWalkRelief || q.legNumbCold || q.nightLegCramp) return true;
+        if (q.jointAcheSwell || q.jointMorningStiff || q.jointGoutFlare) return true;
         if (q.familyHistoryMode === "has" || q.familyHistoryMode === "none") return true;
         if (q.allergyMode === "has" || q.allergyMode === "none") return true;
         if (q.avoidFoodMode === "has" || q.avoidFoodMode === "none") return true;
@@ -7491,6 +7529,18 @@
       function questionnaireHasLegVesselFlag(q) {
         q = normalizeQuestionnaire(q);
         return q.legWalkRelief === "has" || q.legNumbCold === "has";
+      }
+
+      function questionnaireHasJointMorningStiff(q) {
+        return normalizeQuestionnaire(q).jointMorningStiff === "has";
+      }
+
+      function questionnaireHasJointAcheSwell(q) {
+        return normalizeQuestionnaire(q).jointAcheSwell === "has";
+      }
+
+      function questionnaireHasJointGoutFlare(q) {
+        return normalizeQuestionnaire(q).jointGoutFlare === "has";
       }
 
       function questionnaireSummaryLines(q) {
@@ -7533,6 +7583,15 @@
         }
         if (q.nightLegCramp) {
           lines.push("자다가 다리 쥐: " + qLabelById(Q_NIGHT_CRAMP_OPTS, q.nightLegCramp));
+        }
+        if (q.jointAcheSwell) {
+          lines.push("관절 통증·부기: " + qLabelById(Q_JOINT_ACHE_OPTS, q.jointAcheSwell));
+        }
+        if (q.jointMorningStiff) {
+          lines.push("아침 관절 뻣뻣함(30분↑): " + qLabelById(Q_JOINT_STIFF_OPTS, q.jointMorningStiff));
+        }
+        if (q.jointGoutFlare) {
+          lines.push("발가락 등 급성 발적·통증: " + qLabelById(Q_JOINT_GOUT_OPTS, q.jointGoutFlare));
         }
         if (q.emergencyFlag) lines.push("응급 신호: " + qLabelById(Q_EMERGENCY_OPTS, q.emergencyFlag));
         if (q.familyHistoryMode === "none") lines.push("가족력: 없음");
@@ -10394,6 +10453,24 @@
             ]);
         }
 
+        if (questionnaireHasJointMorningStiff(q)) {
+          push("jointRA", 88, "아침 관절 확인",
+            [Q_JOINT_RA_GUIDE + " 앱·AI가 진단하지 않습니다."],
+            ["병원에서 관절 증상 확인해 보기"]);
+        }
+
+        if (questionnaireHasJointGoutFlare(q)) {
+          push("jointGout", 72, "통풍 식단 주의",
+            [Q_JOINT_GOUT_GUIDE + " 앱·AI가 진단하지 않습니다."],
+            ["맥주·내장류·단 음료 줄이기", "병원에서도 한 번 확인해 보기"]);
+        }
+
+        if (questionnaireHasJointAcheSwell(q)) {
+          push("jointOA", 58, "관절·체중 챙기기",
+            [Q_JOINT_OA_GUIDE + " 앱·AI가 진단하지 않습니다."],
+            ["체중을 무리 없이 관리하기", "관절에 부담 적은 걷기·활동"]);
+        }
+
         if (/고혈압|암로디핀|로사르탄|ARB|ACE|이뇨제|텔미사르탄|발사르탄/i.test(text) || bpLooksElevated() || (q.goals || []).indexOf("bp") >= 0) {
           push("bpCare", saltyNow ? 50 : 48, "혈압 챙기기",
             [
@@ -10500,6 +10577,15 @@
         if (signals[0].id === "legVessel") {
           return Q_LEG_VESSEL_GUIDE;
         }
+        if (signals[0].id === "jointRA") {
+          return Q_JOINT_RA_GUIDE;
+        }
+        if (signals[0].id === "jointGout") {
+          return Q_JOINT_GOUT_GUIDE;
+        }
+        if (signals[0].id === "jointOA") {
+          return Q_JOINT_OA_GUIDE;
+        }
         var top = signals.slice(0, 2);
         var parts = top.map(function (sig) {
           return pickSignalText(sig, "opinion");
@@ -10520,6 +10606,15 @@
         }
         if (signals[0].id === "legVessel") {
           return ["병원에서 다리·발 혈관 확인해 보기"];
+        }
+        if (signals[0].id === "jointRA") {
+          return ["병원에서 관절 증상 확인해 보기"];
+        }
+        if (signals[0].id === "jointGout") {
+          return ["맥주·내장류·단 음료 줄이기"];
+        }
+        if (signals[0].id === "jointOA") {
+          return ["체중을 무리 없이 관리하기"];
         }
         var actions = [];
         var seen = {};
@@ -10551,6 +10646,9 @@
         if (!signals.length) return "일상 챙기기 이어가기";
         if (signals[0].id === "emergency") return "급증상 신호 — 병원·응급 우선";
         if (signals[0].id === "legVessel") return "다리 혈관 — 병원 확인";
+        if (signals[0].id === "jointRA") return "아침 관절 — 병원 확인";
+        if (signals[0].id === "jointGout") return "통풍 식단 — 맥주·내장·단 음료";
+        if (signals[0].id === "jointOA") return "관절 — 체중 관리";
 
         var tags = [];
         signals.forEach(function (sig) {
@@ -10650,6 +10748,16 @@
         var legVesselNote = questionnaireHasLegVesselFlag(state.questionnaire)
           ? "중요: 문진에 다리 혈관 신호(걸을 때 통증·쉬면 완화 / 발·다리 저림·차가움) 있음 → 판단·한 줄에 반드시 고정 문구만 쓰세요: 「" + Q_LEG_VESSEL_GUIDE + "」 혈관을 앱·AI가 진단하지 말고, 생활 조언을 이 안내보다 앞에 두지 마세요."
           : "";
+        var jointNotes = [];
+        if (questionnaireHasJointMorningStiff(state.questionnaire)) {
+          jointNotes.push("중요: 아침 관절 뻣뻣함(30분↑) 있음 → 고정 문구: 「" + Q_JOINT_RA_GUIDE + "」 진단 추정 금지.");
+        }
+        if (questionnaireHasJointGoutFlare(state.questionnaire)) {
+          jointNotes.push("중요: 발가락 등 급성 발적·통증 있음 → 고정 문구: 「" + Q_JOINT_GOUT_GUIDE + "」 진단 추정 금지.");
+        }
+        if (questionnaireHasJointAcheSwell(state.questionnaire)) {
+          jointNotes.push("중요: 관절 통증·부기 있음 → 고정 문구: 「" + Q_JOINT_OA_GUIDE + "」 진단 추정 금지.");
+        }
         var yPat = facts.yPat || {};
         var tPat = facts.tPat || {};
         var trend = facts.menuTrend || {};
@@ -10665,6 +10773,7 @@
           "같은 날 데이터가 비슷해도 표현은 조금씩 다르게. 데이터 차이가 있으면 요약·행동이 달라져야 함.",
           emergencyNote,
           legVesselNote,
+          jointNotes.join(" "),
           "(참고) 성별: " + (state.sex.trim() || "(없음)"),
           "(참고) 나이: " + (state.age.trim() || "(없음)"),
           "(참고) 키: " + (state.height.trim() || "(없음)"),
@@ -10991,6 +11100,28 @@
           return lines.join(" ");
         }
 
+        if (
+          questionnaireHasLegVesselFlag(qo) &&
+          /다리|종아리|발|걸을|저림|차갑|파행/i.test(q)
+        ) {
+          return Q_LEG_VESSEL_GUIDE + " 혈관 검사는 병원에서 해야 알 수 있고, 앱·AI가 진단하지 않습니다.";
+        }
+
+        if (
+          /관절|무릎|허리|손가락|발가락|뻣뻣|통풍|붓/i.test(q) ||
+          qo.bodyAreas.indexOf("joint") >= 0
+        ) {
+          if (questionnaireHasJointMorningStiff(qo)) {
+            return Q_JOINT_RA_GUIDE + " 앱·AI가 진단하지 않습니다.";
+          }
+          if (questionnaireHasJointGoutFlare(qo) && /발가락|엄지|빨갛|통풍|붓/i.test(q)) {
+            return Q_JOINT_GOUT_GUIDE + " 앱·AI가 진단하지 않습니다.";
+          }
+          if (questionnaireHasJointAcheSwell(qo)) {
+            return Q_JOINT_OA_GUIDE + " 앱·AI가 진단하지 않습니다.";
+          }
+        }
+
         if (/어지|머리|두통|멍하|눈/i.test(q) || /head/.test(qLower) || qo.bodyAreas.indexOf("head") >= 0 && /머리|어지/.test(q)) {
           lines.push("머리가 무겁거나 어지러운 느낌은 수면·수분·식사 리듬과 함께 살펴보는 경우가 많습니다.");
           if (qo.sleepBand === "under5") {
@@ -11060,6 +11191,14 @@
         var legVesselNote = questionnaireHasLegVesselFlag(state.questionnaire)
           ? "중요: 문진에 다리 혈관 신호 있음 → 답변 맨 앞에 고정 문구만: 「" + Q_LEG_VESSEL_GUIDE + "」 혈관 진단을 추정하지 마세요."
           : "";
+        var jointNote = "";
+        if (questionnaireHasJointMorningStiff(state.questionnaire)) {
+          jointNote = "중요: 아침 관절 뻣뻣함 있음 → 고정 문구: 「" + Q_JOINT_RA_GUIDE + "」";
+        } else if (questionnaireHasJointGoutFlare(state.questionnaire)) {
+          jointNote = "중요: 급성 발적·통증 있음 → 고정 문구: 「" + Q_JOINT_GOUT_GUIDE + "」";
+        } else if (questionnaireHasJointAcheSwell(state.questionnaire)) {
+          jointNote = "중요: 관절 통증·부기 있음 → 고정 문구: 「" + Q_JOINT_OA_GUIDE + "」";
+        }
         return [
           "사용자가 증상·불편을 질문했습니다. 내부 기록만 참고하고, 화면에 쓸 짧은 답만 만드세요.",
           "질문: " + String(question || "").trim(),
@@ -11069,6 +11208,7 @@
           "과거 수술·완치 병명은 판단 맥락으로만 쓰고, 화면에 원문 나열하지 마세요.",
           emergencyNote,
           legVesselNote,
+          jointNote,
           "(참고) 성별: " + (state.sex.trim() || "(없음)"),
           "(참고) 나이: " + (state.age.trim() || "(없음)"),
           "(참고) 키: " + (state.height.trim() || "(없음)"),
@@ -12418,6 +12558,15 @@
         if (questionnaireHasLegVesselFlag(state.questionnaire)) {
           return Q_LEG_VESSEL_GUIDE;
         }
+        if (questionnaireHasJointMorningStiff(state.questionnaire)) {
+          return Q_JOINT_RA_GUIDE;
+        }
+        if (questionnaireHasJointGoutFlare(state.questionnaire)) {
+          return Q_JOINT_GOUT_GUIDE;
+        }
+        if (questionnaireHasJointAcheSwell(state.questionnaire)) {
+          return Q_JOINT_OA_GUIDE;
+        }
         if (!cur.qDays && prev.qDays) {
           return L.thisLabel + " 문진 기록이 적어, 증상 흐름 비교는 다음에 이어 갑니다.";
         }
@@ -12995,6 +13144,24 @@
           q.nightLegCramp = qPickSingle(q.nightLegCramp, id);
           paintQuestionnaireDraft();
         });
+        fillQuestionnaireOptionChips("q-joint-ache-chips", Q_JOINT_ACHE_OPTS, q.jointAcheSwell, false, "", function (id) {
+          q.jointAcheSwell = qPickSingle(q.jointAcheSwell, id);
+          paintQuestionnaireDraft();
+        });
+        fillQuestionnaireOptionChips("q-joint-stiff-chips", Q_JOINT_STIFF_OPTS, q.jointMorningStiff, false, "", function (id) {
+          q.jointMorningStiff = qPickSingle(q.jointMorningStiff, id);
+          paintQuestionnaireDraft();
+        });
+        fillQuestionnaireOptionChips("q-joint-gout-chips", Q_JOINT_GOUT_OPTS, q.jointGoutFlare, false, "", function (id) {
+          q.jointGoutFlare = qPickSingle(q.jointGoutFlare, id);
+          paintQuestionnaireDraft();
+        });
+        var jointAcheAlert = document.getElementById("q-joint-ache-alert");
+        var jointStiffAlert = document.getElementById("q-joint-stiff-alert");
+        var jointGoutAlert = document.getElementById("q-joint-gout-alert");
+        if (jointAcheAlert) jointAcheAlert.hidden = q.jointAcheSwell !== "has";
+        if (jointStiffAlert) jointStiffAlert.hidden = q.jointMorningStiff !== "has";
+        if (jointGoutAlert) jointGoutAlert.hidden = q.jointGoutFlare !== "has";
         fillQuestionnaireOptionChips("q-emergency-chips", Q_EMERGENCY_OPTS, q.emergencyFlag, false, "", function (id) {
           q.emergencyFlag = qPickSingle(q.emergencyFlag, id);
           paintQuestionnaireDraft();
