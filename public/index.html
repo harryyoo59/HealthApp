@@ -4309,7 +4309,7 @@
         <span data-i18n="records.title">내 기록 관리</span>
         <span class="ops-chevron" aria-hidden="true">▾</span>
       </button>
-      <p class="app-shell-version" id="app-shell-version" data-shell-version="20261018.3">이 화면 버전 20261018.3</p>      <div class="ops-body" id="records-body" hidden>
+      <p class="app-shell-version" id="app-shell-version" data-shell-version="20261018.4">이 화면 버전 20261018.4</p>      <div class="ops-body" id="records-body" hidden>
 
         <div class="records-vitals" id="records-vitals">
           <h3 class="ops-section-title">몸 수치 (혈압·혈당)</h3>
@@ -4371,7 +4371,7 @@
       <div class="cheer-row">
         <p class="cheer-text">Harry 에게 응원의<br>하트 눌러 주시면<br>제가 더욱 힘이 납니다.</p>
         <button type="button" class="cheer-media" id="cheer-media" aria-label="Harry에게 응원 하트 보내기">
-          <img src="/cheer-heart.webp?v=20261018.3" alt="" width="48" height="48" decoding="async">
+          <img src="/cheer-heart.webp?v=20261018.4" alt="" width="48" height="48" decoding="async">
           <span class="cheer-burst-layer" id="cheer-burst-layer" aria-hidden="true"></span>
         </button>
       </div>
@@ -4707,6 +4707,21 @@
             <p class="q-block-label">엄지발가락 같은 곳이 갑자기 빨갛게 붓고 심하게 아픈 적이 있나요?</p>
             <div class="act-chips q-chips" id="q-joint-gout-chips" role="group" aria-label="엄지발가락 등 급성 발적·통증"></div>
             <p class="q-block-hint" id="q-joint-gout-alert" hidden>맥주·내장류·단 음료를 조심해 보세요. 병원 확인도 권합니다. 앱이 진단하지 않습니다.</p>
+          </div>
+          <div class="q-block">
+            <p class="q-block-label">귀에서 삐 소리나 윙 소리가 자주 들리나요?</p>
+            <div class="act-chips q-chips" id="q-tinnitus-chips" role="group" aria-label="이명(삐·윙 소리)"></div>
+            <p class="q-block-hint" id="q-tinnitus-alert" hidden>큰 소음을 줄이고, 잠과 카페인을 챙겨 보세요. 앱이 진단하지 않습니다.</p>
+          </div>
+          <div class="q-block">
+            <p class="q-block-label">그 소리가 심장 뛰는 것처럼 쿵쿵 박자에 맞춰 들리나요?</p>
+            <div class="act-chips q-chips" id="q-tinnitus-pulse-chips" role="group" aria-label="박동성 이명"></div>
+            <p class="q-block-hint q-leg-vessel-alert" id="q-tinnitus-pulse-alert" hidden>혈관·혈압 쪽일 수 있으니 병원에서 확인해 보세요. 앱이 진단하지 않습니다.</p>
+          </div>
+          <div class="q-block">
+            <p class="q-block-label">한쪽 귀만 갑자기 안 들리거나 이명이 생긴 적이 있나요?</p>
+            <div class="act-chips q-chips" id="q-tinnitus-sudden-chips" role="group" aria-label="한쪽 귀 갑작스런 난청·이명"></div>
+            <p class="q-block-hint q-leg-vessel-alert" id="q-tinnitus-sudden-alert" hidden>바로 이비인후과에 가세요. 빨리 치료할수록 회복에 도움이 됩니다. 앱이 진단하지 않습니다.</p>
           </div>
           <div class="q-block">
             <p class="q-block-label">응급 신호 — 가슴 통증·한쪽 마비·심한 숨참 같은 급증상</p>
@@ -5316,6 +5331,22 @@
       var Q_JOINT_OA_GUIDE = "관절이 자주 아프거나 붓는다면 체중을 무리 없이 관리하는 편이 도움이 될 수 있습니다.";
       var Q_JOINT_RA_GUIDE = "아침 관절 뻣뻣함이 30분 넘게 가면 병원에서 확인해 보세요.";
       var Q_JOINT_GOUT_GUIDE = "갑자기 빨갛게 붓고 심하게 아픈 적이 있다면 맥주·내장류·단 음료를 조심해 보세요.";
+      var Q_TINNITUS_OPTS = [
+        { id: "none", label: "없음" },
+        { id: "has", label: "있음" }
+      ];
+      var Q_TINNITUS_PULSE_OPTS = [
+        { id: "none", label: "없음" },
+        { id: "has", label: "있음" }
+      ];
+      var Q_TINNITUS_SUDDEN_OPTS = [
+        { id: "none", label: "없음" },
+        { id: "has", label: "있음" }
+      ];
+      /** 이명 문진 「있음」 시 AI 변주 없이 고정 안내 */
+      var Q_TINNITUS_COMMON_GUIDE = "귀에서 삐·윙 소리가 자주 들리면 큰 소음을 줄이고, 잠과 카페인을 챙겨 보세요.";
+      var Q_TINNITUS_PULSE_GUIDE = "심장 박자에 맞춰 들리는 이명은 혈관·혈압 쪽일 수 있으니 병원에서 확인해 보세요.";
+      var Q_TINNITUS_SUDDEN_GUIDE = "한쪽 귀가 갑자기 안 들리거나 이명이 생기면 바로 이비인후과에 가세요.";
       var Q_AVOID_FOOD_OPTS = [
         { id: "peanut", label: "땅콩" },
         { id: "seafood", label: "해산물" },
@@ -7417,6 +7448,9 @@
           jointAcheSwell: "",
           jointMorningStiff: "",
           jointGoutFlare: "",
+          tinnitusCommon: "",
+          tinnitusPulsatile: "",
+          tinnitusSudden: "",
           familyHistoryMode: "",
           familyHistories: [],
           familyHistoryDetail: "",
@@ -7467,6 +7501,9 @@
         base.jointAcheSwell = String(raw.jointAcheSwell || "").trim();
         base.jointMorningStiff = String(raw.jointMorningStiff || "").trim();
         base.jointGoutFlare = String(raw.jointGoutFlare || "").trim();
+        base.tinnitusCommon = String(raw.tinnitusCommon || "").trim();
+        base.tinnitusPulsatile = String(raw.tinnitusPulsatile || "").trim();
+        base.tinnitusSudden = String(raw.tinnitusSudden || "").trim();
         base.familyHistoryMode = String(raw.familyHistoryMode || "").trim();
         base.familyHistories = normalizeStringList(raw.familyHistories);
         base.familyHistoryDetail = String(raw.familyHistoryDetail || "").trim();
@@ -7508,6 +7545,7 @@
         if (q.homeMeasure || q.weightChange || q.emergencyFlag) return true;
         if (q.legWalkRelief || q.legNumbCold || q.nightLegCramp) return true;
         if (q.jointAcheSwell || q.jointMorningStiff || q.jointGoutFlare) return true;
+        if (q.tinnitusCommon || q.tinnitusPulsatile || q.tinnitusSudden) return true;
         if (q.familyHistoryMode === "has" || q.familyHistoryMode === "none") return true;
         if (q.allergyMode === "has" || q.allergyMode === "none") return true;
         if (q.avoidFoodMode === "has" || q.avoidFoodMode === "none") return true;
@@ -7541,6 +7579,18 @@
 
       function questionnaireHasJointGoutFlare(q) {
         return normalizeQuestionnaire(q).jointGoutFlare === "has";
+      }
+
+      function questionnaireHasTinnitusCommon(q) {
+        return normalizeQuestionnaire(q).tinnitusCommon === "has";
+      }
+
+      function questionnaireHasTinnitusPulsatile(q) {
+        return normalizeQuestionnaire(q).tinnitusPulsatile === "has";
+      }
+
+      function questionnaireHasTinnitusSudden(q) {
+        return normalizeQuestionnaire(q).tinnitusSudden === "has";
       }
 
       function questionnaireSummaryLines(q) {
@@ -7592,6 +7642,15 @@
         }
         if (q.jointGoutFlare) {
           lines.push("발가락 등 급성 발적·통증: " + qLabelById(Q_JOINT_GOUT_OPTS, q.jointGoutFlare));
+        }
+        if (q.tinnitusCommon) {
+          lines.push("이명(삐·윙): " + qLabelById(Q_TINNITUS_OPTS, q.tinnitusCommon));
+        }
+        if (q.tinnitusPulsatile) {
+          lines.push("박동성 이명: " + qLabelById(Q_TINNITUS_PULSE_OPTS, q.tinnitusPulsatile));
+        }
+        if (q.tinnitusSudden) {
+          lines.push("한쪽 귀 갑작스런 난청·이명: " + qLabelById(Q_TINNITUS_SUDDEN_OPTS, q.tinnitusSudden));
         }
         if (q.emergencyFlag) lines.push("응급 신호: " + qLabelById(Q_EMERGENCY_OPTS, q.emergencyFlag));
         if (q.familyHistoryMode === "none") lines.push("가족력: 없음");
@@ -10471,6 +10530,24 @@
             ["체중을 무리 없이 관리하기", "관절에 부담 적은 걷기·활동"]);
         }
 
+        if (questionnaireHasTinnitusSudden(q)) {
+          push("tinnitusSudden", 93, "갑작스런 난청",
+            [Q_TINNITUS_SUDDEN_GUIDE + " 빨리 치료할수록 회복에 도움이 됩니다. 앱·AI가 진단하지 않습니다."],
+            ["바로 이비인후과 진료 받기"]);
+        }
+
+        if (questionnaireHasTinnitusPulsatile(q)) {
+          push("tinnitusPulse", 86, "박동성 이명 확인",
+            [Q_TINNITUS_PULSE_GUIDE + " 앱·AI가 진단하지 않습니다."],
+            ["병원에서 이명·혈압 확인해 보기"]);
+        }
+
+        if (questionnaireHasTinnitusCommon(q)) {
+          push("tinnitusCommon", 40, "이명·생활 챙기기",
+            [Q_TINNITUS_COMMON_GUIDE + " 앱·AI가 진단하지 않습니다."],
+            ["큰 소음 줄이기", "잠·카페인 챙기기"]);
+        }
+
         if (/고혈압|암로디핀|로사르탄|ARB|ACE|이뇨제|텔미사르탄|발사르탄/i.test(text) || bpLooksElevated() || (q.goals || []).indexOf("bp") >= 0) {
           push("bpCare", saltyNow ? 50 : 48, "혈압 챙기기",
             [
@@ -10586,6 +10663,15 @@
         if (signals[0].id === "jointOA") {
           return Q_JOINT_OA_GUIDE;
         }
+        if (signals[0].id === "tinnitusSudden") {
+          return Q_TINNITUS_SUDDEN_GUIDE;
+        }
+        if (signals[0].id === "tinnitusPulse") {
+          return Q_TINNITUS_PULSE_GUIDE;
+        }
+        if (signals[0].id === "tinnitusCommon") {
+          return Q_TINNITUS_COMMON_GUIDE;
+        }
         var top = signals.slice(0, 2);
         var parts = top.map(function (sig) {
           return pickSignalText(sig, "opinion");
@@ -10604,17 +10690,26 @@
         if (signals[0].id === "emergency") {
           return [pickSignalText(signals[0], "action") || "가까운 병원·응급실로 가시기"];
         }
+        if (signals[0].id === "tinnitusSudden") {
+          return ["바로 이비인후과 진료 받기"];
+        }
         if (signals[0].id === "legVessel") {
           return ["병원에서 다리·발 혈관 확인해 보기"];
         }
         if (signals[0].id === "jointRA") {
           return ["병원에서 관절 증상 확인해 보기"];
         }
+        if (signals[0].id === "tinnitusPulse") {
+          return ["병원에서 이명·혈압 확인해 보기"];
+        }
         if (signals[0].id === "jointGout") {
           return ["맥주·내장류·단 음료 줄이기"];
         }
         if (signals[0].id === "jointOA") {
           return ["체중을 무리 없이 관리하기"];
+        }
+        if (signals[0].id === "tinnitusCommon") {
+          return ["큰 소음 줄이기", "잠·카페인 챙기기"].slice(0, 1);
         }
         var actions = [];
         var seen = {};
@@ -10645,10 +10740,13 @@
         var signals = gatherStatusSignals(facts);
         if (!signals.length) return "일상 챙기기 이어가기";
         if (signals[0].id === "emergency") return "급증상 신호 — 병원·응급 우선";
+        if (signals[0].id === "tinnitusSudden") return "갑작스런 난청 — 바로 이비인후과";
         if (signals[0].id === "legVessel") return "다리 혈관 — 병원 확인";
         if (signals[0].id === "jointRA") return "아침 관절 — 병원 확인";
+        if (signals[0].id === "tinnitusPulse") return "박동성 이명 — 병원 확인";
         if (signals[0].id === "jointGout") return "통풍 식단 — 맥주·내장·단 음료";
         if (signals[0].id === "jointOA") return "관절 — 체중 관리";
+        if (signals[0].id === "tinnitusCommon") return "이명 — 소음·잠·카페인";
 
         var tags = [];
         signals.forEach(function (sig) {
@@ -10757,6 +10855,15 @@
         }
         if (questionnaireHasJointAcheSwell(state.questionnaire)) {
           jointNotes.push("중요: 관절 통증·부기 있음 → 고정 문구: 「" + Q_JOINT_OA_GUIDE + "」 진단 추정 금지.");
+        }
+        if (questionnaireHasTinnitusSudden(state.questionnaire)) {
+          jointNotes.push("중요: 한쪽 귀 갑작스런 난청·이명 있음 → 고정 문구: 「" + Q_TINNITUS_SUDDEN_GUIDE + "」 진단 추정 금지.");
+        }
+        if (questionnaireHasTinnitusPulsatile(state.questionnaire)) {
+          jointNotes.push("중요: 박동성 이명 있음 → 고정 문구: 「" + Q_TINNITUS_PULSE_GUIDE + "」 진단 추정 금지.");
+        }
+        if (questionnaireHasTinnitusCommon(state.questionnaire)) {
+          jointNotes.push("중요: 흔한 이명 있음 → 고정 문구: 「" + Q_TINNITUS_COMMON_GUIDE + "」 진단 추정 금지.");
         }
         var yPat = facts.yPat || {};
         var tPat = facts.tPat || {};
@@ -11122,6 +11229,21 @@
           }
         }
 
+        if (/이명|귀|삐|윙|안\s*들|청력|난청/i.test(q)) {
+          if (questionnaireHasTinnitusSudden(qo)) {
+            return Q_TINNITUS_SUDDEN_GUIDE + " 빨리 치료할수록 회복에 도움이 됩니다. 앱·AI가 진단하지 않습니다.";
+          }
+          if (questionnaireHasTinnitusPulsatile(qo) && /쿵|박자|심장|맥박|뛰/i.test(q)) {
+            return Q_TINNITUS_PULSE_GUIDE + " 앱·AI가 진단하지 않습니다.";
+          }
+          if (questionnaireHasTinnitusCommon(qo) || questionnaireHasTinnitusPulsatile(qo)) {
+            if (questionnaireHasTinnitusPulsatile(qo)) {
+              return Q_TINNITUS_PULSE_GUIDE + " 앱·AI가 진단하지 않습니다.";
+            }
+            return Q_TINNITUS_COMMON_GUIDE + " 앱·AI가 진단하지 않습니다.";
+          }
+        }
+
         if (/어지|머리|두통|멍하|눈/i.test(q) || /head/.test(qLower) || qo.bodyAreas.indexOf("head") >= 0 && /머리|어지/.test(q)) {
           lines.push("머리가 무겁거나 어지러운 느낌은 수면·수분·식사 리듬과 함께 살펴보는 경우가 많습니다.");
           if (qo.sleepBand === "under5") {
@@ -11192,12 +11314,18 @@
           ? "중요: 문진에 다리 혈관 신호 있음 → 답변 맨 앞에 고정 문구만: 「" + Q_LEG_VESSEL_GUIDE + "」 혈관 진단을 추정하지 마세요."
           : "";
         var jointNote = "";
-        if (questionnaireHasJointMorningStiff(state.questionnaire)) {
+        if (questionnaireHasTinnitusSudden(state.questionnaire)) {
+          jointNote = "중요: 갑작스런 난청·이명 있음 → 고정 문구: 「" + Q_TINNITUS_SUDDEN_GUIDE + "」";
+        } else if (questionnaireHasJointMorningStiff(state.questionnaire)) {
           jointNote = "중요: 아침 관절 뻣뻣함 있음 → 고정 문구: 「" + Q_JOINT_RA_GUIDE + "」";
+        } else if (questionnaireHasTinnitusPulsatile(state.questionnaire)) {
+          jointNote = "중요: 박동성 이명 있음 → 고정 문구: 「" + Q_TINNITUS_PULSE_GUIDE + "」";
         } else if (questionnaireHasJointGoutFlare(state.questionnaire)) {
           jointNote = "중요: 급성 발적·통증 있음 → 고정 문구: 「" + Q_JOINT_GOUT_GUIDE + "」";
         } else if (questionnaireHasJointAcheSwell(state.questionnaire)) {
           jointNote = "중요: 관절 통증·부기 있음 → 고정 문구: 「" + Q_JOINT_OA_GUIDE + "」";
+        } else if (questionnaireHasTinnitusCommon(state.questionnaire)) {
+          jointNote = "중요: 이명 있음 → 고정 문구: 「" + Q_TINNITUS_COMMON_GUIDE + "」";
         }
         return [
           "사용자가 증상·불편을 질문했습니다. 내부 기록만 참고하고, 화면에 쓸 짧은 답만 만드세요.",
@@ -12555,17 +12683,26 @@
         if (cur.emergencyDays > 0) {
           return "급증상 신호가 있어 보입니다. 앱 안내보다 병원·응급실·119를 우선하세요.";
         }
+        if (questionnaireHasTinnitusSudden(state.questionnaire)) {
+          return Q_TINNITUS_SUDDEN_GUIDE;
+        }
         if (questionnaireHasLegVesselFlag(state.questionnaire)) {
           return Q_LEG_VESSEL_GUIDE;
         }
         if (questionnaireHasJointMorningStiff(state.questionnaire)) {
           return Q_JOINT_RA_GUIDE;
         }
+        if (questionnaireHasTinnitusPulsatile(state.questionnaire)) {
+          return Q_TINNITUS_PULSE_GUIDE;
+        }
         if (questionnaireHasJointGoutFlare(state.questionnaire)) {
           return Q_JOINT_GOUT_GUIDE;
         }
         if (questionnaireHasJointAcheSwell(state.questionnaire)) {
           return Q_JOINT_OA_GUIDE;
+        }
+        if (questionnaireHasTinnitusCommon(state.questionnaire)) {
+          return Q_TINNITUS_COMMON_GUIDE;
         }
         if (!cur.qDays && prev.qDays) {
           return L.thisLabel + " 문진 기록이 적어, 증상 흐름 비교는 다음에 이어 갑니다.";
@@ -13162,6 +13299,24 @@
         if (jointAcheAlert) jointAcheAlert.hidden = q.jointAcheSwell !== "has";
         if (jointStiffAlert) jointStiffAlert.hidden = q.jointMorningStiff !== "has";
         if (jointGoutAlert) jointGoutAlert.hidden = q.jointGoutFlare !== "has";
+        fillQuestionnaireOptionChips("q-tinnitus-chips", Q_TINNITUS_OPTS, q.tinnitusCommon, false, "", function (id) {
+          q.tinnitusCommon = qPickSingle(q.tinnitusCommon, id);
+          paintQuestionnaireDraft();
+        });
+        fillQuestionnaireOptionChips("q-tinnitus-pulse-chips", Q_TINNITUS_PULSE_OPTS, q.tinnitusPulsatile, false, "", function (id) {
+          q.tinnitusPulsatile = qPickSingle(q.tinnitusPulsatile, id);
+          paintQuestionnaireDraft();
+        });
+        fillQuestionnaireOptionChips("q-tinnitus-sudden-chips", Q_TINNITUS_SUDDEN_OPTS, q.tinnitusSudden, false, "", function (id) {
+          q.tinnitusSudden = qPickSingle(q.tinnitusSudden, id);
+          paintQuestionnaireDraft();
+        });
+        var tinnitusAlert = document.getElementById("q-tinnitus-alert");
+        var tinnitusPulseAlert = document.getElementById("q-tinnitus-pulse-alert");
+        var tinnitusSuddenAlert = document.getElementById("q-tinnitus-sudden-alert");
+        if (tinnitusAlert) tinnitusAlert.hidden = q.tinnitusCommon !== "has";
+        if (tinnitusPulseAlert) tinnitusPulseAlert.hidden = q.tinnitusPulsatile !== "has";
+        if (tinnitusSuddenAlert) tinnitusSuddenAlert.hidden = q.tinnitusSudden !== "has";
         fillQuestionnaireOptionChips("q-emergency-chips", Q_EMERGENCY_OPTS, q.emergencyFlag, false, "", function (id) {
           q.emergencyFlag = qPickSingle(q.emergencyFlag, id);
           paintQuestionnaireDraft();
