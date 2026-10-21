@@ -3554,6 +3554,10 @@
       line-height: 1.2;
       pointer-events: none;
     }
+    .lab-photo-tap-badge.is-read {
+      background: rgba(46, 92, 72, 0.9);
+      color: #cfe6d9;
+    }
     .lab-photos-empty {
       margin: 0;
       color: var(--muted);
@@ -4550,7 +4554,7 @@
         <span data-i18n="records.title">내 기록 관리</span>
         <span class="ops-chevron" aria-hidden="true">▾</span>
       </button>
-      <p class="app-shell-version" id="app-shell-version" data-shell-version="20261021.2">이 화면 버전 20261021.2</p>      <div class="ops-body" id="records-body" hidden>
+      <p class="app-shell-version" id="app-shell-version" data-shell-version="20261021.3">이 화면 버전 20261021.3</p>      <div class="ops-body" id="records-body" hidden>
 
         <div class="records-vitals" id="records-vitals">
           <h3 class="ops-section-title">몸 수치 (혈압·혈당)</h3>
@@ -4612,7 +4616,7 @@
       <div class="cheer-row">
         <p class="cheer-text">Harry 에게 응원의<br>하트 눌러 주시면<br>제가 더욱 힘이 납니다.</p>
         <button type="button" class="cheer-media" id="cheer-media" aria-label="Harry에게 응원 하트 보내기">
-          <img src="/cheer-heart.webp?v=20261021.2" alt="" width="48" height="48" decoding="async">
+          <img src="/cheer-heart.webp?v=20261021.3" alt="" width="48" height="48" decoding="async">
           <span class="cheer-burst-layer" id="cheer-burst-layer" aria-hidden="true"></span>
         </button>
       </div>
@@ -4657,7 +4661,7 @@
       <div class="chamzone-credit-row">
         <img
           class="chamzone-credit-icon"
-          src="/chamzone-icon.png?v=20261021.2"
+          src="/chamzone-icon.png?v=20261021.3"
           alt=""
           width="40"
           height="40"
@@ -4665,7 +4669,7 @@
         >
         <img
           class="chamzone-credit-logo"
-          src="/chamzone-logo.png?v=20261021.2"
+          src="/chamzone-logo.png?v=20261021.3"
           alt="ChamZone Interactive"
           width="200"
           height="36"
@@ -5081,7 +5085,7 @@
           <p class="labs-hint">결과표에서 같은 이름을 찾아 숫자만 넣으세요. 없으면 비워 두세요.</p>
           <div class="lab-photos-block" id="lab-photos-block">
             <p class="labs-group">검사 결과표 사진</p>
-            <p class="labs-hint lab-photos-hint">① 표를 찍거나 앨범에서 고르면 이 폰에만 보관됩니다. ② 보관된 사진(그림)을 누르면 「읽어서 저장하기」로 숫자를 칸에 넣습니다. ③ 오른쪽 위 「삭제」는 그 사진만 지웁니다.</p>
+            <p class="labs-hint lab-photos-hint">① 표를 찍거나 앨범에서 고르면 이 폰에만 보관됩니다. ② 「눌러서 읽기」사진(그림)을 누르고 「읽어서 저장하기」로 숫자를 칸에 넣습니다. ③ 읽은 표는 「읽었음」으로 바뀝니다. ④ 오른쪽 위 「삭제」는 그 사진만 지웁니다.</p>
             <div class="lab-photos-actions">
               <button type="button" id="lab-photo-capture-btn">사진 찍기</button>
               <button type="button" id="lab-photo-pick-btn">앨범에서 고르기</button>
@@ -8456,7 +8460,8 @@
             return {
               id: String(item.id),
               createdAt: Number(item.createdAt) || Date.now(),
-              thumb: typeof item.thumb === "string" ? item.thumb : ""
+              thumb: typeof item.thumb === "string" ? item.thumb : "",
+              readAt: Number(item.readAt) || 0
             };
           });
         } catch (e) {
@@ -8467,12 +8472,30 @@
       function saveLabPhotosMeta() {
         try {
           var slim = labPhotosMeta.map(function (item) {
-            return { id: item.id, createdAt: item.createdAt, thumb: item.thumb || "" };
+            return {
+              id: item.id,
+              createdAt: item.createdAt,
+              thumb: item.thumb || "",
+              readAt: Number(item.readAt) || 0
+            };
           });
           return persistSetItem(LAB_PHOTOS_META_KEY, JSON.stringify(slim));
         } catch (e) {
           return false;
         }
+      }
+
+      function markLabPhotoRead(id) {
+        if (!id) return;
+        var found = false;
+        labPhotosMeta.forEach(function (item) {
+          if (item.id !== id) return;
+          item.readAt = Date.now();
+          found = true;
+        });
+        if (!found) return;
+        saveLabPhotosMeta();
+        paintLabPhotos();
       }
 
       function compressLabPhotoFile(file) {
@@ -8538,7 +8561,12 @@
           grid.appendChild(empty);
           return;
         }
+        var firstUnreadIdx = -1;
         labPhotosMeta.forEach(function (item, idx) {
+          if (firstUnreadIdx < 0 && !item.readAt) firstUnreadIdx = idx;
+        });
+        labPhotosMeta.forEach(function (item, idx) {
+          var isRead = !!item.readAt;
           var card = document.createElement("div");
           card.className = "lab-photo-card";
           card.setAttribute("data-lab-photo-id", item.id);
@@ -8547,9 +8575,11 @@
           openBtn.className = "lab-photo-open";
           openBtn.setAttribute(
             "aria-label",
-            idx === 0
-              ? "첫 번째 검사표 사진 — 눌러서 읽기"
-              : "검사표 사진 — 눌러서 읽기"
+            isRead
+              ? "검사표 사진 — 이미 읽었음"
+              : (idx === firstUnreadIdx
+                ? "첫 번째 읽을 검사표 사진 — 눌러서 읽기"
+                : "검사표 사진 — 눌러서 읽기")
           );
           var img = document.createElement("img");
           img.alt = "";
@@ -8561,8 +8591,10 @@
           });
           card.appendChild(openBtn);
           var badge = document.createElement("span");
-          badge.className = "lab-photo-tap-badge";
-          badge.textContent = idx === 0 ? "눌러서 읽기" : "읽기";
+          badge.className = "lab-photo-tap-badge" + (isRead ? " is-read" : "");
+          badge.textContent = isRead
+            ? "읽었음"
+            : (idx === firstUnreadIdx ? "눌러서 읽기" : "읽기");
           card.appendChild(badge);
           var del = document.createElement("button");
           del.type = "button";
@@ -8610,7 +8642,8 @@
                 labPhotosMeta.unshift({
                   id: id,
                   createdAt: Date.now(),
-                  thumb: out.thumb
+                  thumb: out.thumb,
+                  readAt: 0
                 });
                 saveLabPhotosMeta();
               });
@@ -8921,6 +8954,7 @@
             return;
           }
           applyParsedLabToFormAndSave(parsed);
+          markLabPhotoRead(labPhotoModalPhotoId);
           closeLabPhotoModal();
           if (typeof showToast === "function") showToast("검사표에서 읽어 저장했습니다. 숫자를 확인해 주세요.");
         }).catch(function () {
