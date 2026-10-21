@@ -2488,6 +2488,43 @@
       overflow: hidden;
     }
     .vitals-chart svg { width: 100%; height: 100%; display: block; }
+    .labroom-metric-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin: 0 0 8px;
+    }
+    .labroom-metric-chips .act-chip {
+      font-size: 12px;
+      padding: 7px 9px;
+    }
+    .labroom-axis {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      margin: 0 0 10px;
+      font-size: 11px;
+      color: var(--muted);
+    }
+    .labroom-open-input {
+      appearance: none;
+      width: 100%;
+      border-radius: 12px;
+      border: 1px solid var(--line);
+      background: var(--accent);
+      color: #0b1a14;
+      font: inherit;
+      font-size: 14px;
+      font-weight: 800;
+      padding: 12px 10px;
+      cursor: pointer;
+      margin: 0 0 4px;
+    }
+    .labroom-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
     .vitals-clinic {
       width: 100%;
       border-collapse: collapse;
@@ -4598,7 +4635,7 @@
         <span data-i18n="records.title">내 기록 관리</span>
         <span class="ops-chevron" aria-hidden="true">▾</span>
       </button>
-      <p class="app-shell-version" id="app-shell-version" data-shell-version="20261021.6">이 화면 버전 20261021.6</p>      <div class="ops-body" id="records-body" hidden>
+      <p class="app-shell-version" id="app-shell-version" data-shell-version="20261021.7">이 화면 버전 20261021.7</p>      <div class="ops-body" id="records-body" hidden>
 
         <div class="records-vitals" id="records-vitals">
           <h3 class="ops-section-title">몸 수치 (혈압·혈당)</h3>
@@ -4660,7 +4697,7 @@
       <div class="cheer-row">
         <p class="cheer-text">Harry 에게 응원의<br>하트 눌러 주시면<br>제가 더욱 힘이 납니다.</p>
         <button type="button" class="cheer-media" id="cheer-media" aria-label="Harry에게 응원 하트 보내기">
-          <img src="/cheer-heart.webp?v=20261021.6" alt="" width="48" height="48" decoding="async">
+          <img src="/cheer-heart.webp?v=20261021.7" alt="" width="48" height="48" decoding="async">
           <span class="cheer-burst-layer" id="cheer-burst-layer" aria-hidden="true"></span>
         </button>
       </div>
@@ -4705,7 +4742,7 @@
       <div class="chamzone-credit-row">
         <img
           class="chamzone-credit-icon"
-          src="/chamzone-icon.png?v=20261021.6"
+          src="/chamzone-icon.png?v=20261021.7"
           alt=""
           width="40"
           height="40"
@@ -4713,7 +4750,7 @@
         >
         <img
           class="chamzone-credit-logo"
-          src="/chamzone-logo.png?v=20261021.6"
+          src="/chamzone-logo.png?v=20261021.7"
           alt="ChamZone Interactive"
           width="200"
           height="36"
@@ -4729,6 +4766,35 @@
     <button type="button" data-nav="diet" data-i18n="nav.diet">식단</button>
   </nav>
 
+
+  <div class="vitals-backdrop" id="labroom-backdrop" role="dialog" aria-modal="true" aria-labelledby="labroom-title" hidden>
+    <div class="vitals-sheet">
+      <div class="sheet-head">
+        <h2 id="labroom-title">검사 변화</h2>
+        <button type="button" class="sheet-close" id="labroom-close">닫기</button>
+      </div>
+      <p class="sheet-help">읽어서 저장한 숫자는 이 방에 쌓입니다. 기록이 늘면 그래프로 변화를 볼 수 있습니다. 참고용이며 진단이 아닙니다.</p>
+      <button type="button" class="labroom-open-input" id="labroom-open-input">새 검사 입력하기</button>
+      <div class="vitals-sheet-scroll">
+        <div class="vitals-block">
+          <h3 id="labroom-chart-title">수치 추이</h3>
+          <p class="vitals-note">보고 싶은 항목을 고르세요. 기록한 날짜만 점으로 이어집니다.</p>
+          <div class="labroom-metric-chips" id="labroom-metric-chips" role="group" aria-label="그래프 항목"></div>
+          <div class="vitals-chart" id="labroom-chart" aria-hidden="true"></div>
+          <div class="labroom-axis" id="labroom-axis" hidden>
+            <span id="labroom-axis-min"></span>
+            <span id="labroom-axis-max"></span>
+          </div>
+          <p class="vitals-note" id="labroom-chart-empty">검사 기록이 두 번 이상 쌓이면 선 그래프가 더 잘 보입니다.</p>
+        </div>
+        <div class="vitals-block">
+          <h3>날짜별 기록</h3>
+          <p class="vitals-note">서류 사진과 숫자 요약입니다. 「위 칸에 보기」는 입력 화면으로 불러옵니다.</p>
+          <div class="labroom-list" id="labroom-list" aria-live="polite"></div>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <div class="vitals-backdrop" id="vitals-backdrop" role="dialog" aria-modal="true" aria-labelledby="vitals-title" hidden>
     <div class="vitals-sheet">
@@ -5136,8 +5202,9 @@
             </div>
             <input type="file" id="lab-photo-capture-input" accept="image/*" capture="environment" hidden multiple />
             <input type="file" id="lab-photo-pick-input" accept="image/*" hidden multiple />
-            <p class="lab-photos-howto" id="lab-photos-howto" hidden>다음 행동: 「눌러서 읽기」사진을 한 장씩 누르세요. 읽기가 끝나면 아래 서류함으로 이동합니다.</p>
+            <p class="lab-photos-howto" id="lab-photos-howto" hidden>다음 행동: 「눌러서 읽기」사진을 한 장씩 누르세요. 읽기가 끝나면 「검사 변화」방과 아래 서류함으로 갑니다.</p>
             <div class="lab-photos-grid" id="lab-photos-grid" aria-live="polite"></div>
+            <button type="button" class="labroom-open-input" id="labs-open-labroom" style="margin-top:4px">검사 변화 방 열기</button>
           </div>
           <label id="lab-date-label">검사일</label>
           <div class="lab-date-row" role="group" aria-labelledby="lab-date-label">
@@ -5153,7 +5220,7 @@
           <p class="labs-group">소변</p>
           <div class="lab-fields" id="lab-fields-urine"></div>
           <p class="labs-group">저장된 검사</p>
-          <p class="lab-history-hint">그 날짜 검사 숫자와 서류가 여기 남습니다. 「위 칸에 보기」를 누르면 위쪽 입력 칸에 다시 불러옵니다.</p>
+          <p class="lab-history-hint">여기와 「검사 변화」방에 날짜별 숫자·서류가 남습니다. 그래프·비교는 검사 변화 방에서 보세요.</p>
           <div class="lab-history" id="lab-history" aria-live="polite"></div>
           <label for="labs-memo">기타·예전 기록 (선택)</label>
           <textarea id="labs-memo" rows="2" placeholder="목록에 없는 수치·예전 메모"></textarea>
@@ -9091,11 +9158,9 @@
         upsertLabPanelFromForm();
         syncLabsTextFromState();
         paintLabHistory();
+        clearLabFormInputs();
         saveState();
-        var anchor = document.getElementById("lab-date-label") || document.getElementById("labs-block");
-        if (anchor && typeof anchor.scrollIntoView === "function") {
-          try { anchor.scrollIntoView({ behavior: "smooth", block: "start" }); } catch (eScroll) { /* ignore */ }
-        }
+        if (typeof paintLabRoom === "function") paintLabRoom();
         return merged;
       }
 
@@ -9145,7 +9210,7 @@
           markLabPhotoRead(labPhotoModalPhotoId, merged && merged.date ? merged.date : "");
           closeLabPhotoModal();
           if (typeof showToast === "function") {
-            showToast("숫자는 위 칸에, 서류는 「저장된 검사」로 옮겼습니다.");
+            showToast("기록은 「검사 변화」방에 쌓였습니다. 입력 칸은 비웠습니다.");
           }
         }).catch(function () {
           if (status) status.textContent = "읽기에 실패했습니다. 글씨가 잘 보이게 다시 찍어 주세요.";
@@ -9155,6 +9220,226 @@
             readBtn.textContent = "다시 읽기";
           }
         });
+      }
+
+      var labRoomUi = { metricId: "ldl" };
+
+      var LAB_ROOM_METRICS = [
+        { id: "fastingGlucose", label: "공복혈당" },
+        { id: "hba1c", label: "당화혈색소" },
+        { id: "totalChol", label: "총콜" },
+        { id: "hdl", label: "HDL" },
+        { id: "ldl", label: "LDL" },
+        { id: "tg", label: "중성지방" },
+        { id: "ast", label: "AST" },
+        { id: "alt", label: "ALT" },
+        { id: "creatinine", label: "크레아티닌" },
+        { id: "egfr", label: "eGFR" },
+        { id: "uricAcid", label: "요산" },
+        { id: "hemoglobin", label: "혈색소" }
+      ];
+
+      function openLabsInputSheet() {
+        closeLabRoom();
+        openSheet("meds");
+        setTimeout(function () {
+          var target = document.getElementById("labs-block") || labDateYEl;
+          if (!target) return;
+          target.scrollIntoView({ block: "start", behavior: "smooth" });
+          if (labDateYEl) labDateYEl.focus();
+        }, 40);
+      }
+
+      function closeLabRoom() {
+        var bd = document.getElementById("labroom-backdrop");
+        if (!bd) return;
+        bd.classList.remove("open");
+        bd.hidden = true;
+      }
+
+      function openLabRoom() {
+        closeSheet();
+        var bd = document.getElementById("labroom-backdrop");
+        if (!bd) return;
+        paintLabRoom();
+        bd.hidden = false;
+        bd.classList.add("open");
+      }
+
+      function paintLabRoomChart(panels, metricId) {
+        var chart = document.getElementById("labroom-chart");
+        var axis = document.getElementById("labroom-axis");
+        var axisMin = document.getElementById("labroom-axis-min");
+        var axisMax = document.getElementById("labroom-axis-max");
+        var emptyNote = document.getElementById("labroom-chart-empty");
+        var title = document.getElementById("labroom-chart-title");
+        var metric = LAB_ROOM_METRICS.filter(function (m) { return m.id === metricId; })[0]
+          || LAB_ROOM_METRICS[0];
+        if (title) title.textContent = metric.label + " 추이";
+        var points = [];
+        panels.slice().reverse().forEach(function (panel) {
+          var raw = panel.values[metric.id];
+          var n = parseFloat(String(raw || "").replace(/,/g, ""));
+          if (!isFinite(n) || !panel.date) return;
+          points.push({ date: panel.date, value: n });
+        });
+        if (!chart) return;
+        if (!points.length) {
+          chart.innerHTML = '<p class="vitals-note" style="padding:16px">이 항목 기록이 아직 없습니다.</p>';
+          if (axis) axis.hidden = true;
+          if (emptyNote) emptyNote.hidden = false;
+          return;
+        }
+        var values = points.map(function (p) { return p.value; });
+        var min = Math.min.apply(null, values);
+        var max = Math.max.apply(null, values);
+        if (max === min) { max = min + 1; }
+        var w = 300, h = 120, pad = 14;
+        var pts = values.map(function (v, i) {
+          var x = pad + (values.length === 1 ? (w - pad * 2) / 2 : (i / (values.length - 1)) * (w - pad * 2));
+          var y = h - pad - ((v - min) / (max - min)) * (h - pad * 2);
+          return x.toFixed(1) + "," + y.toFixed(1);
+        }).join(" ");
+        var dots = values.map(function (v, i) {
+          var x = pad + (values.length === 1 ? (w - pad * 2) / 2 : (i / (values.length - 1)) * (w - pad * 2));
+          var y = h - pad - ((v - min) / (max - min)) * (h - pad * 2);
+          return '<circle cx="' + x.toFixed(1) + '" cy="' + y.toFixed(1) + '" r="3.5" fill="#7dcea0" />';
+        }).join("");
+        chart.innerHTML = '<svg viewBox="0 0 300 120" preserveAspectRatio="none"><polyline fill="none" stroke="#7dcea0" stroke-width="3" points="' + pts + '" />' + dots + "</svg>";
+        if (axis) {
+          axis.hidden = false;
+          if (axisMin) axisMin.textContent = "낮음 " + min;
+          if (axisMax) axisMax.textContent = "높음 " + max;
+        }
+        if (emptyNote) {
+          emptyNote.hidden = points.length >= 2;
+          emptyNote.textContent = points.length < 2
+            ? "같은 항목이 한 번 더 쌓이면 변화 선이 더 잘 보입니다."
+            : "";
+        }
+      }
+
+      function paintLabRoomList(panels) {
+        var listEl = document.getElementById("labroom-list");
+        if (!listEl) return;
+        listEl.innerHTML = "";
+        var readPhotos = getReadLabPhotos();
+        var photosByDate = {};
+        readPhotos.forEach(function (item) {
+          var key = String(item.labDate || "").trim() || "_nodate";
+          if (!photosByDate[key]) photosByDate[key] = [];
+          photosByDate[key].push(item);
+        });
+        if (!panels.length && !readPhotos.length) {
+          var empty = document.createElement("p");
+          empty.className = "vitals-note";
+          empty.textContent = "아직 방에 쌓인 검사가 없습니다. 「새 검사 입력하기」로 표를 읽어 주세요.";
+          listEl.appendChild(empty);
+          return;
+        }
+        panels.forEach(function (panel) {
+          var item = document.createElement("div");
+          item.className = "lab-history-item";
+          var meta = document.createElement("p");
+          meta.className = "lab-history-meta";
+          meta.textContent = formatLabDateKo(panel.date);
+          item.appendChild(meta);
+          var sum = document.createElement("p");
+          sum.className = "lab-history-sum";
+          sum.textContent = formatLabPanelValuesLine(panel) || "숫자 없음";
+          item.appendChild(sum);
+          var loadBtn = document.createElement("button");
+          loadBtn.type = "button";
+          loadBtn.className = "lab-history-load";
+          loadBtn.textContent = "입력 칸에 보기";
+          loadBtn.addEventListener("click", function () {
+            openLabsInputSheet();
+            setTimeout(function () {
+              writeLabForm(panel);
+              if (typeof showToast === "function") showToast("입력 칸에 불러왔습니다. 고치면 다시 저장하세요.");
+            }, 80);
+          });
+          item.appendChild(loadBtn);
+          var photos = photosByDate[panel.date] || [];
+          if (photos.length) {
+            var docs = document.createElement("div");
+            docs.className = "lab-history-docs";
+            photos.forEach(function (photo) {
+              var card = document.createElement("div");
+              card.className = "lab-history-doc";
+              var openBtn = document.createElement("button");
+              openBtn.type = "button";
+              openBtn.className = "lab-photo-open";
+              openBtn.setAttribute("aria-label", "보관한 검사표 보기");
+              var img = document.createElement("img");
+              img.alt = "";
+              img.decoding = "async";
+              img.src = photo.thumb || "";
+              openBtn.appendChild(img);
+              openBtn.addEventListener("click", function () {
+                openLabPhotoModal(photo.id);
+              });
+              card.appendChild(openBtn);
+              var badge = document.createElement("span");
+              badge.className = "lab-photo-tap-badge is-read";
+              badge.textContent = "서류";
+              card.appendChild(badge);
+              docs.appendChild(card);
+              if (!photo.thumb) {
+                labPhotoIdbGet(photo.id).then(function (rec) {
+                  if (!rec || !rec.dataUrl) return;
+                  img.src = rec.dataUrl;
+                }).catch(function () { /* ignore */ });
+              }
+            });
+            item.appendChild(docs);
+          }
+          listEl.appendChild(item);
+        });
+      }
+
+      function paintLabRoom() {
+        var panels = normalizeLabPanels(state.labPanels);
+        var chips = document.getElementById("labroom-metric-chips");
+        if (chips) {
+          chips.innerHTML = "";
+          if (!LAB_ROOM_METRICS.some(function (m) { return m.id === labRoomUi.metricId; })) {
+            labRoomUi.metricId = "ldl";
+          }
+          LAB_ROOM_METRICS.forEach(function (m) {
+            var btn = document.createElement("button");
+            btn.type = "button";
+            btn.className = "act-chip";
+            btn.textContent = m.label;
+            btn.setAttribute("aria-pressed", m.id === labRoomUi.metricId ? "true" : "false");
+            btn.addEventListener("click", function () {
+              labRoomUi.metricId = m.id;
+              paintLabRoom();
+            });
+            chips.appendChild(btn);
+          });
+        }
+        paintLabRoomChart(panels, labRoomUi.metricId);
+        paintLabRoomList(panels);
+      }
+
+      function setupLabRoom() {
+        var closeBtn = document.getElementById("labroom-close");
+        var bd = document.getElementById("labroom-backdrop");
+        var openInput = document.getElementById("labroom-open-input");
+        var fromLabs = document.getElementById("labs-open-labroom");
+        if (closeBtn) closeBtn.addEventListener("click", closeLabRoom);
+        if (openInput) openInput.addEventListener("click", openLabsInputSheet);
+        if (fromLabs) {
+          fromLabs.addEventListener("click", function () {
+            openLabRoom();
+          });
+        }
+        if (bd) {
+          bd.addEventListener("click", function (ev) {
+            if (ev.target === bd) closeLabRoom();
+          });
+        }
       }
 
       function setupLabPhotos() {
@@ -14299,8 +14584,6 @@
         });
         if (labsMemoEl) labsMemoEl.value = state.labsMemo || "";
         clearLabFormInputs();
-        var savedPanels = normalizeLabPanels(state.labPanels);
-        if (savedPanels.length) writeLabForm(savedPanels[0]);
         paintLabHistory();
         paintLabPhotos();
         if (medsEls.labs) medsEls.labs.value = state.labs || "";
@@ -16869,13 +17152,7 @@
           return;
         }
         if (name === "labs") {
-          openSheet("meds");
-          setTimeout(function () {
-            var target = document.getElementById("labs-block") || labDateYEl;
-            if (!target) return;
-            target.scrollIntoView({ block: "start", behavior: "smooth" });
-            if (labDateYEl) labDateYEl.focus();
-          }, 40);
+          openLabRoom();
           return;
         }
         if (name === "diet") {
@@ -17102,6 +17379,7 @@
       buildLabFieldInputs();
       bindLabDateDigitInputs();
       setupLabPhotos();
+      setupLabRoom();
       fixedMenus = loadFixedMenu();
       saveFixedMenu();
       foodWarehouseItems = loadFoodWarehouse();
