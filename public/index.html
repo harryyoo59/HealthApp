@@ -4656,7 +4656,7 @@
           <div class="status-body" id="status-body">
             <p class="status-filled" id="status-filled" aria-live="polite"></p>
           </div>
-          <p class="status-note" data-i18n="status.note">참고용 정리이며 의료 진단·치료가 아닙니다. 의사·약사 판단을 대신하지 않습니다. 약·병명 원문은 여기에 적지 않습니다.</p>
+          <p class="status-note" data-i18n="status.note">참고용 정리이며 의료 진단·치료가 아닙니다. 의사·약사 판단을 대신하지 않습니다. 검사표를 읽으면 그 참고 의견도 여기에 같이 반영됩니다. 약·병명 원문은 여기에 적지 않습니다.</p>
         </div>
       </section>
     </div>
@@ -4720,7 +4720,7 @@
         <span data-i18n="records.title">내 기록 관리</span>
         <span class="ops-chevron" aria-hidden="true">▾</span>
       </button>
-      <p class="app-shell-version" id="app-shell-version" data-shell-version="20261021.13">이 화면 버전 20261021.13</p>      <div class="ops-body" id="records-body" hidden>
+      <p class="app-shell-version" id="app-shell-version" data-shell-version="20261021.14">이 화면 버전 20261021.14</p>      <div class="ops-body" id="records-body" hidden>
 
         <div class="records-vitals" id="records-vitals">
           <h3 class="ops-section-title">몸 수치 (혈압·혈당)</h3>
@@ -4782,7 +4782,7 @@
       <div class="cheer-row">
         <p class="cheer-text">Harry 에게 응원의<br>하트 눌러 주시면<br>제가 더욱 힘이 납니다.</p>
         <button type="button" class="cheer-media" id="cheer-media" aria-label="Harry에게 응원 하트 보내기">
-          <img src="/cheer-heart.webp?v=20261021.13" alt="" width="48" height="48" decoding="async">
+          <img src="/cheer-heart.webp?v=20261021.14" alt="" width="48" height="48" decoding="async">
           <span class="cheer-burst-layer" id="cheer-burst-layer" aria-hidden="true"></span>
         </button>
       </div>
@@ -4827,7 +4827,7 @@
       <div class="chamzone-credit-row">
         <img
           class="chamzone-credit-icon"
-          src="/chamzone-icon.png?v=20261021.13"
+          src="/chamzone-icon.png?v=20261021.14"
           alt=""
           width="40"
           height="40"
@@ -4835,7 +4835,7 @@
         >
         <img
           class="chamzone-credit-logo"
-          src="/chamzone-logo.png?v=20261021.13"
+          src="/chamzone-logo.png?v=20261021.14"
           alt="ChamZone Interactive"
           width="200"
           height="36"
@@ -9464,8 +9464,9 @@
           markLabPhotoRead(labPhotoModalPhotoId, merged && merged.date ? merged.date : "");
           closeLabPhotoModal();
           if (typeof showToast === "function") {
-            showToast("숫자를 읽어 저장했습니다. 검사 변화 방에서 참고 의견을 보세요.");
+            showToast("숫자를 읽어 저장했습니다. 검사 변화 방과 「현재 내몸 상태」에 참고 의견을 반영했습니다.");
           }
+          if (typeof refreshSummary === "function") refreshSummary();
           openLabRoom();
         }).catch(function () {
           if (status) {
@@ -11435,11 +11436,33 @@
         return dayActivityHasBits(activityState) || dayActivityHasBits(todayActivityState);
       }
 
-      /** 종합 의견: 기본정보(또는 처방/병명) + 어제 음식·행동 중 하나 이상 */
+      /** 종합 의견: 기본정보(또는 처방/병명/검사) + (음식·행동 또는 검사 숫자) */
       function hasEnoughForOpinion() {
         var basics = hasProfileBits() >= 2 || hasMedsBits();
-        var day = hasMealBits() || hasActivityBits();
+        var day = hasMealBits() || hasActivityBits() || labPanelsHasBits(state.labPanels);
         return basics && day;
+      }
+
+      function getLatestLabOpinionPack() {
+        var panels = normalizeLabPanels(state.labPanels);
+        if (!panels.length) return null;
+        var panel = panels[0];
+        if (!labPanelHasBits(panel)) return null;
+        return { panel: panel, opinion: buildLabPanelOpinion(panel) };
+      }
+
+      function formatLabOpinionForStatus(pack) {
+        if (!pack || !pack.opinion || !pack.opinion.lines || !pack.opinion.lines.length) return "";
+        var dateKo = formatLabDateKo(pack.panel.date);
+        return "검사 참고(" + dateKo + "):\n" + pack.opinion.lines.join("\n");
+      }
+
+      function appendLabOpinionToStatusDetail(detail) {
+        var labBlock = formatLabOpinionForStatus(getLatestLabOpinionPack());
+        if (!labBlock) return String(detail || "").trim();
+        var d = String(detail || "").trim();
+        if (d.indexOf("검사 참고(") >= 0) return d;
+        return d ? (d + "\n\n" + labBlock) : labBlock;
       }
 
       function hasAnyHomeInput() {
@@ -12636,6 +12659,36 @@
             ]);
         }
 
+        var labPack = typeof getLatestLabOpinionPack === "function" ? getLatestLabOpinionPack() : null;
+        if (labPack && labPack.opinion) {
+          var labOp = labPack.opinion;
+          var labLines = (labOp.lines || []).filter(Boolean);
+          var labLead = labLines.length ? labLines[0] : "";
+          var labSecond = labLines.length > 1 ? labLines[1] : "";
+          if (labOp.level === "alert") {
+            push("labAlert", 87, "검사 수치 확인",
+              [
+                labLead || "최근 검사 숫자 중 눈에 띄는 값이 있어 의사와 확인해 볼 만합니다.",
+                labSecond || "검사 결과표를 의사·약사에게 보여 주시는 편이 안전합니다."
+              ],
+              ["검사 결과표를 의사·약사에게 보여 주기", "검사 변화 방에서 참고 의견 다시 보기"]);
+          } else if (labOp.level === "warn") {
+            push("labWarn", 67, "검사 수치 살피기",
+              [
+                labLead || "최근 검사 숫자 중 조금 높은·낮은 값이 있어 지켜볼 만합니다.",
+                labSecond || "당장 응급은 아니어 보여도, 신경 쓰이면 의사·약사와 확인해 보세요."
+              ],
+              ["검사 변화 방에서 참고 의견 다시 보기", "걱정되면 의사·약사와 확인"]);
+          } else {
+            push("labOk", 26, "검사 참고 유지",
+              [
+                labLead || "최근 검사 숫자는 참고 구간에서 크게 벗어나 보이지 않습니다.",
+                "생활 기록과 함께 다음 같은 항목 변화만 비교해 보세요."
+              ],
+              ["생활 기록과 함께 다음 검사 비교하기"]);
+          }
+        }
+
         if (!signals.length) {
           push("steady", 10, "일상 유지",
             [
@@ -12771,9 +12824,11 @@
         return tmpl(tags);
       }
 
-      /** 펼침 상세 — 판단 + 다음 행동 1~2. PII·약·병명 원문 나열 없음. */
+      /** 펼침 상세 — 판단 + 다음 행동 1~2 + 최근 검사 참고 의견. */
       function buildLocalDetail(facts) {
-        return "판단: " + buildLocalJudgment(facts) + "\n" + buildLocalOpinion(facts);
+        return appendLabOpinionToStatusDetail(
+          "판단: " + buildLocalJudgment(facts) + "\n" + buildLocalOpinion(facts)
+        );
       }
 
       function buildLocalSummaryParts() {
@@ -12909,6 +12964,11 @@
           "(참고) 일반약: " + (state.otc.trim() || "(없음)"),
           "(참고) 건강식품: " + (state.supp.trim() || "(없음)"),
           "(참고) 검사: " + (state.labs.trim() || "(없음)"),
+          "(참고) 검사 참고 의견: " + (function () {
+            var pack = getLatestLabOpinionPack();
+            if (!pack) return "(없음)";
+            return pack.opinion.lines.join(" / ");
+          })(),
           "(참고) 수술 이력: " + (state.surgery.trim() || "(없음)"),
           "(참고) 완치된 병명: " + (state.cured.trim() || "(없음)"),
           "(참고) 어제 끼니 수: " + (facts.yMeals || 0),
@@ -13035,7 +13095,7 @@
             setStatusView(
               "AI 종합",
               aiParts.summary,
-              aiParts.detail || local.detail,
+              appendLabOpinionToStatusDetail(aiParts.detail || local.detail),
               false
             );
           } else {
@@ -13401,6 +13461,11 @@
           "(참고) 일반약: " + (state.otc.trim() || "(없음)"),
           "(참고) 건강식품: " + (state.supp.trim() || "(없음)"),
           "(참고) 검사: " + (state.labs.trim() || "(없음)"),
+          "(참고) 검사 참고 의견: " + (function () {
+            var pack = getLatestLabOpinionPack();
+            if (!pack) return "(없음)";
+            return pack.opinion.lines.join(" / ");
+          })(),
           "(참고) 수술 이력: " + (state.surgery.trim() || "(없음)"),
           "(참고) 완치된 병명: " + (state.cured.trim() || "(없음)"),
           "(참고) 어제 섭취 kcal: " + (facts.intake || "(없음)"),
@@ -15042,6 +15107,7 @@
         syncLabsTextFromState();
         paintLabHistory();
         clearLabFormInputs();
+        if (typeof refreshSummary === "function") refreshSummary();
       }
 
       function clearMedsInputs() {
