@@ -4554,7 +4554,7 @@
         <span data-i18n="records.title">내 기록 관리</span>
         <span class="ops-chevron" aria-hidden="true">▾</span>
       </button>
-      <p class="app-shell-version" id="app-shell-version" data-shell-version="20261021.3">이 화면 버전 20261021.3</p>      <div class="ops-body" id="records-body" hidden>
+      <p class="app-shell-version" id="app-shell-version" data-shell-version="20261021.4">이 화면 버전 20261021.4</p>      <div class="ops-body" id="records-body" hidden>
 
         <div class="records-vitals" id="records-vitals">
           <h3 class="ops-section-title">몸 수치 (혈압·혈당)</h3>
@@ -4616,7 +4616,7 @@
       <div class="cheer-row">
         <p class="cheer-text">Harry 에게 응원의<br>하트 눌러 주시면<br>제가 더욱 힘이 납니다.</p>
         <button type="button" class="cheer-media" id="cheer-media" aria-label="Harry에게 응원 하트 보내기">
-          <img src="/cheer-heart.webp?v=20261021.3" alt="" width="48" height="48" decoding="async">
+          <img src="/cheer-heart.webp?v=20261021.4" alt="" width="48" height="48" decoding="async">
           <span class="cheer-burst-layer" id="cheer-burst-layer" aria-hidden="true"></span>
         </button>
       </div>
@@ -4661,7 +4661,7 @@
       <div class="chamzone-credit-row">
         <img
           class="chamzone-credit-icon"
-          src="/chamzone-icon.png?v=20261021.3"
+          src="/chamzone-icon.png?v=20261021.4"
           alt=""
           width="40"
           height="40"
@@ -4669,7 +4669,7 @@
         >
         <img
           class="chamzone-credit-logo"
-          src="/chamzone-logo.png?v=20261021.3"
+          src="/chamzone-logo.png?v=20261021.4"
           alt="ChamZone Interactive"
           width="200"
           height="36"
@@ -5092,7 +5092,7 @@
             </div>
             <input type="file" id="lab-photo-capture-input" accept="image/*" capture="environment" hidden multiple />
             <input type="file" id="lab-photo-pick-input" accept="image/*" hidden multiple />
-            <p class="lab-photos-howto" id="lab-photos-howto" hidden>다음 행동: 사진 한 장을 누르세요. 뜬 창에서 「읽어서 저장하기」를 누르면 됩니다. 「삭제」는 지우기용입니다.</p>
+            <p class="lab-photos-howto" id="lab-photos-howto" hidden>다음 행동: 「눌러서 읽기」또는 「읽기」인 사진을 누르세요. 「읽었음」은 이미 읽은 표입니다. 「삭제」는 지우기용입니다.</p>
             <div class="lab-photos-grid" id="lab-photos-grid" aria-live="polite"></div>
           </div>
           <label id="lab-date-label">검사일</label>
@@ -8733,16 +8733,27 @@
         return tesseractLoadPromise;
       }
 
+      function mergeLabPanel(into, from) {
+        var base = normalizeLabPanel(into);
+        var add = normalizeLabPanel(from);
+        if (add.date) base.date = add.date;
+        LAB_PANEL_FIELDS.forEach(function (f) {
+          if (add.values[f.id]) base.values[f.id] = add.values[f.id];
+        });
+        return base;
+      }
+
       function parseLabReportText(rawText) {
         var text = String(rawText || "").replace(/\r/g, "\n");
+        var flat = text.replace(/\s+/g, " ").trim();
         var panel = emptyLabPanel();
         var memoBits = [];
         var monthMap = {
           jan: 1, feb: 2, mar: 3, apr: 4, may: 5, jun: 6,
           jul: 7, aug: 8, sep: 9, oct: 10, nov: 11, dec: 12
         };
-        var dateRe = /(\d{1,2})[-\/\s.](Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*[-\/\s.](\d{2,4})/gi;
         var foundDates = [];
+        var dateRe = /(\d{1,2})[-\/\s.](Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*[-\/\s.](\d{2,4})/gi;
         var dm;
         while ((dm = dateRe.exec(text))) {
           var yy = Number(dm[3]);
@@ -8753,11 +8764,21 @@
             foundDates.push(yy + "-" + pad2(mo) + "-" + pad2(dd));
           }
         }
+        var isoRe = /(\d{4})[-\/.](\d{1,2})[-\/.](\d{1,2})/g;
+        while ((dm = isoRe.exec(flat))) {
+          var y2 = Number(dm[1]);
+          var m2 = Number(dm[2]);
+          var d2 = Number(dm[3]);
+          if (y2 >= 1990 && y2 <= 2100 && m2 >= 1 && m2 <= 12 && d2 >= 1 && d2 <= 31) {
+            foundDates.push(y2 + "-" + pad2(m2) + "-" + pad2(d2));
+          }
+        }
         if (foundDates.length) panel.date = foundDates[foundDates.length - 1];
 
         function pick(patterns) {
           for (var i = 0; i < patterns.length; i++) {
-            var m = text.match(patterns[i]);
+            var m = flat.match(patterns[i]);
+            if (!m) m = text.match(patterns[i]);
             if (!m) continue;
             var n = parseFloat(String(m[1]).replace(/,/g, ""));
             if (isFinite(n)) return n;
@@ -8770,68 +8791,68 @@
         }
 
         var glu = pick([
-          /F\s*Gluc(?:ose)?\s*(?:Serum|Plasma)?[^\d\n]{0,48}(\d+\.?\d*)/i,
-          /(?:Fasting\s+)?(?:Plasma\s+|Serum\s+)?Glucose[^\d\n]{0,48}(\d+\.?\d*)/i,
-          /공복혈당[^\d\n]{0,24}(\d+\.?\d*)/
+          /F\s*Gluc(?:ose)?(?:\s+(?:Serum|Plasma))?[^\d]{0,24}(\d+\.?\d*)/i,
+          /(?:Fasting\s+)?(?:Plasma\s+|Serum\s+)?Glucose[^\d]{0,24}(\d+\.?\d*)/i,
+          /공복혈당[^\d]{0,16}(\d+\.?\d*)/
         ]);
         if (glu != null) {
           panel.values.fastingGlucose = String(Math.round(glu < 40 ? glu * 18.018 : glu));
         }
 
         var hba = pick([
-          /HbA1c[^\d\n]{0,24}(\d+\.?\d*)/i,
-          /당화혈색소[^\d\n]{0,24}(\d+\.?\d*)/
+          /HbA1c[^\d]{0,16}(\d+\.?\d*)/i,
+          /당화혈색소[^\d]{0,16}(\d+\.?\d*)/
         ]);
         if (hba != null) panel.values.hba1c = fmt1(hba);
 
         var chol = pick([
-          /(?:^|\n)\s*Cholesterol(?!\s*(?:HDL|LDL|Non))[^\d\n]{0,40}(\d+\.?\d*)/im,
-          /Total\s*Cholesterol[^\d\n]{0,24}(\d+\.?\d*)/i,
-          /총콜레스테롤[^\d\n]{0,24}(\d+\.?\d*)/
+          /Total\s*Cholesterol[^\d]{0,20}(\d+\.?\d*)/i,
+          /Cholesterol(?!\s*(?:HDL|LDL|Non))[^\d]{0,20}(\d+\.?\d*)/i,
+          /총콜레스테롤[^\d]{0,16}(\d+\.?\d*)/
         ]);
         if (chol != null) {
           panel.values.totalChol = String(Math.round(chol < 20 ? chol * 38.67 : chol));
         }
 
         var tg = pick([
-          /Triglycerides?[^\d\n]{0,40}(\d+\.?\d*)/i,
-          /중성지방[^\d\n]{0,24}(\d+\.?\d*)/
+          /Triglycerides?[^\d]{0,20}(\d+\.?\d*)/i,
+          /중성지방[^\d]{0,16}(\d+\.?\d*)/
         ]);
         if (tg != null) {
           panel.values.tg = String(Math.round(tg < 30 ? tg * 88.57 : tg));
         }
 
         var hdl = pick([
-          /HDL\s*Chol\.?[^\d\n]{0,40}(\d+\.?\d*)/i,
-          /HDL[-\s]?C?[^\d\n]{0,24}(\d+\.?\d*)/i
+          /HDL\s*Chol\.?[^\d]{0,20}(\d+\.?\d*)/i,
+          /HDL[-\s]?C(?![a-z])[^\d]{0,16}(\d+\.?\d*)/i
         ]);
         if (hdl != null) {
           panel.values.hdl = String(Math.round(hdl < 5 ? hdl * 38.67 : hdl));
         }
 
         var ldl = pick([
-          /LDL\s*Chol\.?[^\d\n]{0,40}(\d+\.?\d*)/i,
-          /LDL[-\s]?C?[^\d\n]{0,24}(\d+\.?\d*)/i
+          /LDL\s*Chol\.?[^\d]{0,20}(\d+\.?\d*)/i,
+          /LDL[-\s]?C(?![a-z])[^\d]{0,16}(\d+\.?\d*)/i
         ]);
         if (ldl != null) {
           panel.values.ldl = String(Math.round(ldl < 15 ? ldl * 38.67 : ldl));
         }
 
         var ast = pick([
-          /(?:^|\n)\s*AST[^\d\n]{0,40}(\d+\.?\d*)/im,
-          /\bGOT[^\d\n]{0,24}(\d+\.?\d*)/i
+          /\bAST\b[^\d]{0,20}(\d+\.?\d*)/i,
+          /\bGOT\b[^\d]{0,16}(\d+\.?\d*)/i
         ]);
         if (ast != null) panel.values.ast = String(Math.round(ast));
 
         var alt = pick([
-          /(?:^|\n)\s*ALT[^\d\n]{0,40}(\d+\.?\d*)/im,
-          /\bGPT[^\d\n]{0,24}(\d+\.?\d*)/i
+          /\bALT\b[^\d]{0,20}(\d+\.?\d*)/i,
+          /\bGPT\b[^\d]{0,16}(\d+\.?\d*)/i
         ]);
         if (alt != null) panel.values.alt = String(Math.round(alt));
 
         var crea = pick([
-          /Creatinine[^\d\n]{0,40}(\d+\.?\d*)/i,
-          /크레아티닌[^\d\n]{0,24}(\d+\.?\d*)/
+          /Creatinine[^\d]{0,20}(\d+\.?\d*)/i,
+          /크레아티닌[^\d]{0,16}(\d+\.?\d*)/
         ]);
         if (crea != null) {
           panel.values.creatinine = crea > 20
@@ -8840,15 +8861,15 @@
         }
 
         var egfr = pick([
-          /eGFR[^\d\n]{0,40}(\d+\.?\d*)/i,
-          /\bGFR[^\d\n]{0,24}(\d+\.?\d*)/i
+          /eGFR[^\d]{0,20}(\d+\.?\d*)/i,
+          /\bGFR\b[^\d]{0,16}(\d+\.?\d*)/i
         ]);
         if (egfr != null) panel.values.egfr = String(Math.round(egfr));
 
         var uric = pick([
-          /Urate[^\d\n]{0,40}(\d+\.?\d*)/i,
-          /Uric\s*acid[^\d\n]{0,40}(\d+\.?\d*)/i,
-          /요산[^\d\n]{0,24}(\d+\.?\d*)/
+          /Urate[^\d]{0,20}(\d+\.?\d*)/i,
+          /Uric\s*acid[^\d]{0,20}(\d+\.?\d*)/i,
+          /요산[^\d]{0,16}(\d+\.?\d*)/
         ]);
         if (uric != null) {
           panel.values.uricAcid = uric < 2
@@ -8857,17 +8878,18 @@
         }
 
         var hb = pick([
-          /Haemoglobin[^\d\n]{0,40}(\d+\.?\d*)/i,
-          /Hemoglobin[^\d\n]{0,40}(\d+\.?\d*)/i,
-          /혈색소[^\d\n]{0,24}(\d+\.?\d*)/
+          /Haemoglobin[^\d]{0,20}(\d+\.?\d*)/i,
+          /Hemoglobin[^\d]{0,20}(\d+\.?\d*)/i,
+          /\bHb\b[^\d]{0,12}(\d+\.?\d*)/i,
+          /혈색소[^\d]{0,16}(\d+\.?\d*)/
         ]);
         if (hb != null) {
           panel.values.hemoglobin = hb > 40 ? fmt1(hb / 10) : fmt1(hb);
         }
 
-        var ferr = pick([/Ferritin[^\d\n]{0,40}(\d+\.?\d*)/i]);
+        var ferr = pick([/Ferritin[^\d]{0,20}(\d+\.?\d*)/i]);
         if (ferr != null) memoBits.push("Ferritin " + Math.round(ferr));
-        var tsh = pick([/(?:^|\n)\s*TSH[^\d\n]{0,40}(\d+\.?\d*)/im]);
+        var tsh = pick([/\bTSH\b[^\d]{0,20}(\d+\.?\d*)/i]);
         if (tsh != null) memoBits.push("TSH " + fmt1(tsh));
 
         return {
@@ -8892,10 +8914,22 @@
       }
 
       function applyParsedLabToFormAndSave(parsed) {
-        var panel = normalizeLabPanel(parsed.panel);
-        if (!labPanelHasBits(panel) && !parsed.memoExtra) return false;
-        if (!panel.date) panel.date = getTodayKey();
-        writeLabForm(panel);
+        var incoming = normalizeLabPanel(parsed.panel);
+        if (!labPanelHasBits(incoming) && !parsed.memoExtra) return false;
+        var current = readLabForm();
+        var dateKey = incoming.date || current.date || getTodayKey();
+        incoming.date = dateKey;
+        state.labPanels = normalizeLabPanels(state.labPanels);
+        var saved = null;
+        for (var i = 0; i < state.labPanels.length; i++) {
+          if (state.labPanels[i].date === dateKey) {
+            saved = state.labPanels[i];
+            break;
+          }
+        }
+        var merged = mergeLabPanel(mergeLabPanel(saved || emptyLabPanel(), current), incoming);
+        if (!merged.date) merged.date = getTodayKey();
+        writeLabForm(merged);
         if (parsed.memoExtra && labsMemoEl) {
           var cur = String(labsMemoEl.value || "").trim();
           if (cur.indexOf(parsed.memoExtra) === -1) {
@@ -8906,8 +8940,11 @@
         upsertLabPanelFromForm();
         syncLabsTextFromState();
         paintLabHistory();
-        clearLabFormInputs();
         saveState();
+        var anchor = document.getElementById("lab-date-label") || document.getElementById("labs-block");
+        if (anchor && typeof anchor.scrollIntoView === "function") {
+          try { anchor.scrollIntoView({ behavior: "smooth", block: "start" }); } catch (eScroll) { /* ignore */ }
+        }
         return true;
       }
 
@@ -8956,7 +8993,9 @@
           applyParsedLabToFormAndSave(parsed);
           markLabPhotoRead(labPhotoModalPhotoId);
           closeLabPhotoModal();
-          if (typeof showToast === "function") showToast("검사표에서 읽어 저장했습니다. 숫자를 확인해 주세요.");
+          if (typeof showToast === "function") {
+            showToast("아래 검사일·혈액 칸에 숫자를 넣었습니다. 확인 후 필요하면 고치세요.");
+          }
         }).catch(function () {
           if (status) status.textContent = "읽기에 실패했습니다. 글씨가 잘 보이게 다시 찍어 주세요.";
           labPhotoOcrBusy = false;
@@ -9014,7 +9053,7 @@
             break;
           }
         }
-        if (found >= 0) state.labPanels[found] = panel;
+        if (found >= 0) state.labPanels[found] = mergeLabPanel(state.labPanels[found], panel);
         else state.labPanels.unshift(panel);
         state.labPanels.sort(function (a, b) {
           return String(b.date || "").localeCompare(String(a.date || ""));
