@@ -4720,7 +4720,7 @@
         <span data-i18n="records.title">내 기록 관리</span>
         <span class="ops-chevron" aria-hidden="true">▾</span>
       </button>
-      <p class="app-shell-version" id="app-shell-version" data-shell-version="20261021.11">이 화면 버전 20261021.11</p>      <div class="ops-body" id="records-body" hidden>
+      <p class="app-shell-version" id="app-shell-version" data-shell-version="20261021.12">이 화면 버전 20261021.12</p>      <div class="ops-body" id="records-body" hidden>
 
         <div class="records-vitals" id="records-vitals">
           <h3 class="ops-section-title">몸 수치 (혈압·혈당)</h3>
@@ -4782,7 +4782,7 @@
       <div class="cheer-row">
         <p class="cheer-text">Harry 에게 응원의<br>하트 눌러 주시면<br>제가 더욱 힘이 납니다.</p>
         <button type="button" class="cheer-media" id="cheer-media" aria-label="Harry에게 응원 하트 보내기">
-          <img src="/cheer-heart.webp?v=20261021.11" alt="" width="48" height="48" decoding="async">
+          <img src="/cheer-heart.webp?v=20261021.12" alt="" width="48" height="48" decoding="async">
           <span class="cheer-burst-layer" id="cheer-burst-layer" aria-hidden="true"></span>
         </button>
       </div>
@@ -4827,7 +4827,7 @@
       <div class="chamzone-credit-row">
         <img
           class="chamzone-credit-icon"
-          src="/chamzone-icon.png?v=20261021.11"
+          src="/chamzone-icon.png?v=20261021.12"
           alt=""
           width="40"
           height="40"
@@ -4835,7 +4835,7 @@
         >
         <img
           class="chamzone-credit-logo"
-          src="/chamzone-logo.png?v=20261021.11"
+          src="/chamzone-logo.png?v=20261021.12"
           alt="ChamZone Interactive"
           width="200"
           height="36"
@@ -8827,7 +8827,8 @@
           var img = new Image();
           img.onload = function () {
             try {
-              var maxW = 1280;
+              // OCR용으로 해상도·화질을 넉넉히 유지 (너무 줄이면 같은 표도 숫자 인식이 들쭉날쭉함)
+              var maxW = 1920;
               var w = img.naturalWidth || img.width;
               var h = img.naturalHeight || img.height;
               var scale = w > maxW ? maxW / w : 1;
@@ -8838,7 +8839,7 @@
               canvas.height = ch;
               var ctx = canvas.getContext("2d");
               ctx.drawImage(img, 0, 0, cw, ch);
-              var dataUrl = canvas.toDataURL("image/jpeg", 0.72);
+              var dataUrl = canvas.toDataURL("image/jpeg", 0.88);
               var tw = 180;
               var th = Math.max(1, Math.round(ch * (tw / cw)));
               var tCanvas = document.createElement("canvas");
@@ -8859,6 +8860,54 @@
             reject(new Error("img-load"));
           };
           img.src = url;
+        });
+      }
+
+      function prepareLabImageForOcr(dataUrl, mode) {
+        return new Promise(function (resolve) {
+          if (!dataUrl) {
+            resolve(dataUrl);
+            return;
+          }
+          var img = new Image();
+          img.onload = function () {
+            try {
+              var maxW = mode === "boost" ? 2200 : 1800;
+              var w = img.naturalWidth || img.width || 1;
+              var h = img.naturalHeight || img.height || 1;
+              var scale = w > maxW ? maxW / w : (w < 900 ? Math.min(1.5, 1100 / w) : 1);
+              var cw = Math.max(1, Math.round(w * scale));
+              var ch = Math.max(1, Math.round(h * scale));
+              var canvas = document.createElement("canvas");
+              canvas.width = cw;
+              canvas.height = ch;
+              var ctx = canvas.getContext("2d");
+              ctx.fillStyle = "#fff";
+              ctx.fillRect(0, 0, cw, ch);
+              ctx.drawImage(img, 0, 0, cw, ch);
+              if (mode === "boost") {
+                var imageData = ctx.getImageData(0, 0, cw, ch);
+                var d = imageData.data;
+                var contrast = 1.35;
+                var bright = 12;
+                for (var i = 0; i < d.length; i += 4) {
+                  var g = 0.299 * d[i] + 0.587 * d[i + 1] + 0.114 * d[i + 2];
+                  g = (g - 128) * contrast + 128 + bright;
+                  if (g < 0) g = 0;
+                  if (g > 255) g = 255;
+                  // 약한 이진화로 글자·숫자 대비 강화
+                  g = g > 168 ? 255 : (g < 95 ? 0 : g);
+                  d[i] = d[i + 1] = d[i + 2] = g;
+                }
+                ctx.putImageData(imageData, 0, 0);
+              }
+              resolve(canvas.toDataURL("image/jpeg", 0.92));
+            } catch (e) {
+              resolve(dataUrl);
+            }
+          };
+          img.onerror = function () { resolve(dataUrl); };
+          img.src = dataUrl;
         });
       }
 
@@ -9060,6 +9109,15 @@
 
       function parseLabReportText(rawText) {
         var text = String(rawText || "").replace(/\r/g, "\n");
+        // OCR 흔한 오인식(O/0, l/1, S/5 등)을 숫자 근처에서만 완화
+        text = text
+          .replace(/HbA[lI1]c/gi, "HbA1c")
+          .replace(/HBA[lI1]C/gi, "HbA1c")
+          .replace(/\bLD[lI]\b/gi, "LDL")
+          .replace(/\bHD[lI]\b/gi, "HDL")
+          .replace(/eGFR/gi, "eGFR")
+          .replace(/Creatlnlne/gi, "Creatinine")
+          .replace(/Tr[i1]glycer/gi, "Triglycer");
         var flat = text.replace(/\s+/g, " ").trim();
         var panel = emptyLabPanel();
         var memoBits = [];
@@ -9095,7 +9153,7 @@
             var m = flat.match(patterns[i]);
             if (!m) m = text.match(patterns[i]);
             if (!m) continue;
-            var n = parseFloat(String(m[1]).replace(/,/g, ""));
+            var n = parseFloat(String(m[1]).replace(/,/g, "").replace(/[Oo]/g, "0").replace(/[lI]/g, "1"));
             if (isFinite(n)) return n;
           }
           return null;
@@ -9106,68 +9164,68 @@
         }
 
         var glu = pick([
-          /F\s*Gluc(?:ose)?(?:\s+(?:Serum|Plasma))?[^\d]{0,24}(\d+\.?\d*)/i,
-          /(?:Fasting\s+)?(?:Plasma\s+|Serum\s+)?Glucose[^\d]{0,24}(\d+\.?\d*)/i,
-          /공복혈당[^\d]{0,16}(\d+\.?\d*)/
+          /F\s*Gluc(?:ose)?(?:\s+(?:Serum|Plasma))?[^\d]{0,40}(\d+\.?\d*)/i,
+          /(?:Fasting\s+)?(?:Plasma\s+|Serum\s+)?Glucose[^\d]{0,40}(\d+\.?\d*)/i,
+          /공복혈당[^\d]{0,24}(\d+\.?\d*)/
         ]);
         if (glu != null) {
           panel.values.fastingGlucose = String(Math.round(glu < 40 ? glu * 18.018 : glu));
         }
 
         var hba = pick([
-          /HbA1c[^\d]{0,16}(\d+\.?\d*)/i,
-          /당화혈색소[^\d]{0,16}(\d+\.?\d*)/
+          /HbA1c[^\d]{0,28}(\d+\.?\d*)/i,
+          /당화혈색소[^\d]{0,24}(\d+\.?\d*)/
         ]);
         if (hba != null) panel.values.hba1c = fmt1(hba);
 
         var chol = pick([
-          /Total\s*Cholesterol[^\d]{0,20}(\d+\.?\d*)/i,
-          /Cholesterol(?!\s*(?:HDL|LDL|Non))[^\d]{0,20}(\d+\.?\d*)/i,
-          /총콜레스테롤[^\d]{0,16}(\d+\.?\d*)/
+          /Total\s*Cholesterol[^\d]{0,36}(\d+\.?\d*)/i,
+          /Cholesterol(?!\s*(?:HDL|LDL|Non))[^\d]{0,36}(\d+\.?\d*)/i,
+          /총콜레스테롤[^\d]{0,24}(\d+\.?\d*)/
         ]);
         if (chol != null) {
           panel.values.totalChol = String(Math.round(chol < 20 ? chol * 38.67 : chol));
         }
 
         var tg = pick([
-          /Triglycerides?[^\d]{0,20}(\d+\.?\d*)/i,
-          /중성지방[^\d]{0,16}(\d+\.?\d*)/
+          /Triglycerides?[^\d]{0,36}(\d+\.?\d*)/i,
+          /중성지방[^\d]{0,24}(\d+\.?\d*)/
         ]);
         if (tg != null) {
           panel.values.tg = String(Math.round(tg < 30 ? tg * 88.57 : tg));
         }
 
         var hdl = pick([
-          /HDL\s*Chol\.?[^\d]{0,20}(\d+\.?\d*)/i,
-          /HDL[-\s]?C(?![a-z])[^\d]{0,16}(\d+\.?\d*)/i
+          /HDL\s*Chol\.?[^\d]{0,36}(\d+\.?\d*)/i,
+          /HDL[-\s]?C(?![a-z])[^\d]{0,28}(\d+\.?\d*)/i
         ]);
         if (hdl != null) {
           panel.values.hdl = String(Math.round(hdl < 5 ? hdl * 38.67 : hdl));
         }
 
         var ldl = pick([
-          /LDL\s*Chol\.?[^\d]{0,20}(\d+\.?\d*)/i,
-          /LDL[-\s]?C(?![a-z])[^\d]{0,16}(\d+\.?\d*)/i
+          /LDL\s*Chol\.?[^\d]{0,36}(\d+\.?\d*)/i,
+          /LDL[-\s]?C(?![a-z])[^\d]{0,28}(\d+\.?\d*)/i
         ]);
         if (ldl != null) {
           panel.values.ldl = String(Math.round(ldl < 15 ? ldl * 38.67 : ldl));
         }
 
         var ast = pick([
-          /\bAST\b[^\d]{0,20}(\d+\.?\d*)/i,
-          /\bGOT\b[^\d]{0,16}(\d+\.?\d*)/i
+          /\bAST\b[^\d]{0,36}(\d+\.?\d*)/i,
+          /\bGOT\b[^\d]{0,28}(\d+\.?\d*)/i
         ]);
         if (ast != null) panel.values.ast = String(Math.round(ast));
 
         var alt = pick([
-          /\bALT\b[^\d]{0,20}(\d+\.?\d*)/i,
-          /\bGPT\b[^\d]{0,16}(\d+\.?\d*)/i
+          /\bALT\b[^\d]{0,36}(\d+\.?\d*)/i,
+          /\bGPT\b[^\d]{0,28}(\d+\.?\d*)/i
         ]);
         if (alt != null) panel.values.alt = String(Math.round(alt));
 
         var crea = pick([
-          /Creatinine[^\d]{0,20}(\d+\.?\d*)/i,
-          /크레아티닌[^\d]{0,16}(\d+\.?\d*)/
+          /Creatinine[^\d]{0,36}(\d+\.?\d*)/i,
+          /크레아티닌[^\d]{0,24}(\d+\.?\d*)/
         ]);
         if (crea != null) {
           panel.values.creatinine = crea > 20
@@ -9176,15 +9234,15 @@
         }
 
         var egfr = pick([
-          /eGFR[^\d]{0,20}(\d+\.?\d*)/i,
-          /\bGFR\b[^\d]{0,16}(\d+\.?\d*)/i
+          /eGFR[^\d]{0,36}(\d+\.?\d*)/i,
+          /\bGFR\b[^\d]{0,28}(\d+\.?\d*)/i
         ]);
         if (egfr != null) panel.values.egfr = String(Math.round(egfr));
 
         var uric = pick([
-          /Urate[^\d]{0,20}(\d+\.?\d*)/i,
-          /Uric\s*acid[^\d]{0,20}(\d+\.?\d*)/i,
-          /요산[^\d]{0,16}(\d+\.?\d*)/
+          /Urate[^\d]{0,36}(\d+\.?\d*)/i,
+          /Uric\s*acid[^\d]{0,36}(\d+\.?\d*)/i,
+          /요산[^\d]{0,24}(\d+\.?\d*)/
         ]);
         if (uric != null) {
           panel.values.uricAcid = uric < 2
@@ -9193,18 +9251,18 @@
         }
 
         var hb = pick([
-          /Haemoglobin[^\d]{0,20}(\d+\.?\d*)/i,
-          /Hemoglobin[^\d]{0,20}(\d+\.?\d*)/i,
-          /\bHb\b[^\d]{0,12}(\d+\.?\d*)/i,
-          /혈색소[^\d]{0,16}(\d+\.?\d*)/
+          /Haemoglobin[^\d]{0,36}(\d+\.?\d*)/i,
+          /Hemoglobin[^\d]{0,36}(\d+\.?\d*)/i,
+          /\bHb\b[^\d]{0,20}(\d+\.?\d*)/i,
+          /혈색소[^\d]{0,24}(\d+\.?\d*)/
         ]);
         if (hb != null) {
           panel.values.hemoglobin = hb > 40 ? fmt1(hb / 10) : fmt1(hb);
         }
 
-        var ferr = pick([/Ferritin[^\d]{0,20}(\d+\.?\d*)/i]);
+        var ferr = pick([/Ferritin[^\d]{0,36}(\d+\.?\d*)/i]);
         if (ferr != null) memoBits.push("Ferritin " + Math.round(ferr));
-        var tsh = pick([/\bTSH\b[^\d]{0,20}(\d+\.?\d*)/i]);
+        var tsh = pick([/\bTSH\b[^\d]{0,36}(\d+\.?\d*)/i]);
         if (tsh != null) memoBits.push("TSH " + fmt1(tsh));
 
         return {
@@ -9340,6 +9398,22 @@
         return merged;
       }
 
+      function recognizeLabPhotoOnce(Tesseract, dataUrl, label, statusEl) {
+        return prepareLabImageForOcr(dataUrl, label).then(function (ocrUrl) {
+          return Tesseract.recognize(ocrUrl, "eng", {
+            logger: function (m) {
+              if (!statusEl || !m || m.status !== "recognizing text") return;
+              var p = Math.round((m.progress || 0) * 100);
+              var tag = label === "boost" ? "선명하게 다시 " : "";
+              statusEl.textContent = tag + "글자를 읽는 중… " + p + "%";
+            }
+          }).then(function (result) {
+            var text = result && result.data ? result.data.text : "";
+            return parseLabReportText(text);
+          });
+        });
+      }
+
       function runLabPhotoReadAndSave() {
         if (labPhotoOcrBusy || !labPhotoModalPhotoId) return;
         var status = document.getElementById("lab-photo-modal-status");
@@ -9353,19 +9427,23 @@
         labPhotoIdbGet(labPhotoModalPhotoId).then(function (rec) {
           if (!rec || !rec.dataUrl) throw new Error("no-photo");
           return ensureTesseract().then(function (Tesseract) {
-            return Tesseract.recognize(rec.dataUrl, "eng", {
-              logger: function (m) {
-                if (!status || !m || m.status !== "recognizing text") return;
-                var p = Math.round((m.progress || 0) * 100);
-                status.textContent = "글자를 읽는 중… " + p + "%";
-              }
+            return recognizeLabPhotoOnce(Tesseract, rec.dataUrl, "normal", status).then(function (parsed) {
+              if (parsed && parsed.hitCount >= 1) return parsed;
+              if (status) status.textContent = "숫자가 약합니다. 대비를 높여 한 번 더 읽습니다…";
+              return recognizeLabPhotoOnce(Tesseract, rec.dataUrl, "boost", status).then(function (parsed2) {
+                if (parsed2 && parsed2.hitCount > (parsed ? parsed.hitCount : 0)) return parsed2;
+                return parsed2 && parsed2.hitCount >= 1 ? parsed2 : (parsed || parsed2);
+              });
             });
           });
-        }).then(function (result) {
-          var text = result && result.data ? result.data.text : "";
-          var parsed = parseLabReportText(text);
+        }).then(function (parsed) {
+          if (!parsed) throw new Error("no-parse");
           if (status) status.textContent = summarizeParsedLab(parsed);
           if (parsed.hitCount < 1) {
+            if (status) {
+              status.textContent =
+                "같은 표라도 각도·빛·흔들림에 따라 글자 인식이 들쭉날쭉합니다. 「다시 읽기」를 누르거나, 표를 가까이·밝게 다시 찍어 주세요. 안 되면 아래 칸에 직접 넣어도 됩니다.";
+            }
             labPhotoOcrBusy = false;
             if (readBtn) {
               readBtn.disabled = false;
@@ -9390,7 +9468,10 @@
           }
           openLabRoom();
         }).catch(function () {
-          if (status) status.textContent = "읽기에 실패했습니다. 글씨가 잘 보이게 다시 찍어 주세요.";
+          if (status) {
+            status.textContent =
+              "읽기에 실패했습니다. 네트워크(글자 엔진 받기) 또는 사진 화질 문제일 수 있습니다. 「다시 읽기」를 눌러 보세요.";
+          }
           labPhotoOcrBusy = false;
           if (readBtn) {
             readBtn.disabled = false;
