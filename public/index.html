@@ -3451,6 +3451,171 @@
       color: var(--muted);
       line-height: 1.4;
     }
+    .lab-photos-block {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin: 4px 0 2px;
+    }
+    .lab-photos-hint {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--muted);
+    }
+    .lab-photos-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+    .lab-photos-actions button {
+      appearance: none;
+      border-radius: 10px;
+      border: 1px solid var(--line);
+      background: rgba(26, 58, 48, 0.7);
+      color: var(--ink);
+      font: inherit;
+      font-size: 13px;
+      font-weight: 700;
+      padding: 11px 8px;
+      cursor: pointer;
+    }
+    .lab-photos-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+    .lab-photo-card {
+      position: relative;
+      aspect-ratio: 1;
+      border-radius: 10px;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      background: #0f1f18;
+      padding: 0;
+    }
+    .lab-photo-open {
+      appearance: none;
+      display: block;
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      border: 0;
+      background: transparent;
+      cursor: pointer;
+    }
+    .lab-photo-card img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .lab-photo-del {
+      position: absolute;
+      top: 4px;
+      right: 4px;
+      width: 26px;
+      height: 26px;
+      border-radius: 999px;
+      border: 0;
+      background: rgba(0, 0, 0, 0.62);
+      color: #fff;
+      font-size: 16px;
+      line-height: 1;
+      cursor: pointer;
+    }
+    .lab-photos-empty {
+      margin: 0;
+      color: var(--muted);
+      font-size: 12px;
+    }
+    .lab-photo-modal-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 90;
+      display: none;
+      align-items: flex-end;
+      justify-content: center;
+      background: rgba(0, 0, 0, 0.55);
+      padding: 12px;
+    }
+    .lab-photo-modal-backdrop.open { display: flex; }
+    .lab-photo-modal {
+      width: min(390px, 100%);
+      max-height: min(88vh, 760px);
+      overflow: auto;
+      border-radius: 16px 16px 12px 12px;
+      background: #142820;
+      border: 1px solid rgba(232, 242, 236, 0.16);
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .lab-photo-modal-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+    .lab-photo-modal-head h3 {
+      margin: 0;
+      font-size: 16px;
+      color: var(--ink);
+    }
+    .lab-photo-modal-close {
+      appearance: none;
+      border: 0;
+      background: transparent;
+      color: var(--ink);
+      font-size: 24px;
+      line-height: 1;
+      cursor: pointer;
+    }
+    .lab-photo-modal-preview {
+      width: 100%;
+      max-height: 220px;
+      object-fit: contain;
+      border-radius: 10px;
+      background: #0f1f18;
+      border: 1px solid var(--line);
+    }
+    .lab-photo-modal-status {
+      margin: 0;
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.45;
+      white-space: pre-wrap;
+    }
+    .lab-photo-modal-actions {
+      display: grid;
+      grid-template-columns: 1fr 1.2fr;
+      gap: 8px;
+    }
+    .lab-photo-modal-actions button {
+      appearance: none;
+      border-radius: 10px;
+      border: 1px solid var(--line);
+      font: inherit;
+      font-size: 14px;
+      font-weight: 700;
+      padding: 12px 8px;
+      cursor: pointer;
+    }
+    .lab-photo-btn-secondary {
+      background: rgba(26, 58, 48, 0.7);
+      color: var(--ink);
+    }
+    .lab-photo-btn-primary {
+      background: var(--accent);
+      color: #0b1a14;
+      border-color: transparent;
+    }
+    .lab-photo-btn-primary:disabled,
+    .lab-photo-btn-secondary:disabled {
+      opacity: 0.55;
+      cursor: default;
+    }
     .sheet-actions {
       display: grid;
       grid-template-columns: 1fr 1.4fr;
@@ -4354,7 +4519,7 @@
         <span data-i18n="records.title">내 기록 관리</span>
         <span class="ops-chevron" aria-hidden="true">▾</span>
       </button>
-      <p class="app-shell-version" id="app-shell-version" data-shell-version="20261018.11">이 화면 버전 20261018.11</p>      <div class="ops-body" id="records-body" hidden>
+      <p class="app-shell-version" id="app-shell-version" data-shell-version="20261021.1">이 화면 버전 20261021.1</p>      <div class="ops-body" id="records-body" hidden>
 
         <div class="records-vitals" id="records-vitals">
           <h3 class="ops-section-title">몸 수치 (혈압·혈당)</h3>
@@ -4416,7 +4581,7 @@
       <div class="cheer-row">
         <p class="cheer-text">Harry 에게 응원의<br>하트 눌러 주시면<br>제가 더욱 힘이 납니다.</p>
         <button type="button" class="cheer-media" id="cheer-media" aria-label="Harry에게 응원 하트 보내기">
-          <img src="/cheer-heart.webp?v=20261018.11" alt="" width="48" height="48" decoding="async">
+          <img src="/cheer-heart.webp?v=20261021.1" alt="" width="48" height="48" decoding="async">
           <span class="cheer-burst-layer" id="cheer-burst-layer" aria-hidden="true"></span>
         </button>
       </div>
@@ -4461,7 +4626,7 @@
       <div class="chamzone-credit-row">
         <img
           class="chamzone-credit-icon"
-          src="/chamzone-icon.png?v=20261018.11"
+          src="/chamzone-icon.png?v=20261021.1"
           alt=""
           width="40"
           height="40"
@@ -4469,7 +4634,7 @@
         >
         <img
           class="chamzone-credit-logo"
-          src="/chamzone-logo.png?v=20261018.11"
+          src="/chamzone-logo.png?v=20261021.1"
           alt="ChamZone Interactive"
           width="200"
           height="36"
@@ -4883,6 +5048,17 @@
         <div class="meds-field labs-block" id="labs-block">
           <p class="labs-block-title" id="labs-block-title">검사기록</p>
           <p class="labs-hint">결과표에서 같은 이름을 찾아 숫자만 넣으세요. 없으면 비워 두세요.</p>
+          <div class="lab-photos-block" id="lab-photos-block">
+            <p class="labs-group">검사 결과표 사진</p>
+            <p class="labs-hint lab-photos-hint">표를 찍어 두면 이 폰에만 저장됩니다. 사진을 누르면 읽어 칸에 넣을 수 있습니다.</p>
+            <div class="lab-photos-actions">
+              <button type="button" id="lab-photo-capture-btn">사진 찍기</button>
+              <button type="button" id="lab-photo-pick-btn">앨범에서 고르기</button>
+            </div>
+            <input type="file" id="lab-photo-capture-input" accept="image/*" capture="environment" hidden multiple />
+            <input type="file" id="lab-photo-pick-input" accept="image/*" hidden multiple />
+            <div class="lab-photos-grid" id="lab-photos-grid" aria-live="polite"></div>
+          </div>
           <label id="lab-date-label">검사일</label>
           <div class="lab-date-row" role="group" aria-labelledby="lab-date-label">
             <input type="text" id="lab-date-y" inputmode="numeric" pattern="[0-9]*" maxlength="4" placeholder="0000" autocomplete="off" aria-label="년도" />
@@ -5171,6 +5347,27 @@
   </div>
 
   <div
+    class="lab-photo-modal-backdrop"
+    id="lab-photo-modal-backdrop"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="lab-photo-modal-title"
+    hidden
+  >
+    <div class="lab-photo-modal">
+      <div class="lab-photo-modal-head">
+        <h3 id="lab-photo-modal-title">검사표 읽기</h3>
+        <button type="button" class="lab-photo-modal-close" id="lab-photo-modal-close" aria-label="닫기">×</button>
+      </div>
+      <img class="lab-photo-modal-preview" id="lab-photo-modal-preview" alt="선택한 검사 결과표" />
+      <p class="lab-photo-modal-status" id="lab-photo-modal-status">사진을 읽어 숫자 칸에 넣을 수 있습니다.</p>
+      <div class="lab-photo-modal-actions">
+        <button type="button" class="lab-photo-btn-secondary" id="lab-photo-modal-cancel">닫기</button>
+        <button type="button" class="lab-photo-btn-primary" id="lab-photo-modal-read">읽어서 저장하기</button>
+      </div>
+    </div>
+  </div>
+  <div
     class="share-modal-backdrop"
     id="share-modal-backdrop"
     role="dialog"
@@ -5249,6 +5446,10 @@
       var Q_COMEBACK_GAP_DAYS = 7;
       var VITALS_PREFS_KEY = "healthapp.vitalsPrefs.v1";
       var VITALS_LOG_KEY = "healthapp.vitalsLog.v1";
+      var LAB_PHOTOS_META_KEY = "healthapp.labPhotosMeta.v1";
+      var LAB_PHOTOS_DB_NAME = "healthappLabPhotos";
+      var LAB_PHOTOS_STORE = "photos";
+      var LAB_PHOTOS_MAX = 20;
       var BACKUP_DB_NAME = "healthappBackup";
       var BACKUP_STORE = "snapshots";
       var BACKUP_ID = "latest";
@@ -8130,6 +8331,597 @@
           item.appendChild(sum);
           labHistoryEl.appendChild(item);
         });
+      }
+
+      var labPhotosMeta = [];
+      var labPhotoModalPhotoId = "";
+      var labPhotoOcrBusy = false;
+      var tesseractLoadPromise = null;
+
+      function openLabPhotosDb() {
+        return new Promise(function (resolve, reject) {
+          if (!window.indexedDB) {
+            reject(new Error("no-idb"));
+            return;
+          }
+          var req = indexedDB.open(LAB_PHOTOS_DB_NAME, 1);
+          req.onupgradeneeded = function () {
+            var db = req.result;
+            if (!db.objectStoreNames.contains(LAB_PHOTOS_STORE)) {
+              db.createObjectStore(LAB_PHOTOS_STORE, { keyPath: "id" });
+            }
+          };
+          req.onsuccess = function () { resolve(req.result); };
+          req.onerror = function () { reject(req.error || new Error("idb-open")); };
+        });
+      }
+
+      function labPhotoIdbPut(rec) {
+        return openLabPhotosDb().then(function (db) {
+          return new Promise(function (resolve, reject) {
+            try {
+              var tx = db.transaction(LAB_PHOTOS_STORE, "readwrite");
+              tx.objectStore(LAB_PHOTOS_STORE).put(rec);
+              tx.oncomplete = function () { db.close(); resolve(); };
+              tx.onerror = function () { db.close(); reject(tx.error || new Error("idb-put")); };
+            } catch (e) {
+              try { db.close(); } catch (e2) { /* ignore */ }
+              reject(e);
+            }
+          });
+        });
+      }
+
+      function labPhotoIdbGet(id) {
+        return openLabPhotosDb().then(function (db) {
+          return new Promise(function (resolve, reject) {
+            try {
+              var tx = db.transaction(LAB_PHOTOS_STORE, "readonly");
+              var req = tx.objectStore(LAB_PHOTOS_STORE).get(id);
+              req.onsuccess = function () { db.close(); resolve(req.result || null); };
+              req.onerror = function () { db.close(); reject(req.error || new Error("idb-get")); };
+            } catch (e) {
+              try { db.close(); } catch (e2) { /* ignore */ }
+              reject(e);
+            }
+          });
+        });
+      }
+
+      function labPhotoIdbDelete(id) {
+        return openLabPhotosDb().then(function (db) {
+          return new Promise(function (resolve) {
+            try {
+              var tx = db.transaction(LAB_PHOTOS_STORE, "readwrite");
+              tx.objectStore(LAB_PHOTOS_STORE).delete(id);
+              tx.oncomplete = function () { db.close(); resolve(); };
+              tx.onerror = function () { db.close(); resolve(); };
+            } catch (e) {
+              try { db.close(); } catch (e2) { /* ignore */ }
+              resolve();
+            }
+          });
+        });
+      }
+
+      function clearLabPhotosIdbBestEffort() {
+        try {
+          if (!window.indexedDB) return;
+          var req = indexedDB.deleteDatabase(LAB_PHOTOS_DB_NAME);
+          req.onsuccess = function () { /* ok */ };
+          req.onerror = function () { /* ignore */ };
+        } catch (e) { /* ignore */ }
+      }
+
+      function loadLabPhotosMeta() {
+        try {
+          var raw = localStorage.getItem(LAB_PHOTOS_META_KEY);
+          var list = raw ? JSON.parse(raw) : [];
+          if (!Array.isArray(list)) return [];
+          return list.filter(function (item) {
+            return item && typeof item === "object" && item.id;
+          }).map(function (item) {
+            return {
+              id: String(item.id),
+              createdAt: Number(item.createdAt) || Date.now(),
+              thumb: typeof item.thumb === "string" ? item.thumb : ""
+            };
+          });
+        } catch (e) {
+          return [];
+        }
+      }
+
+      function saveLabPhotosMeta() {
+        try {
+          var slim = labPhotosMeta.map(function (item) {
+            return { id: item.id, createdAt: item.createdAt, thumb: item.thumb || "" };
+          });
+          return persistSetItem(LAB_PHOTOS_META_KEY, JSON.stringify(slim));
+        } catch (e) {
+          return false;
+        }
+      }
+
+      function compressLabPhotoFile(file) {
+        return new Promise(function (resolve, reject) {
+          if (!file || !/^image\//.test(file.type || "")) {
+            reject(new Error("not-image"));
+            return;
+          }
+          var url = URL.createObjectURL(file);
+          var img = new Image();
+          img.onload = function () {
+            try {
+              var maxW = 1280;
+              var w = img.naturalWidth || img.width;
+              var h = img.naturalHeight || img.height;
+              var scale = w > maxW ? maxW / w : 1;
+              var cw = Math.max(1, Math.round(w * scale));
+              var ch = Math.max(1, Math.round(h * scale));
+              var canvas = document.createElement("canvas");
+              canvas.width = cw;
+              canvas.height = ch;
+              var ctx = canvas.getContext("2d");
+              ctx.drawImage(img, 0, 0, cw, ch);
+              var dataUrl = canvas.toDataURL("image/jpeg", 0.72);
+              var tw = 180;
+              var th = Math.max(1, Math.round(ch * (tw / cw)));
+              var tCanvas = document.createElement("canvas");
+              tCanvas.width = tw;
+              tCanvas.height = th;
+              var tCtx = tCanvas.getContext("2d");
+              tCtx.drawImage(canvas, 0, 0, tw, th);
+              var thumb = tCanvas.toDataURL("image/jpeg", 0.6);
+              URL.revokeObjectURL(url);
+              resolve({ dataUrl: dataUrl, thumb: thumb });
+            } catch (eDraw) {
+              URL.revokeObjectURL(url);
+              reject(eDraw);
+            }
+          };
+          img.onerror = function () {
+            URL.revokeObjectURL(url);
+            reject(new Error("img-load"));
+          };
+          img.src = url;
+        });
+      }
+
+      function makeLabPhotoId() {
+        return "lp_" + Date.now().toString(36) + "_" + Math.random().toString(36).slice(2, 8);
+      }
+
+      function paintLabPhotos() {
+        var grid = document.getElementById("lab-photos-grid");
+        if (!grid) return;
+        grid.innerHTML = "";
+        if (!labPhotosMeta.length) {
+          var empty = document.createElement("p");
+          empty.className = "lab-photos-empty";
+          empty.style.gridColumn = "1 / -1";
+          empty.textContent = "아직 찍은 검사표가 없습니다.";
+          grid.appendChild(empty);
+          return;
+        }
+        labPhotosMeta.forEach(function (item) {
+          var card = document.createElement("div");
+          card.className = "lab-photo-card";
+          card.setAttribute("data-lab-photo-id", item.id);
+          var openBtn = document.createElement("button");
+          openBtn.type = "button";
+          openBtn.className = "lab-photo-open";
+          openBtn.setAttribute("aria-label", "검사표 사진 열기");
+          var img = document.createElement("img");
+          img.alt = "";
+          img.decoding = "async";
+          img.src = item.thumb || "";
+          openBtn.appendChild(img);
+          openBtn.addEventListener("click", function () {
+            openLabPhotoModal(item.id);
+          });
+          card.appendChild(openBtn);
+          var del = document.createElement("button");
+          del.type = "button";
+          del.className = "lab-photo-del";
+          del.setAttribute("aria-label", "사진 삭제");
+          del.textContent = "×";
+          del.addEventListener("click", function (ev) {
+            ev.preventDefault();
+            ev.stopPropagation();
+            deleteLabPhoto(item.id);
+          });
+          card.appendChild(del);
+          grid.appendChild(card);
+          if (!item.thumb) {
+            labPhotoIdbGet(item.id).then(function (rec) {
+              if (!rec || !rec.dataUrl) return;
+              img.src = rec.dataUrl;
+            }).catch(function () { /* ignore */ });
+          }
+        });
+      }
+
+      function addLabPhotoFiles(fileList) {
+        var files = Array.prototype.slice.call(fileList || [], 0).filter(function (f) {
+          return f && /^image\//.test(f.type || "");
+        });
+        if (!files.length) return;
+        var room = Math.max(0, LAB_PHOTOS_MAX - labPhotosMeta.length);
+        if (room <= 0) {
+          if (typeof showToast === "function") showToast("사진은 최대 " + LAB_PHOTOS_MAX + "장까지입니다.");
+          return;
+        }
+        files = files.slice(0, room);
+        var chain = Promise.resolve();
+        files.forEach(function (file) {
+          chain = chain.then(function () {
+            return compressLabPhotoFile(file).then(function (out) {
+              var id = makeLabPhotoId();
+              return labPhotoIdbPut({
+                id: id,
+                createdAt: Date.now(),
+                dataUrl: out.dataUrl
+              }).then(function () {
+                labPhotosMeta.unshift({
+                  id: id,
+                  createdAt: Date.now(),
+                  thumb: out.thumb
+                });
+                saveLabPhotosMeta();
+              });
+            });
+          });
+        });
+        chain.then(function () {
+          paintLabPhotos();
+          if (typeof showToast === "function") showToast("검사표 사진을 저장했습니다.");
+        }).catch(function () {
+          if (typeof showToast === "function") showToast("사진을 저장하지 못했습니다.");
+        });
+      }
+
+      function deleteLabPhoto(id) {
+        if (!id) return;
+        if (!window.confirm("이 검사표 사진을 삭제할까요?")) return;
+        labPhotosMeta = labPhotosMeta.filter(function (item) { return item.id !== id; });
+        saveLabPhotosMeta();
+        paintLabPhotos();
+        labPhotoIdbDelete(id);
+        if (labPhotoModalPhotoId === id) closeLabPhotoModal();
+      }
+
+      function closeLabPhotoModal() {
+        var backdrop = document.getElementById("lab-photo-modal-backdrop");
+        if (backdrop) {
+          backdrop.classList.remove("open");
+          backdrop.hidden = true;
+        }
+        labPhotoModalPhotoId = "";
+        labPhotoOcrBusy = false;
+        var readBtn = document.getElementById("lab-photo-modal-read");
+        if (readBtn) {
+          readBtn.disabled = false;
+          readBtn.textContent = "읽어서 저장하기";
+        }
+      }
+
+      function openLabPhotoModal(id) {
+        labPhotoModalPhotoId = id;
+        var backdrop = document.getElementById("lab-photo-modal-backdrop");
+        var preview = document.getElementById("lab-photo-modal-preview");
+        var status = document.getElementById("lab-photo-modal-status");
+        var readBtn = document.getElementById("lab-photo-modal-read");
+        if (!backdrop || !preview || !status) return;
+        status.textContent = "사진을 불러오는 중…";
+        if (readBtn) {
+          readBtn.disabled = true;
+          readBtn.textContent = "읽어서 저장하기";
+        }
+        preview.removeAttribute("src");
+        backdrop.hidden = false;
+        backdrop.classList.add("open");
+        labPhotoIdbGet(id).then(function (rec) {
+          if (!rec || !rec.dataUrl) {
+            status.textContent = "사진을 찾지 못했습니다.";
+            return;
+          }
+          preview.src = rec.dataUrl;
+          status.textContent = "「읽어서 저장하기」를 누르면 표의 숫자를 찾아 칸에 넣습니다. 넣은 뒤 꼭 확인해 주세요.";
+          if (readBtn) readBtn.disabled = false;
+        }).catch(function () {
+          status.textContent = "사진을 불러오지 못했습니다.";
+        });
+      }
+
+      function ensureTesseract() {
+        if (window.Tesseract && typeof window.Tesseract.recognize === "function") {
+          return Promise.resolve(window.Tesseract);
+        }
+        if (tesseractLoadPromise) return tesseractLoadPromise;
+        tesseractLoadPromise = new Promise(function (resolve, reject) {
+          var s = document.createElement("script");
+          s.src = "https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js";
+          s.async = true;
+          s.onload = function () {
+            if (window.Tesseract) resolve(window.Tesseract);
+            else reject(new Error("tesseract-missing"));
+          };
+          s.onerror = function () {
+            tesseractLoadPromise = null;
+            reject(new Error("tesseract-load"));
+          };
+          document.head.appendChild(s);
+        });
+        return tesseractLoadPromise;
+      }
+
+      function parseLabReportText(rawText) {
+        var text = String(rawText || "").replace(/\r/g, "\n");
+        var panel = emptyLabPanel();
+        var memoBits = [];
+        var monthMap = {
+          jan: 1, feb: 2, mar: 3, apr: 4, may: 5, jun: 6,
+          jul: 7, aug: 8, sep: 9, oct: 10, nov: 11, dec: 12
+        };
+        var dateRe = /(\d{1,2})[-\/\s.](Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*[-\/\s.](\d{2,4})/gi;
+        var foundDates = [];
+        var dm;
+        while ((dm = dateRe.exec(text))) {
+          var yy = Number(dm[3]);
+          if (yy < 100) yy += 2000;
+          var mo = monthMap[String(dm[2]).slice(0, 3).toLowerCase()];
+          var dd = Number(dm[1]);
+          if (mo && dd >= 1 && dd <= 31 && yy >= 1990 && yy <= 2100) {
+            foundDates.push(yy + "-" + pad2(mo) + "-" + pad2(dd));
+          }
+        }
+        if (foundDates.length) panel.date = foundDates[foundDates.length - 1];
+
+        function pick(patterns) {
+          for (var i = 0; i < patterns.length; i++) {
+            var m = text.match(patterns[i]);
+            if (!m) continue;
+            var n = parseFloat(String(m[1]).replace(/,/g, ""));
+            if (isFinite(n)) return n;
+          }
+          return null;
+        }
+
+        function fmt1(n) {
+          return (Math.round(n * 10) / 10).toFixed(1).replace(/\.0$/, "");
+        }
+
+        var glu = pick([
+          /F\s*Gluc(?:ose)?\s*(?:Serum|Plasma)?[^\d\n]{0,48}(\d+\.?\d*)/i,
+          /(?:Fasting\s+)?(?:Plasma\s+|Serum\s+)?Glucose[^\d\n]{0,48}(\d+\.?\d*)/i,
+          /공복혈당[^\d\n]{0,24}(\d+\.?\d*)/
+        ]);
+        if (glu != null) {
+          panel.values.fastingGlucose = String(Math.round(glu < 40 ? glu * 18.018 : glu));
+        }
+
+        var hba = pick([
+          /HbA1c[^\d\n]{0,24}(\d+\.?\d*)/i,
+          /당화혈색소[^\d\n]{0,24}(\d+\.?\d*)/
+        ]);
+        if (hba != null) panel.values.hba1c = fmt1(hba);
+
+        var chol = pick([
+          /(?:^|\n)\s*Cholesterol(?!\s*(?:HDL|LDL|Non))[^\d\n]{0,40}(\d+\.?\d*)/im,
+          /Total\s*Cholesterol[^\d\n]{0,24}(\d+\.?\d*)/i,
+          /총콜레스테롤[^\d\n]{0,24}(\d+\.?\d*)/
+        ]);
+        if (chol != null) {
+          panel.values.totalChol = String(Math.round(chol < 20 ? chol * 38.67 : chol));
+        }
+
+        var tg = pick([
+          /Triglycerides?[^\d\n]{0,40}(\d+\.?\d*)/i,
+          /중성지방[^\d\n]{0,24}(\d+\.?\d*)/
+        ]);
+        if (tg != null) {
+          panel.values.tg = String(Math.round(tg < 30 ? tg * 88.57 : tg));
+        }
+
+        var hdl = pick([
+          /HDL\s*Chol\.?[^\d\n]{0,40}(\d+\.?\d*)/i,
+          /HDL[-\s]?C?[^\d\n]{0,24}(\d+\.?\d*)/i
+        ]);
+        if (hdl != null) {
+          panel.values.hdl = String(Math.round(hdl < 5 ? hdl * 38.67 : hdl));
+        }
+
+        var ldl = pick([
+          /LDL\s*Chol\.?[^\d\n]{0,40}(\d+\.?\d*)/i,
+          /LDL[-\s]?C?[^\d\n]{0,24}(\d+\.?\d*)/i
+        ]);
+        if (ldl != null) {
+          panel.values.ldl = String(Math.round(ldl < 15 ? ldl * 38.67 : ldl));
+        }
+
+        var ast = pick([
+          /(?:^|\n)\s*AST[^\d\n]{0,40}(\d+\.?\d*)/im,
+          /\bGOT[^\d\n]{0,24}(\d+\.?\d*)/i
+        ]);
+        if (ast != null) panel.values.ast = String(Math.round(ast));
+
+        var alt = pick([
+          /(?:^|\n)\s*ALT[^\d\n]{0,40}(\d+\.?\d*)/im,
+          /\bGPT[^\d\n]{0,24}(\d+\.?\d*)/i
+        ]);
+        if (alt != null) panel.values.alt = String(Math.round(alt));
+
+        var crea = pick([
+          /Creatinine[^\d\n]{0,40}(\d+\.?\d*)/i,
+          /크레아티닌[^\d\n]{0,24}(\d+\.?\d*)/
+        ]);
+        if (crea != null) {
+          panel.values.creatinine = crea > 20
+            ? fmt1(crea / 88.4)
+            : fmt1(crea);
+        }
+
+        var egfr = pick([
+          /eGFR[^\d\n]{0,40}(\d+\.?\d*)/i,
+          /\bGFR[^\d\n]{0,24}(\d+\.?\d*)/i
+        ]);
+        if (egfr != null) panel.values.egfr = String(Math.round(egfr));
+
+        var uric = pick([
+          /Urate[^\d\n]{0,40}(\d+\.?\d*)/i,
+          /Uric\s*acid[^\d\n]{0,40}(\d+\.?\d*)/i,
+          /요산[^\d\n]{0,24}(\d+\.?\d*)/
+        ]);
+        if (uric != null) {
+          panel.values.uricAcid = uric < 2
+            ? fmt1(uric * 16.81)
+            : fmt1(uric);
+        }
+
+        var hb = pick([
+          /Haemoglobin[^\d\n]{0,40}(\d+\.?\d*)/i,
+          /Hemoglobin[^\d\n]{0,40}(\d+\.?\d*)/i,
+          /혈색소[^\d\n]{0,24}(\d+\.?\d*)/
+        ]);
+        if (hb != null) {
+          panel.values.hemoglobin = hb > 40 ? fmt1(hb / 10) : fmt1(hb);
+        }
+
+        var ferr = pick([/Ferritin[^\d\n]{0,40}(\d+\.?\d*)/i]);
+        if (ferr != null) memoBits.push("Ferritin " + Math.round(ferr));
+        var tsh = pick([/(?:^|\n)\s*TSH[^\d\n]{0,40}(\d+\.?\d*)/im]);
+        if (tsh != null) memoBits.push("TSH " + fmt1(tsh));
+
+        return {
+          panel: panel,
+          memoExtra: memoBits.join(" / "),
+          hitCount: LAB_PANEL_FIELDS.reduce(function (n, f) {
+            return n + (panel.values[f.id] ? 1 : 0);
+          }, 0) + (panel.date ? 1 : 0) + (memoBits.length ? 1 : 0)
+        };
+      }
+
+      function summarizeParsedLab(parsed) {
+        var lines = [];
+        if (parsed.panel.date) lines.push("검사일 " + formatLabDateKo(parsed.panel.date));
+        LAB_PANEL_FIELDS.forEach(function (f) {
+          var v = parsed.panel.values[f.id];
+          if (v) lines.push(f.label + " " + v);
+        });
+        if (parsed.memoExtra) lines.push("기타 " + parsed.memoExtra);
+        if (!lines.length) return "표에서 숫자를 찾지 못했습니다. 직접 입력해 주세요.";
+        return "아래처럼 넣을게요. 확인 후 저장합니다.\n\n" + lines.join("\n");
+      }
+
+      function applyParsedLabToFormAndSave(parsed) {
+        var panel = normalizeLabPanel(parsed.panel);
+        if (!labPanelHasBits(panel) && !parsed.memoExtra) return false;
+        if (!panel.date) panel.date = getTodayKey();
+        writeLabForm(panel);
+        if (parsed.memoExtra && labsMemoEl) {
+          var cur = String(labsMemoEl.value || "").trim();
+          if (cur.indexOf(parsed.memoExtra) === -1) {
+            labsMemoEl.value = cur ? (cur + " · " + parsed.memoExtra) : parsed.memoExtra;
+          }
+        }
+        state.labsMemo = labsMemoEl ? String(labsMemoEl.value || "").trim() : "";
+        upsertLabPanelFromForm();
+        syncLabsTextFromState();
+        paintLabHistory();
+        clearLabFormInputs();
+        saveState();
+        return true;
+      }
+
+      function runLabPhotoReadAndSave() {
+        if (labPhotoOcrBusy || !labPhotoModalPhotoId) return;
+        var status = document.getElementById("lab-photo-modal-status");
+        var readBtn = document.getElementById("lab-photo-modal-read");
+        labPhotoOcrBusy = true;
+        if (readBtn) {
+          readBtn.disabled = true;
+          readBtn.textContent = "읽는 중…";
+        }
+        if (status) status.textContent = "글자를 읽는 중입니다. 잠시만 기다려 주세요…";
+        labPhotoIdbGet(labPhotoModalPhotoId).then(function (rec) {
+          if (!rec || !rec.dataUrl) throw new Error("no-photo");
+          return ensureTesseract().then(function (Tesseract) {
+            return Tesseract.recognize(rec.dataUrl, "eng", {
+              logger: function (m) {
+                if (!status || !m || m.status !== "recognizing text") return;
+                var p = Math.round((m.progress || 0) * 100);
+                status.textContent = "글자를 읽는 중… " + p + "%";
+              }
+            });
+          });
+        }).then(function (result) {
+          var text = result && result.data ? result.data.text : "";
+          var parsed = parseLabReportText(text);
+          if (status) status.textContent = summarizeParsedLab(parsed);
+          if (parsed.hitCount < 1) {
+            labPhotoOcrBusy = false;
+            if (readBtn) {
+              readBtn.disabled = false;
+              readBtn.textContent = "다시 읽기";
+            }
+            return;
+          }
+          var ok = window.confirm(summarizeParsedLab(parsed) + "\n\n이 내용으로 검사기록에 저장할까요?");
+          if (!ok) {
+            labPhotoOcrBusy = false;
+            if (readBtn) {
+              readBtn.disabled = false;
+              readBtn.textContent = "읽어서 저장하기";
+            }
+            return;
+          }
+          applyParsedLabToFormAndSave(parsed);
+          closeLabPhotoModal();
+          if (typeof showToast === "function") showToast("검사표에서 읽어 저장했습니다. 숫자를 확인해 주세요.");
+        }).catch(function () {
+          if (status) status.textContent = "읽기에 실패했습니다. 글씨가 잘 보이게 다시 찍어 주세요.";
+          labPhotoOcrBusy = false;
+          if (readBtn) {
+            readBtn.disabled = false;
+            readBtn.textContent = "다시 읽기";
+          }
+        });
+      }
+
+      function setupLabPhotos() {
+        labPhotosMeta = loadLabPhotosMeta();
+        paintLabPhotos();
+        var captureBtn = document.getElementById("lab-photo-capture-btn");
+        var pickBtn = document.getElementById("lab-photo-pick-btn");
+        var captureInput = document.getElementById("lab-photo-capture-input");
+        var pickInput = document.getElementById("lab-photo-pick-input");
+        var backdrop = document.getElementById("lab-photo-modal-backdrop");
+        var closeBtn = document.getElementById("lab-photo-modal-close");
+        var cancelBtn = document.getElementById("lab-photo-modal-cancel");
+        var readBtn = document.getElementById("lab-photo-modal-read");
+        if (captureBtn && captureInput) {
+          captureBtn.addEventListener("click", function () { captureInput.click(); });
+          captureInput.addEventListener("change", function () {
+            addLabPhotoFiles(captureInput.files);
+            captureInput.value = "";
+          });
+        }
+        if (pickBtn && pickInput) {
+          pickBtn.addEventListener("click", function () { pickInput.click(); });
+          pickInput.addEventListener("change", function () {
+            addLabPhotoFiles(pickInput.files);
+            pickInput.value = "";
+          });
+        }
+        if (closeBtn) closeBtn.addEventListener("click", closeLabPhotoModal);
+        if (cancelBtn) cancelBtn.addEventListener("click", closeLabPhotoModal);
+        if (readBtn) readBtn.addEventListener("click", runLabPhotoReadAndSave);
+        if (backdrop) {
+          backdrop.addEventListener("click", function (ev) {
+            if (ev.target === backdrop) closeLabPhotoModal();
+          });
+        }
       }
 
       function upsertLabPanelFromForm() {
@@ -13239,6 +14031,7 @@
         if (labsMemoEl) labsMemoEl.value = state.labsMemo || "";
         clearLabFormInputs();
         paintLabHistory();
+        paintLabPhotos();
         if (medsEls.labs) medsEls.labs.value = state.labs || "";
       }
 
@@ -14922,6 +15715,7 @@
         });
         try { localStorage.removeItem(CONSENT_KEY); } catch (eConsent) { /* ignore */ }
         clearIndexedBackupBestEffort();
+        clearLabPhotosIdbBestEffort();
       }
 
       function confirmConsentWithdraw() {
@@ -16036,6 +16830,7 @@
       setupQuestionnaireControls();
       buildLabFieldInputs();
       bindLabDateDigitInputs();
+      setupLabPhotos();
       fixedMenus = loadFixedMenu();
       saveFixedMenu();
       foodWarehouseItems = loadFoodWarehouse();
