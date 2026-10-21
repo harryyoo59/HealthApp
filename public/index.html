@@ -4635,7 +4635,7 @@
         <span data-i18n="records.title">내 기록 관리</span>
         <span class="ops-chevron" aria-hidden="true">▾</span>
       </button>
-      <p class="app-shell-version" id="app-shell-version" data-shell-version="20261021.8">이 화면 버전 20261021.8</p>      <div class="ops-body" id="records-body" hidden>
+      <p class="app-shell-version" id="app-shell-version" data-shell-version="20261021.9">이 화면 버전 20261021.9</p>      <div class="ops-body" id="records-body" hidden>
 
         <div class="records-vitals" id="records-vitals">
           <h3 class="ops-section-title">몸 수치 (혈압·혈당)</h3>
@@ -4697,7 +4697,7 @@
       <div class="cheer-row">
         <p class="cheer-text">Harry 에게 응원의<br>하트 눌러 주시면<br>제가 더욱 힘이 납니다.</p>
         <button type="button" class="cheer-media" id="cheer-media" aria-label="Harry에게 응원 하트 보내기">
-          <img src="/cheer-heart.webp?v=20261021.8" alt="" width="48" height="48" decoding="async">
+          <img src="/cheer-heart.webp?v=20261021.9" alt="" width="48" height="48" decoding="async">
           <span class="cheer-burst-layer" id="cheer-burst-layer" aria-hidden="true"></span>
         </button>
       </div>
@@ -4742,7 +4742,7 @@
       <div class="chamzone-credit-row">
         <img
           class="chamzone-credit-icon"
-          src="/chamzone-icon.png?v=20261021.8"
+          src="/chamzone-icon.png?v=20261021.9"
           alt=""
           width="40"
           height="40"
@@ -4750,7 +4750,7 @@
         >
         <img
           class="chamzone-credit-logo"
-          src="/chamzone-logo.png?v=20261021.8"
+          src="/chamzone-logo.png?v=20261021.9"
           alt="ChamZone Interactive"
           width="200"
           height="36"
@@ -4778,14 +4778,15 @@
       <div class="vitals-sheet-scroll">
         <div class="vitals-block">
           <h3 id="labroom-chart-title">수치 추이</h3>
-          <p class="vitals-note">보고 싶은 항목을 고르세요. 기록한 날짜만 점으로 이어집니다.</p>
+          <p class="vitals-note">점 하나 = 검사한 날짜 하나입니다. 같은 날 표를 여러 장 읽어도 한 점으로 합칩니다.</p>
           <div class="labroom-metric-chips" id="labroom-metric-chips" role="group" aria-label="그래프 항목"></div>
           <div class="vitals-chart" id="labroom-chart" aria-hidden="true"></div>
           <div class="labroom-axis" id="labroom-axis" hidden>
             <span id="labroom-axis-min"></span>
             <span id="labroom-axis-max"></span>
           </div>
-          <p class="vitals-note" id="labroom-chart-empty">검사 기록이 두 번 이상 쌓이면 선 그래프가 더 잘 보입니다.</p>
+          <p class="vitals-note" id="labroom-chart-dates" hidden></p>
+          <p class="vitals-note" id="labroom-chart-empty">검사 기록이 두 번 이상(다른 날짜) 쌓이면 변화 선이 더 잘 보입니다.</p>
         </div>
         <div class="vitals-block">
           <h3>날짜별 기록</h3>
@@ -9131,11 +9132,89 @@
         return "아래처럼 넣을게요. 확인 후 저장합니다.\n\n" + lines.join("\n");
       }
 
+      var labOcrSessionDate = "";
+
+      function majorityPhotoLabDate() {
+        var counts = {};
+        getReadLabPhotos().forEach(function (item) {
+          var d = String(item.labDate || "").trim();
+          if (!d) return;
+          counts[d] = (counts[d] || 0) + 1;
+        });
+        var best = "";
+        var bestN = 0;
+        Object.keys(counts).forEach(function (d) {
+          if (counts[d] > bestN) {
+            best = d;
+            bestN = counts[d];
+          }
+        });
+        return best;
+      }
+
+      function resolveLabOcrDate(incomingDate) {
+        var incoming = String(incomingDate || "").trim();
+        if (incoming) {
+          labOcrSessionDate = incoming;
+          return incoming;
+        }
+        var formDate = readLabDateIso();
+        if (formDate) {
+          labOcrSessionDate = formDate;
+          return formDate;
+        }
+        if (labOcrSessionDate) return labOcrSessionDate;
+        var photoDate = majorityPhotoLabDate();
+        if (photoDate) {
+          labOcrSessionDate = photoDate;
+          return photoDate;
+        }
+        var panels = normalizeLabPanels(state.labPanels);
+        if (panels.length && panels[0].date) {
+          labOcrSessionDate = panels[0].date;
+          return panels[0].date;
+        }
+        var today = getTodayKey();
+        labOcrSessionDate = today;
+        return today;
+      }
+
+      function consolidateOrphanLabPanels(mainDate) {
+        mainDate = String(mainDate || "").trim();
+        if (!mainDate) return;
+        var today = getTodayKey();
+        if (mainDate === today) return;
+        state.labPanels = normalizeLabPanels(state.labPanels);
+        var main = null;
+        var orphans = [];
+        state.labPanels.forEach(function (panel) {
+          if (panel.date === mainDate) main = panel;
+          else if (panel.date === today) orphans.push(panel);
+        });
+        if (!orphans.length) return;
+        if (!main) main = emptyLabPanel();
+        main.date = mainDate;
+        orphans.forEach(function (panel) {
+          main = mergeLabPanel(main, panel);
+        });
+        state.labPanels = state.labPanels.filter(function (panel) {
+          return panel.date !== today && panel.date !== mainDate;
+        });
+        state.labPanels.unshift(main);
+        state.labPanels.sort(function (a, b) {
+          return a.date < b.date ? 1 : a.date > b.date ? -1 : 0;
+        });
+        getReadLabPhotos().forEach(function (item) {
+          if (!item.labDate || item.labDate === today) item.labDate = mainDate;
+        });
+        saveLabPhotosMeta();
+      }
+
       function applyParsedLabToFormAndSave(parsed) {
         var incoming = normalizeLabPanel(parsed.panel);
         if (!labPanelHasBits(incoming) && !parsed.memoExtra) return false;
         var current = readLabForm();
-        var dateKey = incoming.date || current.date || getTodayKey();
+        var dateKey = resolveLabOcrDate(incoming.date || current.date || "");
         incoming.date = dateKey;
         state.labPanels = normalizeLabPanels(state.labPanels);
         var saved = null;
@@ -9146,7 +9225,7 @@
           }
         }
         var merged = mergeLabPanel(mergeLabPanel(saved || emptyLabPanel(), current), incoming);
-        if (!merged.date) merged.date = getTodayKey();
+        if (!merged.date) merged.date = dateKey || getTodayKey();
         writeLabForm(merged);
         if (parsed.memoExtra && labsMemoEl) {
           var cur = String(labsMemoEl.value || "").trim();
@@ -9156,6 +9235,7 @@
         }
         state.labsMemo = labsMemoEl ? String(labsMemoEl.value || "").trim() : "";
         upsertLabPanelFromForm();
+        consolidateOrphanLabPanels(merged.date);
         syncLabsTextFromState();
         paintLabHistory();
         clearLabFormInputs();
@@ -9272,21 +9352,26 @@
         var axisMin = document.getElementById("labroom-axis-min");
         var axisMax = document.getElementById("labroom-axis-max");
         var emptyNote = document.getElementById("labroom-chart-empty");
+        var datesNote = document.getElementById("labroom-chart-dates");
         var title = document.getElementById("labroom-chart-title");
         var metric = LAB_ROOM_METRICS.filter(function (m) { return m.id === metricId; })[0]
           || LAB_ROOM_METRICS[0];
         if (title) title.textContent = metric.label + " 추이";
-        var points = [];
+        var byDate = {};
         panels.slice().reverse().forEach(function (panel) {
           var raw = panel.values[metric.id];
           var n = parseFloat(String(raw || "").replace(/,/g, ""));
           if (!isFinite(n) || !panel.date) return;
-          points.push({ date: panel.date, value: n });
+          byDate[panel.date] = n;
+        });
+        var points = Object.keys(byDate).sort().map(function (d) {
+          return { date: d, value: byDate[d] };
         });
         if (!chart) return;
         if (!points.length) {
           chart.innerHTML = '<p class="vitals-note" style="padding:16px">이 항목 기록이 아직 없습니다.</p>';
           if (axis) axis.hidden = true;
+          if (datesNote) datesNote.hidden = true;
           if (emptyNote) emptyNote.hidden = false;
           return;
         }
@@ -9311,10 +9396,16 @@
           if (axisMin) axisMin.textContent = "낮음 " + min;
           if (axisMax) axisMax.textContent = "높음 " + max;
         }
+        if (datesNote) {
+          datesNote.hidden = false;
+          datesNote.textContent = points.length === 1
+            ? ("검사일 " + formatLabDateKo(points[0].date) + " · 점 1개 = 검사 1번")
+            : ("검사일 " + points.map(function (p) { return formatLabDateKo(p.date); }).join(" · "));
+        }
         if (emptyNote) {
           emptyNote.hidden = points.length >= 2;
           emptyNote.textContent = points.length < 2
-            ? "같은 항목이 한 번 더 쌓이면 변화 선이 더 잘 보입니다."
+            ? "다른 날짜 검사가 한 번 더 쌓이면 변화 선이 더 잘 보입니다."
             : "";
         }
       }
@@ -9399,6 +9490,8 @@
       }
 
       function paintLabRoom() {
+        var photoDate = majorityPhotoLabDate();
+        if (photoDate) consolidateOrphanLabPanels(photoDate);
         var panels = normalizeLabPanels(state.labPanels);
         var chips = document.getElementById("labroom-metric-chips");
         if (chips) {
