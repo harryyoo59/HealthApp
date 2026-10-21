@@ -2,10 +2,19 @@
   "name": "know-my-body",
   "private": true,
   "version": "0.1.0",
+  "type": "module",
   "scripts": {
     "dev": "python3 server.py --port 43127",
     "dev:py": "python3 server.py --port 43127",
     "dev:lan": "python3 server.py --bind 0.0.0.0 --port 43127",
-    "dev:legacy": "python3 -m http.server 43127 --bind 127.0.0.1 --directory public"
+    "dev:legacy": "python3 -m http.server 43127 --bind 127.0.0.1 --directory public",
+    "check": "node scripts/check-syntax.mjs",
+    "test:unit": "node --test tests/unit/*.test.mjs",
+    "test:e2e": "playwright test",
+    "test": "npm run check && npm run test:unit && npm run test:e2e",
+    "test:ci": "npm run check && npm run test:unit"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.49.0"
   }
 }

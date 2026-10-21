@@ -10,3 +10,9 @@
 .tmp-shots/
 credentials.json
 node_modules/
+
+# Test / Playwright
+test-results/
+playwright-report/
+blob-report/
+playwright/.cache/
