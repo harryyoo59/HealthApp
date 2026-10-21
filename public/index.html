@@ -4635,7 +4635,7 @@
         <span data-i18n="records.title">내 기록 관리</span>
         <span class="ops-chevron" aria-hidden="true">▾</span>
       </button>
-      <p class="app-shell-version" id="app-shell-version" data-shell-version="20261021.7">이 화면 버전 20261021.7</p>      <div class="ops-body" id="records-body" hidden>
+      <p class="app-shell-version" id="app-shell-version" data-shell-version="20261021.8">이 화면 버전 20261021.8</p>      <div class="ops-body" id="records-body" hidden>
 
         <div class="records-vitals" id="records-vitals">
           <h3 class="ops-section-title">몸 수치 (혈압·혈당)</h3>
@@ -4697,7 +4697,7 @@
       <div class="cheer-row">
         <p class="cheer-text">Harry 에게 응원의<br>하트 눌러 주시면<br>제가 더욱 힘이 납니다.</p>
         <button type="button" class="cheer-media" id="cheer-media" aria-label="Harry에게 응원 하트 보내기">
-          <img src="/cheer-heart.webp?v=20261021.7" alt="" width="48" height="48" decoding="async">
+          <img src="/cheer-heart.webp?v=20261021.8" alt="" width="48" height="48" decoding="async">
           <span class="cheer-burst-layer" id="cheer-burst-layer" aria-hidden="true"></span>
         </button>
       </div>
@@ -4742,7 +4742,7 @@
       <div class="chamzone-credit-row">
         <img
           class="chamzone-credit-icon"
-          src="/chamzone-icon.png?v=20261021.7"
+          src="/chamzone-icon.png?v=20261021.8"
           alt=""
           width="40"
           height="40"
@@ -4750,7 +4750,7 @@
         >
         <img
           class="chamzone-credit-logo"
-          src="/chamzone-logo.png?v=20261021.7"
+          src="/chamzone-logo.png?v=20261021.8"
           alt="ChamZone Interactive"
           width="200"
           height="36"
@@ -5192,7 +5192,7 @@
         </div>
         <div class="meds-field labs-block" id="labs-block">
           <p class="labs-block-title" id="labs-block-title">검사기록</p>
-          <p class="labs-hint">결과표에서 같은 이름을 찾아 숫자만 넣으세요. 없으면 비워 두세요.</p>
+          <p class="labs-hint">칸 안 흐린 숫자는 건강한 참고 평균입니다. 내 기록과 비교용이며, 저장한 내 숫자는 「검사 변화」방에서 봅니다. 결과표에서 찾은 숫자만 넣으세요.</p>
           <div class="lab-photos-block" id="lab-photos-block">
             <p class="labs-group">검사 결과표 사진</p>
             <p class="labs-hint lab-photos-hint">① 표를 찍거나 앨범에서 고르면 여기에 쌓입니다. ② 사진을 누르고 「읽어서 저장하기」로 아래 칸에 숫자를 넣습니다. ③ 읽기가 끝나면 사진은 아래 「저장된 검사」서류함으로 옮겨집니다. ④ 「삭제」는 그 사진만 지웁니다.</p>
@@ -5850,21 +5850,21 @@
         cured: "완치된 병명"
       };
       var LAB_PANEL_FIELDS = [
-        { id: "fastingGlucose", group: "blood", label: "공복혈당", alias: "Glucose, FBS", placeholder: "예: 98" },
-        { id: "hba1c", group: "blood", label: "당화혈색소", alias: "HbA1c", placeholder: "예: 5.6" },
-        { id: "totalChol", group: "blood", label: "총콜레스테롤", alias: "Total Cholesterol, TC", placeholder: "예: 200" },
-        { id: "hdl", group: "blood", label: "HDL", alias: "HDL-C", placeholder: "예: 55" },
-        { id: "ldl", group: "blood", label: "LDL", alias: "LDL-C", placeholder: "예: 120" },
-        { id: "tg", group: "blood", label: "중성지방", alias: "Triglyceride, TG", placeholder: "예: 140" },
-        { id: "ast", group: "blood", label: "AST", alias: "GOT, AST", placeholder: "예: 25" },
-        { id: "alt", group: "blood", label: "ALT", alias: "GPT, ALT", placeholder: "예: 28" },
-        { id: "creatinine", group: "blood", label: "크레아티닌", alias: "Creatinine", placeholder: "예: 0.9" },
-        { id: "egfr", group: "blood", label: "eGFR", alias: "GFR, eGFR", placeholder: "예: 85" },
-        { id: "uricAcid", group: "blood", label: "요산", alias: "Uric acid", placeholder: "예: 5.5" },
-        { id: "hemoglobin", group: "blood", label: "혈색소", alias: "Hemoglobin, Hb", placeholder: "예: 14.2" },
-        { id: "urineProtein", group: "urine", label: "단백", alias: "Protein, Albumin", placeholder: "예: (-) / ± / (+)" },
-        { id: "urineBlood", group: "urine", label: "잠혈", alias: "Occult blood, OB", placeholder: "예: (-)" },
-        { id: "urineGlucose", group: "urine", label: "당", alias: "Glucose", placeholder: "예: (-)" }
+        { id: "fastingGlucose", group: "blood", label: "공복혈당", alias: "Glucose, FBS", placeholder: "건강참고 90" },
+        { id: "hba1c", group: "blood", label: "당화혈색소", alias: "HbA1c", placeholder: "건강참고 5.4" },
+        { id: "totalChol", group: "blood", label: "총콜레스테롤", alias: "Total Cholesterol, TC", placeholder: "건강참고 180" },
+        { id: "hdl", group: "blood", label: "HDL", alias: "HDL-C", placeholder: "건강참고 55" },
+        { id: "ldl", group: "blood", label: "LDL", alias: "LDL-C", placeholder: "건강참고 90" },
+        { id: "tg", group: "blood", label: "중성지방", alias: "Triglyceride, TG", placeholder: "건강참고 100" },
+        { id: "ast", group: "blood", label: "AST", alias: "GOT, AST", placeholder: "건강참고 22" },
+        { id: "alt", group: "blood", label: "ALT", alias: "GPT, ALT", placeholder: "건강참고 22" },
+        { id: "creatinine", group: "blood", label: "크레아티닌", alias: "Creatinine", placeholder: "건강참고 0.9" },
+        { id: "egfr", group: "blood", label: "eGFR", alias: "GFR, eGFR", placeholder: "건강참고 95" },
+        { id: "uricAcid", group: "blood", label: "요산", alias: "Uric acid", placeholder: "건강참고 5.0" },
+        { id: "hemoglobin", group: "blood", label: "혈색소", alias: "Hemoglobin, Hb", placeholder: "건강참고 14.0" },
+        { id: "urineProtein", group: "urine", label: "단백", alias: "Protein, Albumin", placeholder: "건강참고 (-)" },
+        { id: "urineBlood", group: "urine", label: "잠혈", alias: "Occult blood, OB", placeholder: "건강참고 (-)" },
+        { id: "urineGlucose", group: "urine", label: "당", alias: "Glucose", placeholder: "건강참고 (-)" }
       ];
       var MEAL_FIELDS = {
         breakfast: {
