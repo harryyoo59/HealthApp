@@ -3445,6 +3445,19 @@
       color: var(--muted);
       line-height: 1.4;
     }
+    .lab-history-load {
+      appearance: none;
+      align-self: flex-start;
+      border-radius: 8px;
+      border: 1px solid var(--line);
+      background: rgba(26, 58, 48, 0.85);
+      color: var(--ink);
+      font: inherit;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 8px 10px;
+      cursor: pointer;
+    }
     .lab-history-docs {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -4585,7 +4598,7 @@
         <span data-i18n="records.title">내 기록 관리</span>
         <span class="ops-chevron" aria-hidden="true">▾</span>
       </button>
-      <p class="app-shell-version" id="app-shell-version" data-shell-version="20261021.5">이 화면 버전 20261021.5</p>      <div class="ops-body" id="records-body" hidden>
+      <p class="app-shell-version" id="app-shell-version" data-shell-version="20261021.6">이 화면 버전 20261021.6</p>      <div class="ops-body" id="records-body" hidden>
 
         <div class="records-vitals" id="records-vitals">
           <h3 class="ops-section-title">몸 수치 (혈압·혈당)</h3>
@@ -4647,7 +4660,7 @@
       <div class="cheer-row">
         <p class="cheer-text">Harry 에게 응원의<br>하트 눌러 주시면<br>제가 더욱 힘이 납니다.</p>
         <button type="button" class="cheer-media" id="cheer-media" aria-label="Harry에게 응원 하트 보내기">
-          <img src="/cheer-heart.webp?v=20261021.5" alt="" width="48" height="48" decoding="async">
+          <img src="/cheer-heart.webp?v=20261021.6" alt="" width="48" height="48" decoding="async">
           <span class="cheer-burst-layer" id="cheer-burst-layer" aria-hidden="true"></span>
         </button>
       </div>
@@ -4692,7 +4705,7 @@
       <div class="chamzone-credit-row">
         <img
           class="chamzone-credit-icon"
-          src="/chamzone-icon.png?v=20261021.5"
+          src="/chamzone-icon.png?v=20261021.6"
           alt=""
           width="40"
           height="40"
@@ -4700,7 +4713,7 @@
         >
         <img
           class="chamzone-credit-logo"
-          src="/chamzone-logo.png?v=20261021.5"
+          src="/chamzone-logo.png?v=20261021.6"
           alt="ChamZone Interactive"
           width="200"
           height="36"
@@ -5140,7 +5153,7 @@
           <p class="labs-group">소변</p>
           <div class="lab-fields" id="lab-fields-urine"></div>
           <p class="labs-group">저장된 검사</p>
-          <p class="lab-history-hint">읽은 검사표 서류 보관함입니다. 숫자는 위 칸에 있습니다. 서류를 누르면 다시 볼 수 있습니다.</p>
+          <p class="lab-history-hint">그 날짜 검사 숫자와 서류가 여기 남습니다. 「위 칸에 보기」를 누르면 위쪽 입력 칸에 다시 불러옵니다.</p>
           <div class="lab-history" id="lab-history" aria-live="polite"></div>
           <label for="labs-memo">기타·예전 기록 (선택)</label>
           <textarea id="labs-memo" rows="2" placeholder="목록에 없는 수치·예전 메모"></textarea>
@@ -8226,15 +8239,21 @@
         return normalizeLabPanels(list).length > 0;
       }
 
-      function formatLabPanelLine(panel) {
+      function formatLabPanelValuesLine(panel) {
         panel = normalizeLabPanel(panel);
         var bits = [];
         LAB_PANEL_FIELDS.forEach(function (f) {
           var v = panel.values[f.id];
           if (v) bits.push(f.label + " " + v);
         });
+        return bits.join(", ");
+      }
+
+      function formatLabPanelLine(panel) {
+        panel = normalizeLabPanel(panel);
+        var bits = formatLabPanelValuesLine(panel);
         var head = formatLabDateKo(panel.date);
-        return bits.length ? (head + " · " + bits.join(", ")) : head;
+        return bits ? (head + " · " + bits) : head;
       }
 
       function formatLabPanelsAsText(panels, memo) {
@@ -8410,7 +8429,11 @@
           labHistoryEl.appendChild(empty);
           return;
         }
-        function appendHistoryGroup(dateKey, photos, hasPanel) {
+        var panelByDate = {};
+        list.forEach(function (panel) {
+          if (panel.date) panelByDate[panel.date] = panel;
+        });
+        function appendHistoryGroup(dateKey, photos, panel) {
           var item = document.createElement("div");
           item.className = "lab-history-item";
           var meta = document.createElement("p");
@@ -8419,6 +8442,28 @@
             ? "날짜 없음"
             : formatLabDateKo(dateKey);
           item.appendChild(meta);
+          if (panel) {
+            var valueLine = formatLabPanelValuesLine(panel);
+            var sum = document.createElement("p");
+            sum.className = "lab-history-sum";
+            sum.textContent = valueLine || "숫자 없음 · 서류만 보관됨";
+            item.appendChild(sum);
+            if (valueLine) {
+              var loadBtn = document.createElement("button");
+              loadBtn.type = "button";
+              loadBtn.className = "lab-history-load";
+              loadBtn.textContent = "위 칸에 보기";
+              loadBtn.addEventListener("click", function () {
+                writeLabForm(panel);
+                var anchor = document.getElementById("lab-date-label") || document.getElementById("labs-block");
+                if (anchor && typeof anchor.scrollIntoView === "function") {
+                  try { anchor.scrollIntoView({ behavior: "smooth", block: "start" }); } catch (eScroll) { /* ignore */ }
+                }
+                if (typeof showToast === "function") showToast("위 검사일·혈액 칸에 불러왔습니다.");
+              });
+              item.appendChild(loadBtn);
+            }
+          }
           if (photos && photos.length) {
             var docs = document.createElement("div");
             docs.className = "lab-history-docs";
@@ -8464,19 +8509,14 @@
               }
             });
             item.appendChild(docs);
-          } else if (hasPanel) {
-            var sum = document.createElement("p");
-            sum.className = "lab-history-sum";
-            sum.textContent = "직접 입력한 검사 · 숫자는 위 칸에 있습니다.";
-            item.appendChild(sum);
           }
           labHistoryEl.appendChild(item);
         }
         dates.forEach(function (dateKey) {
-          appendHistoryGroup(dateKey, photosByDate[dateKey] || [], true);
+          appendHistoryGroup(dateKey, photosByDate[dateKey] || [], panelByDate[dateKey] || null);
         });
         if (photosByDate._nodate && photosByDate._nodate.length) {
-          appendHistoryGroup("_nodate", photosByDate._nodate, false);
+          appendHistoryGroup("_nodate", photosByDate._nodate, null);
         }
       }
 
@@ -14259,6 +14299,8 @@
         });
         if (labsMemoEl) labsMemoEl.value = state.labsMemo || "";
         clearLabFormInputs();
+        var savedPanels = normalizeLabPanels(state.labPanels);
+        if (savedPanels.length) writeLabForm(savedPanels[0]);
         paintLabHistory();
         paintLabPhotos();
         if (medsEls.labs) medsEls.labs.value = state.labs || "";
