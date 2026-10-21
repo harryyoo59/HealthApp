@@ -3461,7 +3461,20 @@
       font-size: 12px;
       font-weight: 500;
       color: var(--muted);
+      line-height: 1.45;
     }
+    .lab-photos-howto {
+      margin: 0;
+      padding: 8px 10px;
+      border-radius: 10px;
+      border: 1px solid rgba(232, 242, 236, 0.16);
+      background: rgba(26, 58, 48, 0.55);
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--ink);
+      line-height: 1.45;
+    }
+    .lab-photos-howto[hidden] { display: none; }
     .lab-photos-actions {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -3514,20 +3527,38 @@
       position: absolute;
       top: 4px;
       right: 4px;
-      width: 26px;
-      height: 26px;
-      border-radius: 999px;
+      z-index: 2;
+      min-width: 34px;
+      height: 22px;
+      padding: 0 6px;
+      border-radius: 8px;
       border: 0;
-      background: rgba(0, 0, 0, 0.62);
+      background: rgba(0, 0, 0, 0.72);
       color: #fff;
-      font-size: 16px;
+      font-size: 11px;
+      font-weight: 700;
       line-height: 1;
       cursor: pointer;
+    }
+    .lab-photo-tap-badge {
+      position: absolute;
+      left: 4px;
+      bottom: 4px;
+      z-index: 1;
+      padding: 3px 6px;
+      border-radius: 6px;
+      background: rgba(11, 26, 20, 0.78);
+      color: #e8f2ec;
+      font-size: 10px;
+      font-weight: 700;
+      line-height: 1.2;
+      pointer-events: none;
     }
     .lab-photos-empty {
       margin: 0;
       color: var(--muted);
       font-size: 12px;
+      line-height: 1.45;
     }
     .lab-photo-modal-backdrop {
       position: fixed;
@@ -4519,7 +4550,7 @@
         <span data-i18n="records.title">내 기록 관리</span>
         <span class="ops-chevron" aria-hidden="true">▾</span>
       </button>
-      <p class="app-shell-version" id="app-shell-version" data-shell-version="20261021.1">이 화면 버전 20261021.1</p>      <div class="ops-body" id="records-body" hidden>
+      <p class="app-shell-version" id="app-shell-version" data-shell-version="20261021.2">이 화면 버전 20261021.2</p>      <div class="ops-body" id="records-body" hidden>
 
         <div class="records-vitals" id="records-vitals">
           <h3 class="ops-section-title">몸 수치 (혈압·혈당)</h3>
@@ -4581,7 +4612,7 @@
       <div class="cheer-row">
         <p class="cheer-text">Harry 에게 응원의<br>하트 눌러 주시면<br>제가 더욱 힘이 납니다.</p>
         <button type="button" class="cheer-media" id="cheer-media" aria-label="Harry에게 응원 하트 보내기">
-          <img src="/cheer-heart.webp?v=20261021.1" alt="" width="48" height="48" decoding="async">
+          <img src="/cheer-heart.webp?v=20261021.2" alt="" width="48" height="48" decoding="async">
           <span class="cheer-burst-layer" id="cheer-burst-layer" aria-hidden="true"></span>
         </button>
       </div>
@@ -4626,7 +4657,7 @@
       <div class="chamzone-credit-row">
         <img
           class="chamzone-credit-icon"
-          src="/chamzone-icon.png?v=20261021.1"
+          src="/chamzone-icon.png?v=20261021.2"
           alt=""
           width="40"
           height="40"
@@ -4634,7 +4665,7 @@
         >
         <img
           class="chamzone-credit-logo"
-          src="/chamzone-logo.png?v=20261021.1"
+          src="/chamzone-logo.png?v=20261021.2"
           alt="ChamZone Interactive"
           width="200"
           height="36"
@@ -5050,13 +5081,14 @@
           <p class="labs-hint">결과표에서 같은 이름을 찾아 숫자만 넣으세요. 없으면 비워 두세요.</p>
           <div class="lab-photos-block" id="lab-photos-block">
             <p class="labs-group">검사 결과표 사진</p>
-            <p class="labs-hint lab-photos-hint">표를 찍어 두면 이 폰에만 저장됩니다. 사진을 누르면 읽어 칸에 넣을 수 있습니다.</p>
+            <p class="labs-hint lab-photos-hint">① 표를 찍거나 앨범에서 고르면 이 폰에만 보관됩니다. ② 보관된 사진(그림)을 누르면 「읽어서 저장하기」로 숫자를 칸에 넣습니다. ③ 오른쪽 위 「삭제」는 그 사진만 지웁니다.</p>
             <div class="lab-photos-actions">
               <button type="button" id="lab-photo-capture-btn">사진 찍기</button>
               <button type="button" id="lab-photo-pick-btn">앨범에서 고르기</button>
             </div>
             <input type="file" id="lab-photo-capture-input" accept="image/*" capture="environment" hidden multiple />
             <input type="file" id="lab-photo-pick-input" accept="image/*" hidden multiple />
+            <p class="lab-photos-howto" id="lab-photos-howto" hidden>다음 행동: 사진 한 장을 누르세요. 뜬 창에서 「읽어서 저장하기」를 누르면 됩니다. 「삭제」는 지우기용입니다.</p>
             <div class="lab-photos-grid" id="lab-photos-grid" aria-live="polite"></div>
           </div>
           <label id="lab-date-label">검사일</label>
@@ -8494,24 +8526,31 @@
 
       function paintLabPhotos() {
         var grid = document.getElementById("lab-photos-grid");
+        var howto = document.getElementById("lab-photos-howto");
         if (!grid) return;
         grid.innerHTML = "";
+        if (howto) howto.hidden = !labPhotosMeta.length;
         if (!labPhotosMeta.length) {
           var empty = document.createElement("p");
           empty.className = "lab-photos-empty";
           empty.style.gridColumn = "1 / -1";
-          empty.textContent = "아직 찍은 검사표가 없습니다.";
+          empty.textContent = "아직 찍은 검사표가 없습니다. 위에서 「사진 찍기」또는 「앨범에서 고르기」로 먼저 넣어 주세요.";
           grid.appendChild(empty);
           return;
         }
-        labPhotosMeta.forEach(function (item) {
+        labPhotosMeta.forEach(function (item, idx) {
           var card = document.createElement("div");
           card.className = "lab-photo-card";
           card.setAttribute("data-lab-photo-id", item.id);
           var openBtn = document.createElement("button");
           openBtn.type = "button";
           openBtn.className = "lab-photo-open";
-          openBtn.setAttribute("aria-label", "검사표 사진 열기");
+          openBtn.setAttribute(
+            "aria-label",
+            idx === 0
+              ? "첫 번째 검사표 사진 — 눌러서 읽기"
+              : "검사표 사진 — 눌러서 읽기"
+          );
           var img = document.createElement("img");
           img.alt = "";
           img.decoding = "async";
@@ -8521,11 +8560,16 @@
             openLabPhotoModal(item.id);
           });
           card.appendChild(openBtn);
+          var badge = document.createElement("span");
+          badge.className = "lab-photo-tap-badge";
+          badge.textContent = idx === 0 ? "눌러서 읽기" : "읽기";
+          card.appendChild(badge);
           var del = document.createElement("button");
           del.type = "button";
           del.className = "lab-photo-del";
-          del.setAttribute("aria-label", "사진 삭제");
-          del.textContent = "×";
+          del.setAttribute("aria-label", "이 사진만 삭제");
+          del.title = "이 사진만 삭제";
+          del.textContent = "삭제";
           del.addEventListener("click", function (ev) {
             ev.preventDefault();
             ev.stopPropagation();
@@ -8627,7 +8671,7 @@
             return;
           }
           preview.src = rec.dataUrl;
-          status.textContent = "「읽어서 저장하기」를 누르면 표의 숫자를 찾아 칸에 넣습니다. 넣은 뒤 꼭 확인해 주세요.";
+          status.textContent = "다음: 아래 「읽어서 저장하기」를 누르세요. 표 숫자를 찾아 칸에 넣은 뒤, 확인 창에서 맞는지 봐 주세요.";
           if (readBtn) readBtn.disabled = false;
         }).catch(function () {
           status.textContent = "사진을 불러오지 못했습니다.";
