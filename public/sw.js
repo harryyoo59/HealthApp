@@ -2,7 +2,7 @@
    Bump SHELL_VERSION together with index.html [data-shell-version].
    A new name drops the previous precache on activate. Diary data lives in
    localStorage and is never touched here. */
-var SHELL_VERSION = "20261021.15";
+var SHELL_VERSION = "20261021.16";
 var CACHE = "healthapp-shell-" + SHELL_VERSION;
 /* Vercel cleanUrls: no trailing slash / no /index.html — match final 200 paths. */
 var SHELL = [
@@ -15,6 +15,11 @@ var SHELL = [
   "/icon-maskable-512.png",
   "/css/app.css?v=" + SHELL_VERSION,
   "/js/consent-fouc.js?v=" + SHELL_VERSION,
+  /* ES module import는 쿼리 없이 경로만 씀 — 버전 올리면 CACHE 이름이 바뀌어 다시 받음 */
+  "/js/store.js",
+  "/js/meals.js",
+  "/js/labs.js",
+  "/js/status.js",
   "/js/app.js?v=" + SHELL_VERSION,
   "/js/shell-update.js?v=" + SHELL_VERSION
 ];
