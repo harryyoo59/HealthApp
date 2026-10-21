@@ -3445,6 +3445,37 @@
       color: var(--muted);
       line-height: 1.4;
     }
+    .lab-history-docs {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+    .lab-history-doc {
+      position: relative;
+      aspect-ratio: 1;
+      border-radius: 10px;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      background: #0f1f18;
+      padding: 0;
+    }
+    .lab-history-doc .lab-photo-open {
+      appearance: none;
+      display: block;
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      border: 0;
+      background: transparent;
+      cursor: pointer;
+    }
+    .lab-history-doc img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
     .lab-history-hint {
       margin: 0 0 4px;
       font-size: 12px;
@@ -4554,7 +4585,7 @@
         <span data-i18n="records.title">내 기록 관리</span>
         <span class="ops-chevron" aria-hidden="true">▾</span>
       </button>
-      <p class="app-shell-version" id="app-shell-version" data-shell-version="20261021.4">이 화면 버전 20261021.4</p>      <div class="ops-body" id="records-body" hidden>
+      <p class="app-shell-version" id="app-shell-version" data-shell-version="20261021.5">이 화면 버전 20261021.5</p>      <div class="ops-body" id="records-body" hidden>
 
         <div class="records-vitals" id="records-vitals">
           <h3 class="ops-section-title">몸 수치 (혈압·혈당)</h3>
@@ -4616,7 +4647,7 @@
       <div class="cheer-row">
         <p class="cheer-text">Harry 에게 응원의<br>하트 눌러 주시면<br>제가 더욱 힘이 납니다.</p>
         <button type="button" class="cheer-media" id="cheer-media" aria-label="Harry에게 응원 하트 보내기">
-          <img src="/cheer-heart.webp?v=20261021.4" alt="" width="48" height="48" decoding="async">
+          <img src="/cheer-heart.webp?v=20261021.5" alt="" width="48" height="48" decoding="async">
           <span class="cheer-burst-layer" id="cheer-burst-layer" aria-hidden="true"></span>
         </button>
       </div>
@@ -4661,7 +4692,7 @@
       <div class="chamzone-credit-row">
         <img
           class="chamzone-credit-icon"
-          src="/chamzone-icon.png?v=20261021.4"
+          src="/chamzone-icon.png?v=20261021.5"
           alt=""
           width="40"
           height="40"
@@ -4669,7 +4700,7 @@
         >
         <img
           class="chamzone-credit-logo"
-          src="/chamzone-logo.png?v=20261021.4"
+          src="/chamzone-logo.png?v=20261021.5"
           alt="ChamZone Interactive"
           width="200"
           height="36"
@@ -5085,14 +5116,14 @@
           <p class="labs-hint">결과표에서 같은 이름을 찾아 숫자만 넣으세요. 없으면 비워 두세요.</p>
           <div class="lab-photos-block" id="lab-photos-block">
             <p class="labs-group">검사 결과표 사진</p>
-            <p class="labs-hint lab-photos-hint">① 표를 찍거나 앨범에서 고르면 이 폰에만 보관됩니다. ② 「눌러서 읽기」사진(그림)을 누르고 「읽어서 저장하기」로 숫자를 칸에 넣습니다. ③ 읽은 표는 「읽었음」으로 바뀝니다. ④ 오른쪽 위 「삭제」는 그 사진만 지웁니다.</p>
+            <p class="labs-hint lab-photos-hint">① 표를 찍거나 앨범에서 고르면 여기에 쌓입니다. ② 사진을 누르고 「읽어서 저장하기」로 아래 칸에 숫자를 넣습니다. ③ 읽기가 끝나면 사진은 아래 「저장된 검사」서류함으로 옮겨집니다. ④ 「삭제」는 그 사진만 지웁니다.</p>
             <div class="lab-photos-actions">
               <button type="button" id="lab-photo-capture-btn">사진 찍기</button>
               <button type="button" id="lab-photo-pick-btn">앨범에서 고르기</button>
             </div>
             <input type="file" id="lab-photo-capture-input" accept="image/*" capture="environment" hidden multiple />
             <input type="file" id="lab-photo-pick-input" accept="image/*" hidden multiple />
-            <p class="lab-photos-howto" id="lab-photos-howto" hidden>다음 행동: 「눌러서 읽기」또는 「읽기」인 사진을 누르세요. 「읽었음」은 이미 읽은 표입니다. 「삭제」는 지우기용입니다.</p>
+            <p class="lab-photos-howto" id="lab-photos-howto" hidden>다음 행동: 「눌러서 읽기」사진을 한 장씩 누르세요. 읽기가 끝나면 아래 서류함으로 이동합니다.</p>
             <div class="lab-photos-grid" id="lab-photos-grid" aria-live="polite"></div>
           </div>
           <label id="lab-date-label">검사일</label>
@@ -5109,7 +5140,7 @@
           <p class="labs-group">소변</p>
           <div class="lab-fields" id="lab-fields-urine"></div>
           <p class="labs-group">저장된 검사</p>
-          <p class="lab-history-hint">읽기만 됩니다. 고치려면 위에서 같은 날짜로 다시 넣고 저장하세요.</p>
+          <p class="lab-history-hint">읽은 검사표 서류 보관함입니다. 숫자는 위 칸에 있습니다. 서류를 누르면 다시 볼 수 있습니다.</p>
           <div class="lab-history" id="lab-history" aria-live="polite"></div>
           <label for="labs-memo">기타·예전 기록 (선택)</label>
           <textarea id="labs-memo" rows="2" placeholder="목록에 없는 수치·예전 메모"></textarea>
@@ -8343,30 +8374,110 @@
         return panel;
       }
 
+      function getUnreadLabPhotos() {
+        return labPhotosMeta.filter(function (item) { return !item.readAt; });
+      }
+
+      function getReadLabPhotos() {
+        return labPhotosMeta.filter(function (item) { return !!item.readAt; });
+      }
+
       function paintLabHistory() {
         if (!labHistoryEl) return;
         labHistoryEl.innerHTML = "";
         var list = normalizeLabPanels(state.labPanels);
-        if (!list.length) {
+        var readPhotos = getReadLabPhotos();
+        var photosByDate = {};
+        readPhotos.forEach(function (item) {
+          var key = String(item.labDate || "").trim() || "_nodate";
+          if (!photosByDate[key]) photosByDate[key] = [];
+          photosByDate[key].push(item);
+        });
+        var dateKeys = {};
+        list.forEach(function (panel) {
+          if (panel.date) dateKeys[panel.date] = true;
+        });
+        Object.keys(photosByDate).forEach(function (k) {
+          if (k !== "_nodate") dateKeys[k] = true;
+        });
+        var dates = Object.keys(dateKeys).sort(function (a, b) {
+          return a < b ? 1 : a > b ? -1 : 0;
+        });
+        if (!dates.length && !photosByDate._nodate) {
           var empty = document.createElement("p");
           empty.className = "lab-history-empty";
-          empty.textContent = "아직 저장된 검사가 없습니다. 위에서 넣고 저장하면 여기에 쌓입니다.";
+          empty.textContent = "아직 보관된 검사표가 없습니다. 위에서 읽어 저장하면 서류가 여기로 옵니다.";
           labHistoryEl.appendChild(empty);
           return;
         }
-        list.forEach(function (panel) {
+        function appendHistoryGroup(dateKey, photos, hasPanel) {
           var item = document.createElement("div");
           item.className = "lab-history-item";
           var meta = document.createElement("p");
           meta.className = "lab-history-meta";
-          meta.textContent = formatLabDateKo(panel.date);
-          var sum = document.createElement("p");
-          sum.className = "lab-history-sum";
-          sum.textContent = formatLabPanelLine(panel);
+          meta.textContent = dateKey === "_nodate"
+            ? "날짜 없음"
+            : formatLabDateKo(dateKey);
           item.appendChild(meta);
-          item.appendChild(sum);
+          if (photos && photos.length) {
+            var docs = document.createElement("div");
+            docs.className = "lab-history-docs";
+            photos.forEach(function (photo) {
+              var card = document.createElement("div");
+              card.className = "lab-history-doc";
+              card.setAttribute("data-lab-photo-id", photo.id);
+              var openBtn = document.createElement("button");
+              openBtn.type = "button";
+              openBtn.className = "lab-photo-open";
+              openBtn.setAttribute("aria-label", "보관한 검사표 보기");
+              var img = document.createElement("img");
+              img.alt = "";
+              img.decoding = "async";
+              img.src = photo.thumb || "";
+              openBtn.appendChild(img);
+              openBtn.addEventListener("click", function () {
+                openLabPhotoModal(photo.id);
+              });
+              card.appendChild(openBtn);
+              var badge = document.createElement("span");
+              badge.className = "lab-photo-tap-badge is-read";
+              badge.textContent = "서류";
+              card.appendChild(badge);
+              var del = document.createElement("button");
+              del.type = "button";
+              del.className = "lab-photo-del";
+              del.setAttribute("aria-label", "이 서류만 삭제");
+              del.title = "이 서류만 삭제";
+              del.textContent = "삭제";
+              del.addEventListener("click", function (ev) {
+                ev.preventDefault();
+                ev.stopPropagation();
+                deleteLabPhoto(photo.id);
+              });
+              card.appendChild(del);
+              docs.appendChild(card);
+              if (!photo.thumb) {
+                labPhotoIdbGet(photo.id).then(function (rec) {
+                  if (!rec || !rec.dataUrl) return;
+                  img.src = rec.dataUrl;
+                }).catch(function () { /* ignore */ });
+              }
+            });
+            item.appendChild(docs);
+          } else if (hasPanel) {
+            var sum = document.createElement("p");
+            sum.className = "lab-history-sum";
+            sum.textContent = "직접 입력한 검사 · 숫자는 위 칸에 있습니다.";
+            item.appendChild(sum);
+          }
           labHistoryEl.appendChild(item);
+        }
+        dates.forEach(function (dateKey) {
+          appendHistoryGroup(dateKey, photosByDate[dateKey] || [], true);
         });
+        if (photosByDate._nodate && photosByDate._nodate.length) {
+          appendHistoryGroup("_nodate", photosByDate._nodate, false);
+        }
       }
 
       var labPhotosMeta = [];
@@ -8461,7 +8572,8 @@
               id: String(item.id),
               createdAt: Number(item.createdAt) || Date.now(),
               thumb: typeof item.thumb === "string" ? item.thumb : "",
-              readAt: Number(item.readAt) || 0
+              readAt: Number(item.readAt) || 0,
+              labDate: typeof item.labDate === "string" ? item.labDate : ""
             };
           });
         } catch (e) {
@@ -8476,7 +8588,8 @@
               id: item.id,
               createdAt: item.createdAt,
               thumb: item.thumb || "",
-              readAt: Number(item.readAt) || 0
+              readAt: Number(item.readAt) || 0,
+              labDate: item.labDate || ""
             };
           });
           return persistSetItem(LAB_PHOTOS_META_KEY, JSON.stringify(slim));
@@ -8485,17 +8598,19 @@
         }
       }
 
-      function markLabPhotoRead(id) {
+      function markLabPhotoRead(id, labDate) {
         if (!id) return;
         var found = false;
         labPhotosMeta.forEach(function (item) {
           if (item.id !== id) return;
           item.readAt = Date.now();
+          if (labDate) item.labDate = String(labDate);
           found = true;
         });
         if (!found) return;
         saveLabPhotosMeta();
         paintLabPhotos();
+        paintLabHistory();
       }
 
       function compressLabPhotoFile(file) {
@@ -8552,21 +8667,19 @@
         var howto = document.getElementById("lab-photos-howto");
         if (!grid) return;
         grid.innerHTML = "";
-        if (howto) howto.hidden = !labPhotosMeta.length;
-        if (!labPhotosMeta.length) {
+        var unread = getUnreadLabPhotos();
+        if (howto) howto.hidden = !unread.length;
+        if (!unread.length) {
           var empty = document.createElement("p");
           empty.className = "lab-photos-empty";
           empty.style.gridColumn = "1 / -1";
-          empty.textContent = "아직 찍은 검사표가 없습니다. 위에서 「사진 찍기」또는 「앨범에서 고르기」로 먼저 넣어 주세요.";
+          empty.textContent = getReadLabPhotos().length
+            ? "읽을 표가 없습니다. 읽은 서류는 아래 「저장된 검사」에 있습니다."
+            : "아직 찍은 검사표가 없습니다. 위에서 「사진 찍기」또는 「앨범에서 고르기」로 먼저 넣어 주세요.";
           grid.appendChild(empty);
           return;
         }
-        var firstUnreadIdx = -1;
-        labPhotosMeta.forEach(function (item, idx) {
-          if (firstUnreadIdx < 0 && !item.readAt) firstUnreadIdx = idx;
-        });
-        labPhotosMeta.forEach(function (item, idx) {
-          var isRead = !!item.readAt;
+        unread.forEach(function (item, idx) {
           var card = document.createElement("div");
           card.className = "lab-photo-card";
           card.setAttribute("data-lab-photo-id", item.id);
@@ -8575,11 +8688,9 @@
           openBtn.className = "lab-photo-open";
           openBtn.setAttribute(
             "aria-label",
-            isRead
-              ? "검사표 사진 — 이미 읽었음"
-              : (idx === firstUnreadIdx
-                ? "첫 번째 읽을 검사표 사진 — 눌러서 읽기"
-                : "검사표 사진 — 눌러서 읽기")
+            idx === 0
+              ? "첫 번째 읽을 검사표 사진 — 눌러서 읽기"
+              : "검사표 사진 — 눌러서 읽기"
           );
           var img = document.createElement("img");
           img.alt = "";
@@ -8591,10 +8702,8 @@
           });
           card.appendChild(openBtn);
           var badge = document.createElement("span");
-          badge.className = "lab-photo-tap-badge" + (isRead ? " is-read" : "");
-          badge.textContent = isRead
-            ? "읽었음"
-            : (idx === firstUnreadIdx ? "눌러서 읽기" : "읽기");
+          badge.className = "lab-photo-tap-badge";
+          badge.textContent = idx === 0 ? "눌러서 읽기" : "읽기";
           card.appendChild(badge);
           var del = document.createElement("button");
           del.type = "button";
@@ -8643,7 +8752,8 @@
                   id: id,
                   createdAt: Date.now(),
                   thumb: out.thumb,
-                  readAt: 0
+                  readAt: 0,
+                  labDate: ""
                 });
                 saveLabPhotosMeta();
               });
@@ -8664,6 +8774,7 @@
         labPhotosMeta = labPhotosMeta.filter(function (item) { return item.id !== id; });
         saveLabPhotosMeta();
         paintLabPhotos();
+        paintLabHistory();
         labPhotoIdbDelete(id);
         if (labPhotoModalPhotoId === id) closeLabPhotoModal();
       }
@@ -8945,7 +9056,7 @@
         if (anchor && typeof anchor.scrollIntoView === "function") {
           try { anchor.scrollIntoView({ behavior: "smooth", block: "start" }); } catch (eScroll) { /* ignore */ }
         }
-        return true;
+        return merged;
       }
 
       function runLabPhotoReadAndSave() {
@@ -8990,11 +9101,11 @@
             }
             return;
           }
-          applyParsedLabToFormAndSave(parsed);
-          markLabPhotoRead(labPhotoModalPhotoId);
+          var merged = applyParsedLabToFormAndSave(parsed);
+          markLabPhotoRead(labPhotoModalPhotoId, merged && merged.date ? merged.date : "");
           closeLabPhotoModal();
           if (typeof showToast === "function") {
-            showToast("아래 검사일·혈액 칸에 숫자를 넣었습니다. 확인 후 필요하면 고치세요.");
+            showToast("숫자는 위 칸에, 서류는 「저장된 검사」로 옮겼습니다.");
           }
         }).catch(function () {
           if (status) status.textContent = "읽기에 실패했습니다. 글씨가 잘 보이게 다시 찍어 주세요.";
@@ -9009,6 +9120,7 @@
       function setupLabPhotos() {
         labPhotosMeta = loadLabPhotosMeta();
         paintLabPhotos();
+        paintLabHistory();
         var captureBtn = document.getElementById("lab-photo-capture-btn");
         var pickBtn = document.getElementById("lab-photo-pick-btn");
         var captureInput = document.getElementById("lab-photo-capture-input");
